@@ -10,7 +10,7 @@ extension RGRT256: RGObject {
     public typealias Root = Stem256
     
     public var root: Stem256 { return rawRoot }
-    public var paths: [UInt256 : [[String]]] { return rawPaths }
+    public var keyPaths: [UInt256 : [[String]]] { return rawPaths }
     
     public init(root: Stem256, paths: [UInt256 : [[String]]]) {
         self.rawRoot = root

@@ -96,7 +96,7 @@ public extension RGRT {
     }
     
     func capture(info: [Digest: Data]) -> (Self, [(Key, Value)])? {
-        let insertions = paths.keys.map { (digest: $0, content: info[$0]) }
+        let insertions = keyPaths.keys.map { (digest: $0, content: info[$0]) }
         if insertions.isEmpty || !insertions.contains(where: { $0.content != nil }) { return (self, []) }
         let nextStep = insertions.reduce((self, [])) { (result, entry) -> (Self, [(Key, Value)])? in
             guard let result = result else { return nil }
@@ -116,7 +116,7 @@ public extension RGRT {
     }
     
     func capture(content: Data, digest: Digest) -> (Self, Set<Digest>, [(Key, Value)])? {
-        guard let routes = paths[digest] else { return nil }
+        guard let routes = keyPaths[digest] else { return nil }
         if routes.isEmpty { return nil }
         let resultAfterExploringRoutes = routes.reduce((self, Set<Digest>([]), [])) { (result, entry) -> (Self, Set<Digest>, [Key])? in
             guard let result = result else { return nil }
@@ -127,7 +127,7 @@ public extension RGRT {
         }
         guard let finalResult = resultAfterExploringRoutes else { return nil }
         if finalResult.1.contains(digest) { return nil }
-        let finalRRM = Self(root: finalResult.0.root, paths: finalResult.0.paths.removing(digest))
+        let finalRRM = Self(root: finalResult.0.root, paths: finalResult.0.keyPaths.removing(digest))
         guard let insertedNode = Root.Artifact(content: content) else { return nil }
         if insertedNode.value.isEmpty { return (finalRRM, finalResult.1, []) }
         guard let binaryDecodedValue = decodeValue(insertedNode.value) else { return nil }
@@ -142,8 +142,8 @@ public extension RGRT {
         if nodes.contains(where: { $0 == nil }) { return nil }
         let allSymbolsAlongPath = nodes.map { $0!.prefix }.reduce([], +)
         guard let binaryDecodedKey = decodeKey(allSymbolsAlongPath) else { return nil }
-        if binaryDecodedKey.isEmpty { return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + paths), Set(modifiedRootResult.1.keys), nil)  }
+        if binaryDecodedKey.isEmpty { return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys), nil)  }
         guard let key = Key(raw: binaryDecodedKey) else { return nil }
-        return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + paths), Set(modifiedRootResult.1.keys), key)
+        return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys), key)
     }
 }

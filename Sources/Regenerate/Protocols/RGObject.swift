@@ -9,7 +9,7 @@ public protocol RGObject: Codable {
     typealias Path = Root.Path
     
     var root: Root { get }
-    var paths: [Digest: [Path]] { get }
+    var keyPaths: [Digest: [Path]] { get }
     
     init(root: Root, paths: [Digest: [Path]])
     init?(pieces: [Data])
@@ -44,7 +44,7 @@ public extension RGObject {
     
     func complete() -> Bool { return root.complete }
     
-    func missingDigests() -> Set<Digest> { return Set(paths.keys) }
+    func missingDigests() -> Set<Digest> { return Set(keyPaths.keys) }
     
     func contents() -> [Digest: Data]? {
         return root.contents()
@@ -84,7 +84,7 @@ public extension RGObject {
     
     // warning - this call assumes that the content's digest == digest. Calling this function directly without checking digest equivalency may introduce malicious information
     func capture(content: Data, digest: Digest) -> (Self, Set<Digest>)? {
-        guard let routes = paths[digest] else { return nil }
+        guard let routes = keyPaths[digest] else { return nil }
         if routes.isEmpty { return (self, Set<Digest>([])) }
         let resultExploringRoutes = routes.reduce((self, Set<Digest>([]))) { (result, entry) -> (Self, Set<Digest>)? in
             guard let result = result else { return nil }
@@ -93,13 +93,13 @@ public extension RGObject {
         }
         guard let routeResult = resultExploringRoutes else { return nil }
         if routeResult.1.contains(digest) { return nil }
-        let finalResult = Self(root: routeResult.0.root, paths: routeResult.0.paths.removing(digest))
+        let finalResult = Self(root: routeResult.0.root, paths: routeResult.0.keyPaths.removing(digest))
         return (finalResult, routeResult.1)
     }
     
     func capture(digest: Digest, content: Data, at route: Path) -> (Self, Set<Digest>)? {
         guard let modifiedStem = root.capture(digest: digest, content: content, at: route) else { return nil }
-        let newMissingDigests = modifiedStem.1.keys.filter { !paths.keys.contains($0) }
-        return (Self(root: modifiedStem.0, paths: modifiedStem.1 + paths), Set(newMissingDigests))
+        let newMissingDigests = modifiedStem.1.keys.filter { !keyPaths.keys.contains($0) }
+        return (Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths), Set(newMissingDigests))
     }
 }

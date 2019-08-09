@@ -10,7 +10,7 @@ extension RTOverlay256: RGObject {
     public typealias Root = StemOverlay256
     
     public var root: StemOverlay256 { return rawRoot }
-    public var paths: [UInt256 : [Path]] { return rawPaths }
+    public var keyPaths: [UInt256 : [Path]] { return rawPaths }
     
     public init(root: StemOverlay256, paths: [UInt256 : [Path]]) {
         self.rawRoot = root

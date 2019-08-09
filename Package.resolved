@@ -21,11 +21,11 @@
       },
       {
         "package": "CryptoStarterPack",
-        "repositoryURL": "https://github.com/josephzbao/CryptoStarterPack.git",
+        "repositoryURL": "https://github.com/pumperknickle/CryptoStarterPack.git",
         "state": {
           "branch": null,
-          "revision": "ce7305b098d42ea736e71214f462234a65781197",
-          "version": "1.0.1"
+          "revision": "085b776d1e67634f6cde41c81420316fda1efd2e",
+          "version": "1.0.0"
         }
       },
       {
