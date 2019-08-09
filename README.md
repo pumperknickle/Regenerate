@@ -1,3 +1,3 @@
 # Regenerate
 
-A description of this package.
+Protocol Oriented Programming using Generics in Swift 5.
