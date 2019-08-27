@@ -14,6 +14,7 @@ public protocol RGArtifact: Codable, CryptoHashable {
     func capture(digest: Digest, content: Data, at route: Path) -> (Self, [Digest: [Path]])?
     func missing() -> [Digest: [Path]]
     func contents() -> [Digest: Data]?
+    func pruning() -> Self
 }
 
 public extension RGArtifact {
@@ -24,7 +25,7 @@ public extension RGArtifact {
     }
     
     func serialize() -> Data? {
-        return try? JSONEncoder().encode(self)
+        return try? JSONEncoder().encode(pruning())
     }
     
     init?(content: Data) {

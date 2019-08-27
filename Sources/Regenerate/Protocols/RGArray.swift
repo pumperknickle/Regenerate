@@ -42,11 +42,10 @@ public extension RGArray {
         return core.complete() && Index(completeChildren.count) == length
     }
     
-    func serialize() -> Data? {
+    func pruning() -> Self {
         let prunedRoot = CoreStemType(digest: core.digest)
         let prunedCore = CoreType(root: prunedRoot)
-        let prunedNode = Self(core: prunedCore, length: length, mapping: [:], complete: Set([]))
-        return try? JSONEncoder().encode(prunedNode)
+        return Self(core: prunedCore, length: length, mapping: [:], complete: Set([]))
     }
     
     func changing(core: CoreType? = nil, mapping: [Index: Element]? = nil, complete: Set<Index>? = nil) -> Self {

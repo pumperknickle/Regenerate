@@ -44,11 +44,10 @@ public extension RGDictionary {
     
     func isComplete() -> Bool { return core.complete() && incompleteChildren.isEmpty }
     
-    func serialize() -> Data? {
+    func pruning() -> Self {
         let prunedRoot = CoreType.Root(digest: core.digest)
         let prunedCore = CoreType(root: prunedRoot)
-        let prunedDict = Self(core: prunedCore, mapping: [:], incomplete: Set([]))
-        return try? JSONEncoder().encode(prunedDict)
+        return Self(core: prunedCore, mapping: [:], incomplete: Set([]))
     }
     
     func discover(incompleteKeys: [Key]) -> Self {
