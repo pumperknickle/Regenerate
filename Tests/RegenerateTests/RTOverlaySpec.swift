@@ -39,7 +39,8 @@ final class RTOverlaySpec: QuickSpec {
                     expect(regeneratedPartialDictionary).toNot(beNil())
                     expect(regeneratedPartialDictionary!.root.artifact).toNot(beNil())
                     expect(regeneratedPartialDictionary!.root.artifact!.mapping.count).to(equal(1))
-                    expect(regeneratedPartialDictionary!.complete()).to(beTrue())
+                    expect(regeneratedPartialDictionary!.complete()).to(beFalse())
+                    expect(regeneratedPartialDictionary!.missingDigests()).to(beEmpty())
                 }
             }
             describe("subscribe all") {
@@ -83,7 +84,8 @@ final class RTOverlaySpec: QuickSpec {
                     expect(regeneratedPartialDictionary!.root.artifact!.mapping.keys.contains(secondKey)).to(beTrue())
                     expect(regeneratedPartialDictionary!.root.artifact!.mapping.keys.contains(thirdKey)).to(beTrue())
                     expect(regeneratedPartialDictionary!.root.artifact!.mapping.keys.contains(fourthKey)).to(beTrue())
-                    expect(regeneratedPartialDictionary!.complete()).to(beTrue())
+                    expect(regeneratedPartialDictionary!.complete()).to(beFalse())
+                    expect(regeneratedPartialDictionary!.missingDigests()).to(beEmpty())
                 }
             }
         }

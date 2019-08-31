@@ -6,8 +6,8 @@ import CryptoStarterPack
 
 final class DictionaryOverlaySpec: QuickSpec {
     override func spec() {
-        describe("Partial RMT") {
-            describe("subscribe") {
+        describe("Dictionary Overlay") {
+            describe("target") {
                 let firstKey = UInt256.max
                 let secondKey = UInt256.min
                 typealias ChildNodeType = RGScalar256<UInt256>
@@ -39,10 +39,10 @@ final class DictionaryOverlaySpec: QuickSpec {
                     expect(regeneratedPartialDictionary).toNot(beNil())
                     expect(regeneratedPartialDictionary!.root.artifact).toNot(beNil())
                     expect(regeneratedPartialDictionary!.root.artifact!.mapping.count).to(equal(1))
-                    expect(regeneratedPartialDictionary!.complete()).to(beTrue())
+                    expect(regeneratedPartialDictionary!.complete()).to(beFalse())
                 }
             }
-            describe("subscribe all") {
+            describe("mask") {
                 let superKey = "animals/"
                 let targetKey = superKey + "cats/"
                 let notCats = "dogs/"
@@ -83,7 +83,7 @@ final class DictionaryOverlaySpec: QuickSpec {
                     expect(regeneratedPartialDictionary!.root.artifact!.mapping.keys.contains(secondKey)).to(beTrue())
                     expect(regeneratedPartialDictionary!.root.artifact!.mapping.keys.contains(thirdKey)).to(beTrue())
                     expect(regeneratedPartialDictionary!.root.artifact!.mapping.keys.contains(fourthKey)).to(beTrue())
-                    expect(regeneratedPartialDictionary!.complete()).to(beTrue())
+                    expect(regeneratedPartialDictionary!.complete()).to(beFalse())
                 }
             }
         }

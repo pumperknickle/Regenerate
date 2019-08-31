@@ -188,7 +188,7 @@ public extension Radix {
         if children.values.contains(where: { $0.digest == nil }) { return nil }
         let mappedChildren = children.mapValues { $0.digest! }
         let childKeys = mappedChildren.toSortedKeys()
-        let childValues = childKeys.map { mappedChildren[$0]! }
+        let childValues = mappedChildren.toSortedValues()
         guard let childKeyData = try? JSONEncoder().encode(childKeys.map { $0.toString() }) else { return nil }
         guard let childValueData = try? JSONEncoder().encode(childValues.map { $0.toString() }) else { return nil }
         return try? JSONEncoder().encode([prefixData, valueData, childKeyData, childValueData])

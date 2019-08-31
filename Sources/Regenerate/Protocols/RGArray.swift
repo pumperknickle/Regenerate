@@ -5,7 +5,7 @@ public protocol RGArray: RGArtifact {
     associatedtype Index: FixedWidthInteger, Stringable
     associatedtype Element: CID where Element.Digest == Digest
     associatedtype CoreType: RGRT where CoreType.Key == Index, CoreType.Value == Element.Digest, CoreType.Digest == Digest, CoreType.CryptoDelegateType == CryptoDelegateType
-    typealias CoreStemType = CoreType.Root
+    typealias CoreRootType = CoreType.Root
     
     var core: CoreType! { get }
     var length: Index! { get }
@@ -30,6 +30,11 @@ public extension RGArray {
         self.init(core: core, length: finalIndexingResult.1, mapping: mapping, complete: complete)
     }
     
+    init(digest: Digest, length: Index) {
+        let cutCore = CoreType(digest: digest)
+        self.init(core: cutCore, length: length, mapping: [:], complete: Set([]))
+    }
+    
     func indexToRouteSegment(_ index: Index) -> Edge {
         return index.toString()
     }
@@ -43,7 +48,7 @@ public extension RGArray {
     }
     
     func pruning() -> Self {
-        let prunedRoot = CoreStemType(digest: core.digest)
+        let prunedRoot = CoreRootType(digest: core.digest)
         let prunedCore = CoreType(root: prunedRoot)
         return Self(core: prunedCore, length: length, mapping: [:], complete: Set([]))
     }

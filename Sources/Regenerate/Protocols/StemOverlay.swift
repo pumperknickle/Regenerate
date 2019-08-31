@@ -17,14 +17,10 @@ public protocol StemOverlay: Stem {
 
 public extension StemOverlay where Artifact: RadixOverlay, Artifact.Child == Self {
     init(digest: Digest) {
-        self.init(digest: digest, artifact: nil, complete: true)
+        self.init(digest: digest, artifact: nil, complete: false)
     }
     
     init(digest: Digest, artifact: Artifact?, targets: [[Symbol]]?, masks: [[Symbol]]?, isMasked: Bool) {
-        if targets == nil && masks == nil && !isMasked {
-            self.init(digest: digest, artifact: artifact, complete: true, targets: targets, masks: masks, isMasked: isMasked)
-            return
-        }
         guard let finalArtifact = artifact else {
             self.init(digest: digest, artifact: nil, complete: false, targets: targets, masks: masks, isMasked: isMasked)
             return
@@ -41,12 +37,6 @@ public extension StemOverlay where Artifact: RadixOverlay, Artifact.Child == Sel
             return Self(digest: digest, artifact: artifact, complete: false, targets: subscribed == nil ? self.targets : subscribed!, masks: subscribeAll == nil ? self.masks : subscribeAll!, isMasked: allSubscribed)
         }
         return Self(digest: digest, artifact: artifact, complete: complete, targets: subscribed == nil ? self.targets : subscribed!, masks: subscribeAll == nil ? self.masks : subscribeAll!, isMasked: allSubscribed)
-    }
-    
-    func computedCompleteness() -> Bool {
-        if targets == nil && masks == nil && !isMasked { return true }
-        guard let node = artifact else { return false }
-        return node.isComplete()
     }
     
     func missing() -> [Digest : [Path]] {

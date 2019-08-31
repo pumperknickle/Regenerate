@@ -46,9 +46,7 @@ public extension RadixOverlay where Child: StemOverlay, FullRadix.Symbol == Symb
             guard let result = result else { return nil }
             if childSubs.isEmpty { return result }
             guard let modifiedChild = entry.value.targeting(childSubs) else { return nil }
-            let newChildren = result.0.children.setting(entry.key, withValue: modifiedChild.0)
-            let extendedRoutes = result.1 + modifiedChild.1.prepend(entry.key.toString())
-            return (Self(fullRadix: fullRadix, children: newChildren), extendedRoutes)
+            return (Self(fullRadix: fullRadix, children: result.0.children.setting(entry.key, withValue: modifiedChild.0)), result.1 + modifiedChild.1.prepend(entry.key.toString()))
         })
     }
     
@@ -58,9 +56,7 @@ public extension RadixOverlay where Child: StemOverlay, FullRadix.Symbol == Symb
             guard let result = result else { return nil }
             if childSubAlls.isEmpty { return result }
             guard let modifiedChild = entry.value.masking(childSubAlls) else { return nil }
-            let newChildren = result.0.children.setting(entry.key, withValue: modifiedChild.0)
-            let extendedRoutes = result.1 + modifiedChild.1.prepend(entry.key.toString())
-            return (Self(fullRadix: fullRadix, children: newChildren), extendedRoutes)
+            return (Self(fullRadix: fullRadix, children: result.0.children.setting(entry.key, withValue: modifiedChild.0)), result.1 + modifiedChild.1.prepend(entry.key.toString()))
         })
     }
     
@@ -68,9 +64,7 @@ public extension RadixOverlay where Child: StemOverlay, FullRadix.Symbol == Symb
         return children.reduce((self, [:]), { (result, entry) -> (Self, [Digest: [Path]])? in
             guard let result = result else { return nil }
             guard let modifiedChild = entry.value.mask() else { return nil }
-            let newChildren = result.0.children.setting(entry.key, withValue: modifiedChild.0)
-            let extendedRoutes = result.1 + (modifiedChild.1.prepend(entry.key.toString()))
-            return (Self(fullRadix: fullRadix, children: newChildren), extendedRoutes)
+            return (Self(fullRadix: fullRadix, children: result.0.children.setting(entry.key, withValue: modifiedChild.0)), result.1 + (modifiedChild.1.prepend(entry.key.toString())))
         })
     }
 }
