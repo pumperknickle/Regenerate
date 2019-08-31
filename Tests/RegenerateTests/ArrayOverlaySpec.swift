@@ -40,7 +40,7 @@ final class ArrayOverlaySpec: QuickSpec {
                     
                 }
                 let regeneratedArrayOverlayObject = emptyArrayOverlayObject.capture(info: arrayRoot!.contents()!)
-                it("should be regenerated, but contain only 1 element in the dictionary") {
+                it("should be regenerated, but contain only 1 element in the array") {
                     expect(regeneratedArrayOverlayObject).toNot(beNil())
                     expect(regeneratedArrayOverlayObject!.root.artifact).toNot(beNil())
                     expect(regeneratedArrayOverlayObject!.root.artifact!.mapping.count).to(equal(1))

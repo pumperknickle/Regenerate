@@ -6,43 +6,54 @@ import CryptoStarterPack
 
 final class DictionaryOverlaySpec: QuickSpec {
     override func spec() {
-        describe("Dictionary Overlay") {
-            describe("target") {
+        describe("Partial Dictionary Merkle Structure") {
+            describe("target keys") {
+                typealias ChildNodeType = RGScalar256<UInt256>
+                typealias ChildCIDType = RGCID<ChildNodeType>
+                typealias DictionaryNodeType = RGDictionary256<UInt256, ChildCIDType>
+                typealias DictionaryCIDType = RGCID<DictionaryNodeType>
+                typealias DictionaryOverlayNodeType = DictionaryOverlay256<UInt256, ChildCIDType>
+                typealias DictionaryOverlayCIDType = RGCID<DictionaryOverlayNodeType>
+                typealias DictionaryOverlayObjectType = RGObject256<DictionaryOverlayCIDType>
+
                 let firstKey = UInt256.max
                 let secondKey = UInt256.min
-                typealias ChildNodeType = RGScalar256<UInt256>
-                typealias ChildStemType = RGCID<ChildNodeType>
-                let source = [firstKey: UInt256.min, secondKey: UInt256.max].mapValues { ChildStemType(artifact: ChildNodeType(raw: $0), complete: true)! }
-                typealias DictionaryNodeType = RGDictionary256<UInt256, ChildStemType>
+                let source = [firstKey: UInt256.min, secondKey: UInt256.max].mapValues { ChildCIDType(artifact: ChildNodeType(raw: $0), complete: true)! }
                 let dictionaryNode = DictionaryNodeType(source)
-                typealias DictionaryStemType = RGCID<DictionaryNodeType>
-                let dictionaryRoot = DictionaryStemType(artifact: dictionaryNode!)
+                let dictionaryRoot = DictionaryCIDType(artifact: dictionaryNode!)
+                
                 it("root should exist and have node info") {
                     expect(dictionaryRoot).toNot(beNil())
                     expect(dictionaryRoot!.contents()).toNot(beNil())
                     expect(dictionaryRoot!.contents()!).toNot(beEmpty())
                 }
-                typealias PartialDictionaryNodeType = DictionaryOverlay256<UInt256, ChildStemType>
-                let emptyPartialDictionaryNode = PartialDictionaryNodeType(digest: dictionaryNode!.core.digest)
-                let configuredPartialDictionaryNode = emptyPartialDictionaryNode.targeting([firstKey])!
-                typealias PartialDictionaryStemType = RGCID<PartialDictionaryNodeType>
-                let emptyPartialDictionaryStem = PartialDictionaryStemType(artifact: configuredPartialDictionaryNode)
-                typealias PartialRegenerativeType = RGObject256<PartialDictionaryStemType>
-                let emptyPartialRegenerative = PartialRegenerativeType(root: emptyPartialDictionaryStem!)
-                it("should have no dictionary node information") {
-                    expect(emptyPartialRegenerative.root.artifact).toNot(beNil())
-                    expect(emptyPartialRegenerative.root.artifact!.contents()).toNot(beNil())
-                    expect(emptyPartialRegenerative.root.artifact!.contents()!).to(beEmpty())
+                
+                let emptyDictionaryOverlayNode = DictionaryOverlayNodeType(digest: dictionaryNode!.core.digest)
+                let configuredDictionaryOverlayNode = emptyDictionaryOverlayNode.targeting([firstKey])!
+                let emptyDictionaryOverlayCID = DictionaryOverlayCIDType(artifact: configuredDictionaryOverlayNode)
+                let emptyDictionaryOverlayObject = DictionaryOverlayObjectType(root: emptyDictionaryOverlayCID!)
+                it("shouldn't have any information since it was created with just a digest and length") {
+                    expect(emptyDictionaryOverlayObject.root.artifact).toNot(beNil())
+                    expect(emptyDictionaryOverlayObject.root.artifact!.contents()).toNot(beNil())
+                    expect(emptyDictionaryOverlayObject.root.artifact!.contents()!).to(beEmpty())
                 }
-                let regeneratedPartialDictionary = emptyPartialRegenerative.capture(info: dictionaryRoot!.contents()!)
+                let regenerativeDictionaryOverlayObject = emptyDictionaryOverlayObject.capture(info: dictionaryRoot!.contents()!)
                 it("should be regenerated, but contain only 1 key value tuple for dictionary") {
-                    expect(regeneratedPartialDictionary).toNot(beNil())
-                    expect(regeneratedPartialDictionary!.root.artifact).toNot(beNil())
-                    expect(regeneratedPartialDictionary!.root.artifact!.mapping.count).to(equal(1))
-                    expect(regeneratedPartialDictionary!.complete()).to(beFalse())
+                    expect(regenerativeDictionaryOverlayObject).toNot(beNil())
+                    expect(regenerativeDictionaryOverlayObject!.root.artifact).toNot(beNil())
+                    expect(regenerativeDictionaryOverlayObject!.root.artifact!.mapping.count).to(equal(1))
+                    expect(regenerativeDictionaryOverlayObject!.complete()).to(beFalse())
                 }
             }
             describe("mask") {
+                typealias ChildNodeType = RGScalar256<String>
+                typealias ChildCIDType = RGCID<ChildNodeType>
+                typealias DictionaryNodeType = RGDictionary256<String, ChildCIDType>
+                typealias DictionaryCIDType = RGCID<DictionaryNodeType>
+                typealias DictionaryOverlayNodeType = DictionaryOverlay256<String, ChildCIDType>
+                typealias DictionaryOverlayCIDType = RGCID<DictionaryOverlayNodeType>
+                typealias DictionaryOverlayObjectType = RGObject256<DictionaryOverlayCIDType>
+
                 let superKey = "animals/"
                 let targetKey = superKey + "cats/"
                 let notCats = "dogs/"
@@ -50,40 +61,36 @@ final class DictionaryOverlaySpec: QuickSpec {
                 let secondKey = targetKey + "2"
                 let thirdKey =  targetKey + "3"
                 let fourthKey = targetKey + "4"
-                typealias ChildNodeType = RGScalar256<String>
-                typealias ChildStemType = RGCID<ChildNodeType>
-                let source = [firstKey: "coyote", secondKey: "tiger", thirdKey: "lion", fourthKey: "liger"].mapValues { ChildStemType(artifact: ChildNodeType(raw: $0), complete: true)! }
-                typealias DictionaryNodeType = RGDictionary256<String, ChildStemType>
+                
+                let source = [firstKey: "coyote", secondKey: "tiger", thirdKey: "lion", fourthKey: "liger"].mapValues { ChildCIDType(artifact: ChildNodeType(raw: $0), complete: true)! }
+                
                 let dictionaryNode = DictionaryNodeType(source)
-                typealias DictionaryStemType = RGCID<DictionaryNodeType>
-                let dictionaryRoot = DictionaryStemType(artifact: dictionaryNode!)
+                let dictionaryRoot = DictionaryCIDType(artifact: dictionaryNode!)
+
                 it("root should exist and have node info") {
                     expect(dictionaryRoot).toNot(beNil())
                     expect(dictionaryRoot!.contents()).toNot(beNil())
                     expect(dictionaryRoot!.contents()!).toNot(beEmpty())
                 }
-                typealias PartialDictionaryNodeType = DictionaryOverlay256<String, ChildStemType>
-                let emptyPartialDictionaryNode = PartialDictionaryNodeType(digest: dictionaryNode!.core.digest)
-                let configuredPartialDictionaryNode = emptyPartialDictionaryNode.masking([targetKey])!
-                typealias PartialDictionaryStemType = RGCID<PartialDictionaryNodeType>
-                let emptyPartialDictionaryStem = PartialDictionaryStemType(artifact: configuredPartialDictionaryNode)
-                typealias PartialRegenerativeType = RGObject256<PartialDictionaryStemType>
-                let emptyPartialRegenerative = PartialRegenerativeType(root: emptyPartialDictionaryStem!)
+                let emptyDictionaryOverlayNode = DictionaryOverlayNodeType(digest: dictionaryNode!.core.digest)
+                let configuredDictionaryOverlayNode = emptyDictionaryOverlayNode.masking([targetKey])!
+                let emptyDictionaryOverlayCID = DictionaryOverlayCIDType(artifact: configuredDictionaryOverlayNode)
+                let emptyDictionaryOverlayObject = DictionaryOverlayObjectType(root: emptyDictionaryOverlayCID!)
                 it("should have no dictionary node information") {
-                    expect(emptyPartialRegenerative.root.artifact).toNot(beNil())
-                    expect(emptyPartialRegenerative.root.artifact!.contents()).toNot(beNil())
-                    expect(emptyPartialRegenerative.root.artifact!.contents()!).to(beEmpty())
+                    expect(emptyDictionaryOverlayObject.root.artifact).toNot(beNil())
+                    expect(emptyDictionaryOverlayObject.root.artifact!.contents()).toNot(beNil())
+                    expect(emptyDictionaryOverlayObject.root.artifact!.contents()!).to(beEmpty())
                 }
-                let regeneratedPartialDictionary = emptyPartialRegenerative.capture(info: dictionaryRoot!.contents()!)
+                let regeneratedDictionaryOverlayObject = emptyDictionaryOverlayObject.capture(info: dictionaryRoot!.contents()!)
                 it("should be regenerated, and contain 3 key value tuples, tiger, lions, and ligers as dictionary values") {
-                    expect(regeneratedPartialDictionary).toNot(beNil())
-                    expect(regeneratedPartialDictionary!.root.artifact).toNot(beNil())
-                    expect(regeneratedPartialDictionary!.root.artifact!.mapping.count).to(equal(3))
-                    expect(regeneratedPartialDictionary!.root.artifact!.mapping.keys.contains(firstKey)).to(beFalse())
-                    expect(regeneratedPartialDictionary!.root.artifact!.mapping.keys.contains(secondKey)).to(beTrue())
-                    expect(regeneratedPartialDictionary!.root.artifact!.mapping.keys.contains(thirdKey)).to(beTrue())
-                    expect(regeneratedPartialDictionary!.root.artifact!.mapping.keys.contains(fourthKey)).to(beTrue())
-                    expect(regeneratedPartialDictionary!.complete()).to(beFalse())
+                    expect(regeneratedDictionaryOverlayObject).toNot(beNil())
+                    expect(regeneratedDictionaryOverlayObject!.root.artifact).toNot(beNil())
+                    expect(regeneratedDictionaryOverlayObject!.root.artifact!.mapping.count).to(equal(3))
+                    expect(regeneratedDictionaryOverlayObject!.root.artifact!.mapping.keys.contains(firstKey)).to(beFalse())
+                    expect(regeneratedDictionaryOverlayObject!.root.artifact!.mapping.keys.contains(secondKey)).to(beTrue())
+                    expect(regeneratedDictionaryOverlayObject!.root.artifact!.mapping.keys.contains(thirdKey)).to(beTrue())
+                    expect(regeneratedDictionaryOverlayObject!.root.artifact!.mapping.keys.contains(fourthKey)).to(beTrue())
+                    expect(regeneratedDictionaryOverlayObject!.complete()).to(beFalse())
                 }
             }
         }

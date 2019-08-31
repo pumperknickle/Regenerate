@@ -60,7 +60,8 @@ public extension RGObject {
             return result.setting(digest, withValue: entry)
         }
         guard let digests = optionalDigests else { return nil }
-        return capture(info: digests)
+        let captured = capture(info: digests)
+        return captured
     }
     
     func capture(info: [Digest: Data]) -> Self? {

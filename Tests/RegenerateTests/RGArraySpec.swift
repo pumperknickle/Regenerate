@@ -6,18 +6,21 @@ import CryptoStarterPack
 
 final class RGArraySpec: QuickSpec {
     override func spec() {
-        describe("RGArray") {
+        describe("Array Merkle Structure") {
             typealias ChildNodeType = RGScalar256<UInt256>
+            typealias ChildStemType = RGCID<ChildNodeType>
+            typealias ArrayNodeType = RGArray256<ChildStemType>
+            typealias ArrayStemType = RGCID<ArrayNodeType>
+            typealias RegenerativeArrayType = RGObject256<ArrayStemType>
+            
             let firstNode = ChildNodeType(raw: UInt256.min)
             let secondNode = ChildNodeType(raw: UInt256.max)
-            typealias ChildStemType = RGCID<ChildNodeType>
             let firstStem = ChildStemType(artifact: firstNode, complete: true)
             let secondStem = ChildStemType(artifact: secondNode, complete: true)
             it("should create simple scalar stems") {
                 expect(firstStem).toNot(beNil())
                 expect(secondStem).toNot(beNil())
             }
-            typealias ArrayNodeType = RGArray256<ChildStemType>
             let arrayNode = ArrayNodeType([firstStem!, secondStem!])
             it("should create with raw array") {
                 expect(arrayNode).toNot(beNil())
@@ -31,14 +34,12 @@ final class RGArraySpec: QuickSpec {
                 expect(finalNode!.hash()).toNot(beNil())
                 expect(finalNode!.hash()!).to(equal(arrayNode!.hash()))
             }
-            typealias ArrayStemType = RGCID<ArrayNodeType>
             let arrayRoot = ArrayStemType(artifact: arrayNode!)
             it("should have node content and not be nil") {
                 expect(arrayRoot).toNot(beNil())
                 expect(arrayRoot!.contents()).toNot(beNil())
                 expect(arrayRoot!.contents()!).toNot(beEmpty())
             }
-            typealias RegenerativeArrayType = RGObject256<ArrayStemType>
             let regenerativeArray = RegenerativeArrayType(root: arrayRoot!)
             it("can extract node information") {
                 expect(regenerativeArray.contents()).toNot(beNil())
