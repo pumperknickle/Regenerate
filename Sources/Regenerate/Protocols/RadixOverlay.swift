@@ -26,12 +26,12 @@ public extension RadixOverlay where Child: StemOverlay, FullRadix.Symbol == Symb
         self.init(fullRadix: fullRadix, children: fullRadix.children.mapValues { Child(digest: $0.digest) })
     }
     
-    func serialize() -> Data? {
-        return fullRadix.serialize()
+    func toBoolArray() -> [Bool] {
+        return fullRadix.toBoolArray()
     }
     
-    init?(content: Data) {
-        guard let fullNode = FullRadix(content: content) else { return nil }
+    init?(raw: [Bool]) {
+        guard let fullNode = FullRadix(raw: raw) else { return nil }
         self.init(fullRadix: fullNode)
     }
     

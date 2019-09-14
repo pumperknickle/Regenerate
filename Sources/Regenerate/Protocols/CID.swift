@@ -16,10 +16,10 @@ public protocol CID: Codable {
     func changing(digest: Digest?, artifact: Artifact?, complete: Bool?) -> Self
     
     func missing() -> [Digest: [Path]]
-    func capture(digest: Digest, content: Data, at route: Path) -> (Self, [Digest: [Path]])?
+    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, [Digest: [Path]])?
     func computedValidity() -> Bool
     func computedCompleteness() -> Bool
-    func contents() -> [Digest: Data]?
+    func contents() -> [Digest: [Bool]]?
 }
 
 public extension CID {
@@ -57,10 +57,9 @@ public extension CID {
         return node.isComplete()
     }
     
-    func contents() -> [Digest: Data]? {
+    func contents() -> [Digest: [Bool]]? {
         guard let node = artifact else { return [:] }
-        guard let nodeData = node.serialize() else { return nil }
-        return node.contents()?.setting(digest, withValue: nodeData)
+        return node.contents()?.setting(digest, withValue: node.toBoolArray())
     }
     
     func missing() -> [Digest: [Path]] {
@@ -68,13 +67,13 @@ public extension CID {
         return node.missing()
     }
     
-    func capture(digest: Digest, content: Data) -> (Self, [Digest: [Path]])? {
-        guard let decodedNode = Artifact(content: content) else { return nil }
+    func capture(digest: Digest, content: [Bool]) -> (Self, [Digest: [Path]])? {
+        guard let decodedNode = Artifact(raw: content) else { return nil }
         if digest != self.digest { return nil }
         return (changing(digest: nil, artifact: decodedNode, complete: decodedNode.isComplete()), decodedNode.missing())
     }
     
-    func capture(digest: Digest, content: Data, at route: Path) -> (Self, [Digest: [Path]])? {
+    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, [Digest: [Path]])? {
         if route.isEmpty && artifact == nil { return capture(digest: digest, content: content) }
         guard let node = artifact else { return nil }
         guard let nodeResult = node.capture(digest: digest, content: content, at: route) else { return nil }

@@ -153,13 +153,13 @@ public extension Radix {
         return changing(children: newChildren)
     }
     
-    func nodeInfoAlong(firstLeg: Edge, path route: Path) -> [Data]? {
+    func nodeInfoAlong(firstLeg: Edge, path route: Path) -> [[Bool]]? {
         guard let childKey = convertToSymbol(firstLeg) else { return nil }
         guard let child = children[childKey] else { return nil }
         return child.nodeInfoAlong(path: route)
     }
     
-    func capture(digest: Digest, content: Data, at route: Path) -> (Self, [Digest: [Path]])? {
+    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, [Digest: [Path]])? {
         guard let firstLeg = route.first else { return nil }
         guard let childSymbol = convertToSymbol(firstLeg) else { return nil }
         guard let childStem = children[childSymbol] else { return nil }
@@ -174,27 +174,27 @@ public extension Radix {
         return children.map { $0.value.missing().prepend($0.key.toString()) }.reduce([:], +)
     }
     
-    func contents() -> [Digest: Data]? {
-        return children.values.reduce([:], { (result, entry) -> [Digest: Data]? in
+    func contents() -> [Digest: [Bool]]? {
+        return children.values.reduce([:], { (result, entry) -> [Digest: [Bool]]? in
             guard let result = result else { return nil }
             guard let childContents = entry.contents() else { return nil }
             return result.merging(childContents)
         })
     }
     
-    func serialize() -> Data? {
-        guard let prefixData = try? JSONEncoder().encode(prefix.map { $0.toString() }) else { return nil }
-        guard let valueData = try? JSONEncoder().encode(value.map { $0.toString() }) else { return nil }
-        if children.values.contains(where: { $0.digest == nil }) { return nil }
+    func toBoolArray() -> [Bool] {
+        let prefixData = try! JSONEncoder().encode(prefix.map { $0.toString() })
+        let valueData = try! JSONEncoder().encode(value.map { $0.toString() })
         let mappedChildren = children.mapValues { $0.digest! }
         let childKeys = mappedChildren.toSortedKeys()
         let childValues = mappedChildren.toSortedValues()
-        guard let childKeyData = try? JSONEncoder().encode(childKeys.map { $0.toString() }) else { return nil }
-        guard let childValueData = try? JSONEncoder().encode(childValues.map { $0.toString() }) else { return nil }
-        return try? JSONEncoder().encode([prefixData, valueData, childKeyData, childValueData])
+        let childKeyData = try! JSONEncoder().encode(childKeys.map { $0.toString() })
+        let childValueData = try! JSONEncoder().encode(childValues.map { $0.toString() })
+        return try! JSONEncoder().encode([prefixData, valueData, childKeyData, childValueData]).toBoolArray()
     }
     
-    init?(content: Data) {
+    init?(raw: [Bool]) {
+        guard let content = Data(raw: raw) else { return nil }
         guard let arrayObject = try? JSONDecoder().decode([Data].self, from: content) else { return nil }
         if arrayObject.count != 4 { return nil }
         guard let prefixStrings = try? JSONDecoder().decode([String].self, from: arrayObject[0]) else { return nil }
