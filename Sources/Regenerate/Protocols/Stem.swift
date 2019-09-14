@@ -60,11 +60,10 @@ public extension Stem {
         return mergedStem
     }
     
-    func nodeInfoAlong(path: Path) -> [Data]? {
+    func nodeInfoAlong(path: Path) -> [[Bool]]? {
         guard let node = artifact else { return nil }
-        guard let data = node.serialize() else { return nil }
-        guard let firstLeg = path.first else { return [data] }
+        guard let firstLeg = path.first else { return [node.toBoolArray()] }
         guard let childResult = node.nodeInfoAlong(firstLeg: firstLeg, path: Array(path.dropFirst())) else { return nil }
-        return [data] + childResult
+        return [node.toBoolArray()] + childResult
     }
 }

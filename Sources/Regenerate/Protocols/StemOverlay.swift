@@ -45,8 +45,8 @@ public extension StemOverlay where Artifact: RadixOverlay, Artifact.Child == Sel
         return node.missing()
     }
     
-    func capture(digest: Digest, content: Data) -> (Self, [Digest : [Path]])? {
-        guard let decodedNode = Artifact(content: content) else { return nil }
+    func capture(digest: Digest, content: [Bool]) -> (Self, [Digest : [Path]])? {
+        guard let decodedNode = Artifact(raw: content) else { return nil }
         let childSubs = targets?.filter { $0.starts(with: decodedNode.prefix) && $0.count > decodedNode.prefix.count }.map { Array($0.dropFirst(decodedNode.prefix.count)) }
         let childSubAlls = masks?.filter { $0.starts(with: decodedNode.prefix) && $0.count > decodedNode.prefix.count }.map { Array($0.dropFirst(decodedNode.prefix.count)) }
         guard let childResultWithSubs = (childSubs == nil || childSubs!.isEmpty) ? (decodedNode, [:]) : decodedNode.targeting(childSubs!) else { return nil }
@@ -59,7 +59,7 @@ public extension StemOverlay where Artifact: RadixOverlay, Artifact.Child == Sel
         return (Self(digest: digest, artifact: finalChildResult.0, targets: localSubs, masks: localSubAlls, isMasked: finalAllSubResult), childResultWithSubAlls.1 + childResultWithSubs.1 + finalChildResult.1)
     }
     
-    func capture(digest: Digest, content: Data, at route: Path) -> (Self, [Digest : [Path]])? {
+    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, [Digest : [Path]])? {
         if targets == nil && masks == nil && !isMasked { return nil }
         if route.isEmpty && artifact == nil { return capture(digest: digest, content: content) }
         guard let node = artifact else { return nil }

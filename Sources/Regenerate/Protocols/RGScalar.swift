@@ -9,8 +9,8 @@ public protocol RGScalar: RGArtifact {
 
 public extension RGScalar {
     func isComplete() -> Bool { return true }
-    func capture(digest: Digest, content: Data, at route: Path) -> (Self, [Digest: [Path]])? { return nil }
+    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, [Digest: [Path]])? { return nil }
     func missing() -> [Digest : [Path]] { return [:] }
-    func contents() -> [Digest : Data]? { return [:] }
+    func contents() -> [Digest : [Bool]]? { return [:] }
     func isValid() -> Bool { return true }
 }

@@ -135,7 +135,7 @@ final class RGRTSpec: QuickSpec {
                     describe("malicious insertion") {
                         let cutRRM = someRRM.cuttingAllNodes()
                         let childNode = someRRM.root.artifact!.children.first!.value.artifact!
-                        let childNodeContent = childNode.serialize()!
+                        let childNodeContent = childNode.toBoolArray()
                         let rootDigest = someRRM.root.digest
                         it("should be the wrong digest") {
                             expect(childNode.hash()).toNot(beNil())

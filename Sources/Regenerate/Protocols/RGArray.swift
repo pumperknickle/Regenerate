@@ -61,7 +61,7 @@ public extension RGArray {
         return changing(complete: completeChildren.union(indices))
     }
     
-    func capture(digest: Digest, content: Data, at route: Path) -> (Self, [Digest : [Path]])? {
+    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, [Digest : [Path]])? {
         guard let firstLeg = route.first else {
             guard let insertionResult = core.capture(content: content, digest: digest) else { return nil }
             let modifiedMapping = insertionResult.2.reduce(mapping) { (result, entry) -> [Index: Element] in
@@ -93,9 +93,9 @@ public extension RGArray {
         return mapping.map { $0.value.missing().prepend(indexToRouteSegment($0.key)) }.reduce(missingChildrenInCore, +)
     }
     
-    func contents() -> [Digest : Data]? {
+    func contents() -> [Digest : [Bool]]? {
         guard let coreContents = core.contents() else { return nil }
-        return mapping.values.reduce(coreContents, { (result, entry) -> [Digest: Data]? in
+        return mapping.values.reduce(coreContents, { (result, entry) -> [Digest: [Bool]]? in
             guard let result = result else { return nil }
             guard let childContent = entry.contents() else { return nil }
             return result.merging(childContent)
