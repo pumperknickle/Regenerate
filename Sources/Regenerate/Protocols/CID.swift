@@ -4,6 +4,7 @@ import CryptoStarterPack
 public protocol CID: Codable {
     associatedtype Artifact: RGArtifact
     associatedtype CryptoDelegateType: CryptoDelegate
+    
     typealias Digest = Artifact.Digest
     typealias Edge = Artifact.Edge
     typealias Path = Artifact.Path
