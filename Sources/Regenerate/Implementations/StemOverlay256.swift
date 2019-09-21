@@ -11,6 +11,8 @@ public struct StemOverlay256: Codable {
 }
 
 extension StemOverlay256: CID {
+    public typealias CryptoDelegateType = BaseCrypto
+
     public init(digest: UInt256, artifact: RadixOverlay256?, complete: Bool) {
         self.rawDigest = digest
         self.rawArtifact = artifact

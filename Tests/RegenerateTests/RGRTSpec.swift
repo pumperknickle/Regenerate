@@ -137,10 +137,13 @@ final class RGRTSpec: QuickSpec {
                         let childNode = someRRM.root.artifact!.children.first!.value.artifact!
                         let childNodeContent = childNode.toBoolArray()
                         let rootDigest = someRRM.root.digest
+                        let childNodeHash = BaseCrypto.hash(childNode.toBoolArray())
                         it("should be the wrong digest") {
-                            expect(childNode.hash()).toNot(beNil())
+                            expect(childNode.toBoolArray()).toNot(beNil())
                             expect(rootDigest).toNot(beNil())
-                            expect(childNode.hash()!).toNot(equal(rootDigest!))
+                            expect(childNodeHash).toNot(beNil())
+                            expect(Radix256.Digest(raw: childNodeHash!)).toNot(beNil())
+                            expect(Radix256.Digest(raw: childNodeHash!)).toNot(equal(rootDigest!))
                         }
                         let insertedResult = cutRRM.capture(content: childNodeContent, digest: rootDigest!)
                         it("should accept insertion") {

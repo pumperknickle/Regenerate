@@ -1,8 +1,9 @@
 import Foundation
+import CryptoStarterPack
 
 public protocol CID: Codable {
     associatedtype Artifact: RGArtifact
-    typealias CryptoDelegateType = Artifact.CryptoDelegateType
+    associatedtype CryptoDelegateType: CryptoDelegate
     typealias Digest = Artifact.Digest
     typealias Edge = Artifact.Edge
     typealias Path = Artifact.Path
@@ -17,7 +18,6 @@ public protocol CID: Codable {
     
     func missing() -> [Digest: [Path]]
     func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, [Digest: [Path]])?
-    func computedValidity() -> Bool
     func computedCompleteness() -> Bool
     func contents() -> [Digest: [Bool]]?
 }
@@ -28,8 +28,9 @@ public extension CID {
     }
     
     init?(artifact: Artifact, complete: Bool) {
-        guard let nodeHash = artifact.hash() else { return nil }
-        self.init(digest: nodeHash, artifact: artifact, complete: complete)
+        guard let artifactHashOutput = CryptoDelegateType.hash(artifact.toBoolArray()) else { return nil }
+        guard let digest = Digest(raw: artifactHashOutput) else { return nil }
+        self.init(digest: digest, artifact: artifact, complete: complete)
     }
     
     init(digest: Digest) {
@@ -42,14 +43,6 @@ public extension CID {
     
     init?(artifact: Artifact) {
         self.init(artifact: artifact, complete: artifact.isComplete())
-    }
-    
-    // Imperative integrity verification
-    func computedValidity() -> Bool {
-        guard let node = artifact else { return true }
-        guard let nodeHash = node.hash() else { return false }
-        if digest != nodeHash { return false }
-        return node.isValid()
     }
     
     func computedCompleteness() -> Bool {

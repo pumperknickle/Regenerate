@@ -8,7 +8,6 @@ public struct RGDictionary256<Key: Stringable, Value: CID>: Codable where Value.
 }
 
 extension RGDictionary256: RGArtifact {
-    public typealias CryptoDelegateType = BaseCrypto
     public typealias Digest = UInt256
 }
 

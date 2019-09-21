@@ -8,6 +8,8 @@ public struct Stem256: Codable {
 }
 
 extension Stem256: CID {
+    public typealias CryptoDelegateType = BaseCrypto
+    
     public init(digest: UInt256, artifact: Radix256?, complete: Bool) {
         self.rawDigest = digest
         self.rawArtifact = artifact

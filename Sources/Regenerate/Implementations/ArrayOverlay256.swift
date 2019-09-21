@@ -9,7 +9,6 @@ public struct ArrayOverlay256<Element: CID>: Codable where Element.Digest == UIn
 }
 
 extension ArrayOverlay256: RGArtifact {
-    public typealias CryptoDelegateType = BaseCrypto
     public typealias Digest = UInt256
 }
 

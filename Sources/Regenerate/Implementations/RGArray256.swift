@@ -9,7 +9,6 @@ public struct RGArray256<Element: CID>: Codable where Element.Digest == UInt256 
 }
 
 extension RGArray256: RGArtifact {
-    public typealias CryptoDelegateType = BaseCrypto
     public typealias Digest = UInt256
 }
 

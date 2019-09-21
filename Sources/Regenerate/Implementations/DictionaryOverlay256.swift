@@ -8,7 +8,6 @@ public struct DictionaryOverlay256<Key: Stringable, Value: CID>: Codable where V
 }
 
 extension DictionaryOverlay256: RGArtifact {
-    public typealias CryptoDelegateType = BaseCrypto
     public typealias Digest = UInt256
 }
 
