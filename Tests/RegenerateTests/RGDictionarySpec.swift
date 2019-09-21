@@ -26,8 +26,7 @@ final class RGDictionarySpec: QuickSpec {
                 expect(emptyDictionary).toNot(beNil())
                 let finalDictionary = emptyDictionary!.setting(key: firstKey, to: firstStem!)!.setting(key: secondKey, to: secondStem!)
                 expect(finalDictionary).toNot(beNil())
-                expect(finalDictionary!.hash()).toNot(beNil())
-                expect(finalDictionary!.hash()!).to(equal(dictionaryNode!.hash()))
+                expect(finalDictionary!.toBoolArray()).to(equal(dictionaryNode!.toBoolArray()))
             }
             typealias DictionaryStemType = RGCID<DictionaryNodeType>
             let dictionaryRoot = DictionaryStemType(artifact: dictionaryNode!)

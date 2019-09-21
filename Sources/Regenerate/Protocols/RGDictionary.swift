@@ -4,7 +4,7 @@ import CryptoStarterPack
 public protocol RGDictionary: RGArtifact {
     associatedtype Key: Stringable
     associatedtype Value: CID where Value.Digest == Digest
-    associatedtype CoreType: RGRT where CoreType.Key == Key, CoreType.Value == Digest, CoreType.Digest == Digest, CoreType.CryptoDelegateType == CryptoDelegateType
+    associatedtype CoreType: RGRT where CoreType.Key == Key, CoreType.Value == Digest, CoreType.Digest == Digest
     
     typealias CoreRootType = CoreType.Root
     
@@ -99,7 +99,5 @@ public extension RGDictionary {
             guard let childContents = entry.contents() else { return nil }
             return result.merging(childContents)
         })
-    }
-    
-    func isValid() -> Bool { return core.computedValidity() && !mapping.values.contains(where: { !$0.computedValidity() }) }
+    }    
 }

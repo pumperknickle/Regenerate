@@ -1,4 +1,5 @@
 import Foundation
+import CryptoStarterPack
 
 public struct RGCID<Artifact: RGArtifact>: Codable {
     private let rawDigest: Artifact.Digest!
@@ -7,6 +8,8 @@ public struct RGCID<Artifact: RGArtifact>: Codable {
 }
 
 extension RGCID: CID {
+    public typealias CryptoDelegateType = BaseCrypto
+
     public var digest: Artifact.Digest! { return rawDigest }
     public var artifact: Artifact? { return rawArtifact }
     public var complete: Bool! { return rawComplete }

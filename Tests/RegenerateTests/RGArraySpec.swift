@@ -31,8 +31,7 @@ final class RGArraySpec: QuickSpec {
                 expect(emptyNode).toNot(beNil())
                 let finalNode = emptyNode!.appending(firstStem!)!.appending(secondStem!)
                 expect(finalNode).toNot(beNil())
-                expect(finalNode!.hash()).toNot(beNil())
-                expect(finalNode!.hash()!).to(equal(arrayNode!.hash()))
+                expect(finalNode!.toBoolArray()).to(equal(arrayNode!.toBoolArray()))
             }
             let arrayRoot = ArrayStemType(artifact: arrayNode!)
             it("should have node content and not be nil") {
@@ -84,7 +83,6 @@ final class RGArraySpec: QuickSpec {
                     expect(regeneratedNestedArray).toNot(beNil())
                     expect(regeneratedNestedArray!.complete()).to(beTrue())
                     expect(regeneratedNestedArray!.root.digest).to(equal(nestedRegenerative.root.digest))
-                    expect(regeneratedNestedArray!.root.computedValidity()).to(beTrue())
                     expect(regeneratedNestedArray!.root.artifact!.length).to(equal(UInt256(1)))
                     expect(regeneratedNestedArray!.root.artifact!.mapping.values.first!.artifact!.length).to(equal(UInt256(2)))
                 }

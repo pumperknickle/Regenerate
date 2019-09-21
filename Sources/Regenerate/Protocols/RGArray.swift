@@ -4,7 +4,7 @@ import CryptoStarterPack
 public protocol RGArray: RGArtifact {
     associatedtype Index: FixedWidthInteger, Stringable
     associatedtype Element: CID where Element.Digest == Digest
-    associatedtype CoreType: RGRT where CoreType.Key == Index, CoreType.Value == Element.Digest, CoreType.Digest == Digest, CoreType.CryptoDelegateType == CryptoDelegateType
+    associatedtype CoreType: RGRT where CoreType.Key == Index, CoreType.Value == Element.Digest, CoreType.Digest == Digest
     typealias CoreRootType = CoreType.Root
     
     var core: CoreType! { get }
@@ -108,9 +108,5 @@ public extension RGArray {
         let newLength = length.advanced(by: 1)
         let modifiedMapping = mapping.setting(newLength, withValue: element)
         return Self(core: modifiedCore, length: newLength, mapping: modifiedMapping, complete: completeChildren.union([newLength]))
-    }
-    
-    func isValid() -> Bool {
-        return core.computedValidity() && !mapping.values.contains(where: { !$0.computedValidity() })
     }
 }
