@@ -23,15 +23,13 @@ public extension RGDictionary {
     }
     
     init(digest: Digest) {
-        let cutCore = CoreType(digest: digest)
-        self.init(core: cutCore, mapping: [:], incomplete: Set([]))
+        self.init(core: CoreType(digest: digest), mapping: [:], incomplete: Set([]))
     }
     
     func setting(key: Key, to value: Value) -> Self? {
         if !isComplete() || !value.complete { return nil }
         guard let modifiedCore = core.setting(key: key, to: value.digest) else { return nil }
-        let modifiedMapping = mapping.setting(key, withValue: value)
-        return Self(core: modifiedCore, mapping: modifiedMapping, incomplete: Set([]))
+        return Self(core: modifiedCore, mapping: mapping.setting(key, withValue: value), incomplete: Set([]))
     }
     
     func changing(core: CoreType? = nil, mapping: [Key: Value]? = nil, incompleteChildren: Set<Key>? = nil) -> Self {
@@ -45,9 +43,7 @@ public extension RGDictionary {
     func isComplete() -> Bool { return core.complete() && incompleteChildren.isEmpty }
     
     func pruning() -> Self {
-        let prunedRoot = CoreType.Root(digest: core.digest)
-        let prunedCore = CoreType(root: prunedRoot)
-        return Self(core: prunedCore, mapping: [:], incomplete: Set([]))
+        return Self(core: CoreType(root: CoreType.Root(digest: core.digest)), mapping: [:], incomplete: Set([]))
     }
     
     func discover(incompleteKeys: [Key]) -> Self {

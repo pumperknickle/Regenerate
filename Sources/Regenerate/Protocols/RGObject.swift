@@ -19,8 +19,7 @@ public protocol RGObject: Codable {
 
 public extension RGObject {
     init(digest: Digest) {
-        let cutRoot = Root(digest: digest)
-        self.init(root: cutRoot, paths: cutRoot.missing())
+        self.init(root: Root(digest: digest))
     }
     
     func pieces() -> [[Bool]]? {
