@@ -51,7 +51,7 @@ public extension RGArray {
     }
     
     func pruning() -> Self {
-        return Self(core: CoreType(root: CoreRootType(digest: core.digest)), length: length, mapping: [:], complete: Set([]))
+        return Self(core: CoreType(root: core.root.empty()), length: length, mapping: [:], complete: Set([]))
     }
     
     func changing(core: CoreType? = nil, mapping: [Index: Element]? = nil, complete: Set<Index>? = nil) -> Self {

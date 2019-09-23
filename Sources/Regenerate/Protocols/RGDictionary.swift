@@ -47,7 +47,7 @@ public extension RGDictionary {
     func isComplete() -> Bool { return core.complete() && incompleteChildren.isEmpty }
     
     func pruning() -> Self {
-        return Self(core: CoreType(root: CoreType.Root(digest: core.digest)), mapping: [:], incomplete: Set([]))
+        return Self(core: CoreType(root: core.root.empty()), mapping: [:], incomplete: Set([]))
     }
     
     func discover(incompleteKeys: [Key]) -> Self {
