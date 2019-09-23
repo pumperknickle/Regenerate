@@ -4,7 +4,7 @@ import CryptoStarterPack
 public protocol RGDictionary: RGArtifact {
     associatedtype Key: Stringable
     associatedtype Value: CID where Value.Digest == Digest
-    associatedtype CoreType: RGRT where CoreType.Key == Key, CoreType.Value == Digest, CoreType.Digest == Digest
+    associatedtype CoreType: RGRT where CoreType.Key == Key, CoreType.Value == Value, CoreType.Digest == Digest
     
     typealias CoreRootType = CoreType.Root
     
@@ -17,7 +17,7 @@ public protocol RGDictionary: RGArtifact {
 
 public extension RGDictionary {
     init?(_ rawDictionary: [Key: Value]) {
-        let coreTuples = rawDictionary.map { ($0.key, $0.value.digest!) }
+        let coreTuples = rawDictionary.map { ($0.key, $0.value) }
         guard let core = CoreType(raw: coreTuples) else { return nil }
         self.init(core: core, mapping: rawDictionary, incomplete: Set([]))
     }
@@ -32,7 +32,7 @@ public extension RGDictionary {
     
     func setting(key: Key, to value: Value) -> Self? {
         if !isComplete() || !value.complete { return nil }
-        guard let modifiedCore = core.setting(key: key, to: value.digest) else { return nil }
+        guard let modifiedCore = core.setting(key: key, to: value) else { return nil }
         return Self(core: modifiedCore, mapping: mapping.setting(key, withValue: value), incomplete: Set([]))
     }
     
@@ -62,10 +62,10 @@ public extension RGDictionary {
         guard let firstLeg = route.first else {
             guard let insertionResult = core.capture(content: content, digest: digest) else { return nil }
             let modifiedMapping = insertionResult.2.reduce(mapping, { (result, entry) -> [Key: Value] in
-                return result.setting(entry.0, withValue: Value(digest: entry.1))
+                return result.setting(entry.0, withValue: entry.1)
             })
             let newMappingRoutes = insertionResult.2.reduce([:]) { (result, entry) -> [Digest: [Path]] in
-                return result.setting(entry.1, withValue: [[keyToRouteSegment(entry.0)]])
+                return result.setting(entry.1.digest, withValue: [[keyToRouteSegment(entry.0)]])
             }
             let newRoutes = insertionResult.1.reduce(newMappingRoutes) { (result, entry) -> [Digest: [Path]] in
                 guard let oldRoutes = result[entry] else { return result.setting(entry, withValue: [[]]) }
