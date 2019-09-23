@@ -30,8 +30,12 @@ public extension RGArray {
         self.init(core: core, length: finalIndexingResult.1, mapping: mapping, complete: complete)
     }
     
-    init(digest: Digest, length: Index) {
-        self.init(core: CoreType(digest: digest), length: length, mapping: [:], complete: Set([]))
+    init(root: CoreRootType, length: Index) {
+        self.init(core: CoreType(root: root), length: length)
+    }
+    
+    init(core: CoreType, length: Index) {
+        self.init(core: core, length: length, mapping: [:], complete: Set([]))
     }
     
     func indexToRouteSegment(_ index: Index) -> Edge {

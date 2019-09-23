@@ -27,8 +27,8 @@ final class DictionaryOverlaySpec: QuickSpec {
                     expect(dictionaryRoot!.contents()).toNot(beNil())
                     expect(dictionaryRoot!.contents()!).toNot(beEmpty())
                 }
-                
-                let emptyDictionaryOverlayNode = DictionaryOverlayNodeType(digest: dictionaryNode!.core.digest)
+                let overlayRoot = DictionaryOverlayNodeType.CoreRootType(digest: dictionaryNode!.core.root.digest)
+                let emptyDictionaryOverlayNode = DictionaryOverlayNodeType(root: overlayRoot)
                 let configuredDictionaryOverlayNode = emptyDictionaryOverlayNode.targeting([firstKey])!
                 let emptyDictionaryOverlayCID = DictionaryOverlayCIDType(artifact: configuredDictionaryOverlayNode)
                 let emptyDictionaryOverlayObject = DictionaryOverlayObjectType(root: emptyDictionaryOverlayCID!)
@@ -72,7 +72,8 @@ final class DictionaryOverlaySpec: QuickSpec {
                     expect(dictionaryRoot!.contents()).toNot(beNil())
                     expect(dictionaryRoot!.contents()!).toNot(beEmpty())
                 }
-                let emptyDictionaryOverlayNode = DictionaryOverlayNodeType(digest: dictionaryNode!.core.digest)
+                let overlayRoot = DictionaryOverlayNodeType.CoreRootType(digest: dictionaryNode!.core.root.digest)
+                let emptyDictionaryOverlayNode = DictionaryOverlayNodeType(root: overlayRoot)
                 let configuredDictionaryOverlayNode = emptyDictionaryOverlayNode.masking([targetKey])!
                 let emptyDictionaryOverlayCID = DictionaryOverlayCIDType(artifact: configuredDictionaryOverlayNode)
                 let emptyDictionaryOverlayObject = DictionaryOverlayObjectType(root: emptyDictionaryOverlayCID!)

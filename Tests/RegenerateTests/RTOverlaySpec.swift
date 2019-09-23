@@ -23,7 +23,8 @@ final class RTOverlaySpec: QuickSpec {
                     expect(dictionaryRoot!.contents()!).toNot(beEmpty())
                 }
                 typealias PartialDictionaryNodeType = DictionaryOverlay256<UInt256, ChildStemType>
-                let emptyPartialDictionaryNode = PartialDictionaryNodeType(digest: dictionaryNode!.core.digest)
+                let overlayRoot = PartialDictionaryNodeType.CoreRootType(digest: dictionaryNode!.core.digest)
+                let emptyPartialDictionaryNode = PartialDictionaryNodeType(root: overlayRoot)
                 let configuredPartialDictionaryNode = emptyPartialDictionaryNode.targeting([firstKey])!
                 typealias PartialDictionaryStemType = RGCID<PartialDictionaryNodeType>
                 let emptyPartialDictionaryStem = PartialDictionaryStemType(artifact: configuredPartialDictionaryNode)
@@ -64,7 +65,8 @@ final class RTOverlaySpec: QuickSpec {
                     expect(dictionaryRoot!.contents()!).toNot(beEmpty())
                 }
                 typealias PartialDictionaryNodeType = DictionaryOverlay256<String, ChildStemType>
-                let emptyPartialDictionaryNode = PartialDictionaryNodeType(digest: dictionaryNode!.core.digest)
+                let overlayRoot = PartialDictionaryNodeType.CoreRootType(digest: dictionaryNode!.core.digest)
+                let emptyPartialDictionaryNode = PartialDictionaryNodeType(root: overlayRoot)
                 let configuredPartialDictionaryNode = emptyPartialDictionaryNode.masking([targetKey])!
                 typealias PartialDictionaryStemType = RGCID<PartialDictionaryNodeType>
                 let emptyPartialDictionaryStem = PartialDictionaryStemType(artifact: configuredPartialDictionaryNode)

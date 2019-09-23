@@ -18,10 +18,6 @@ public protocol RGObject: Codable {
 }
 
 public extension RGObject {
-    init(digest: Digest) {
-        self.init(root: Root(digest: digest))
-    }
-    
     func pieces() -> [[Bool]]? {
         guard let firstData = Data(raw: root.digest.toBoolArray()) else { return [] }
         guard let contents = contents() else { return nil }

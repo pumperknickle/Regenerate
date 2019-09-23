@@ -22,8 +22,12 @@ public extension RGDictionary {
         self.init(core: core, mapping: rawDictionary, incomplete: Set([]))
     }
     
-    init(digest: Digest) {
-        self.init(core: CoreType(digest: digest), mapping: [:], incomplete: Set([]))
+    init(root: CoreRootType) {
+        self.init(core: CoreType(root: root))
+    }
+    
+    init(core: CoreType) {
+        self.init(core: core, mapping: [:], incomplete: Set([]))
     }
     
     func setting(key: Key, to value: Value) -> Self? {
