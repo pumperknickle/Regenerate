@@ -105,8 +105,6 @@ final class RGRTSpec: QuickSpec {
                         describe("inserting back contents") {
                             let resultAfterInserting = cutRRM.capture(info: rrmContents!)
                             let otherResult = cutRRM.capture(info: rrmContents!.map { $0.value })
-                            let finalResult = RGRT256<UInt256, UInt256>(root: cutRRM.root, data: rrmContents!.map { $0.value })
-                            let initResult = RGRT256<UInt256, UInt256>(root: cutRRM.root, data: someRRM.pieces()!)
                             it("should be complete") {
                                 expect(resultAfterInserting).toNot(beNil())
                                 expect(resultAfterInserting!.0.complete()).to(beTrue())
@@ -114,12 +112,6 @@ final class RGRTSpec: QuickSpec {
                                 expect(otherResult).toNot(beNil())
                                 expect(otherResult!.0.complete()).to(beTrue())
                                 expect(otherResult!.0.computedValidity()).to(beTrue())
-                                expect(finalResult).toNot(beNil())
-                                expect(finalResult!.complete()).to(beTrue())
-                                expect(finalResult!.computedValidity()).to(beTrue())
-                                expect(initResult).toNot(beNil())
-                                expect(initResult!.complete()).to(beTrue())
-                                expect(initResult!.computedValidity()).to(beTrue())
                             }
                             it("should output correct keys") {
                                 expect(Set(resultAfterInserting!.1.map { $0.0 })).to(equal(Set([oneKey, anotherKey])))

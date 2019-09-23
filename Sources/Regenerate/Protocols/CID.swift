@@ -73,4 +73,8 @@ public extension CID {
         guard let nodeResult = node.capture(digest: digest, content: content, at: route) else { return nil }
         return (changing(digest: nil, artifact: nodeResult.0, complete: nodeResult.0.isComplete()), nodeResult.1)
     }
+    
+    func empty() -> Self {
+        return Self(digest: digest)
+    }
 }
