@@ -5,8 +5,8 @@ public struct StemOverlay256: Codable {
     private let rawDigest: UInt256!
     private let rawArtifact: RadixOverlay256?
     private let rawComplete: Bool!
-    private let rawTargets: [[Bool]]?
-    private let rawMasks: [[Bool]]?
+    private let rawTargets: [[Symbol]]?
+    private let rawMasks: [[Symbol]]?
     private let rawIsMasked: Bool!
 }
 
@@ -35,7 +35,7 @@ extension StemOverlay256: Stem {
 }
 
 extension StemOverlay256: StemOverlay {
-    public init(digest: UInt256, artifact: RadixOverlay256?, complete: Bool, targets: [[Bool]]?, masks: [[Bool]]?, isMasked: Bool) {
+    public init(digest: UInt256, artifact: RadixOverlay256?, complete: Bool, targets: [[Symbol]]?, masks: [[Symbol]]?, isMasked: Bool) {
         self.rawDigest = digest
         self.rawArtifact = artifact
         self.rawComplete = complete
@@ -44,9 +44,9 @@ extension StemOverlay256: StemOverlay {
         self.rawIsMasked = isMasked
     }
     
-    public var targets: [[Bool]]? { return rawTargets }
+    public var targets: [[Symbol]]? { return rawTargets }
     
-    public var masks: [[Bool]]? { return rawMasks }
+    public var masks: [[Symbol]]? { return rawMasks }
     
     public var isMasked: Bool! { return rawIsMasked }
 }

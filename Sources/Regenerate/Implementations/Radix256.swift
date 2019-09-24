@@ -2,9 +2,9 @@ import Foundation
 import CryptoStarterPack
 
 public struct Radix256: Codable {
-    private let rawPrefix: [Bool]!
-    private let rawValue: [Bool]!
-    private let rawChildren: [Bool: Stem256]!
+    private let rawPrefix: [Symbol]!
+    private let rawValue: [Symbol]!
+    private let rawChildren: [Symbol: Child]!
 }
 
 extension Radix256: RGArtifact {
@@ -13,14 +13,14 @@ extension Radix256: RGArtifact {
 
 extension Radix256: Radix {
     public typealias Child = Stem256
-    public typealias Symbol = Bool
+    public typealias Symbol = String
     public typealias Digest = UInt256
     
-    public var prefix: [Bool] { return rawPrefix }
-    public var value: [Bool] { return rawValue }
-    public var children: [Bool : Stem256] { return rawChildren }
+    public var prefix: [Symbol] { return rawPrefix }
+    public var value: [Symbol] { return rawValue }
+    public var children: [Symbol : Child] { return rawChildren }
     
-    public init(prefix: [Bool], value: [Bool], children: [Bool : Stem256]) {
+    public init(prefix: [Symbol], value: [Symbol], children: [Symbol : Child]) {
         self.rawPrefix = prefix
         self.rawValue = value
         self.rawChildren = children

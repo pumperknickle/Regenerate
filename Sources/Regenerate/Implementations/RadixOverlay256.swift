@@ -2,8 +2,8 @@ import Foundation
 import CryptoStarterPack
 
 public struct RadixOverlay256: Codable {
-    private let rawFullRadix: Radix256!
-    private let rawChildren: [Bool : StemOverlay256]!
+    private let rawFullRadix: FullRadix!
+    private let rawChildren: [Symbol : Child]!
 }
 
 extension RadixOverlay256: RGArtifact {
@@ -12,14 +12,14 @@ extension RadixOverlay256: RGArtifact {
 }
 
 extension RadixOverlay256: Radix {
-    public typealias Symbol = Bool
+    public typealias Symbol = String
     public typealias Child = StemOverlay256
     
-    public var children: [Bool : StemOverlay256] { return rawChildren }
+    public var children: [Symbol : Child] { return rawChildren }
 }
 
 extension RadixOverlay256: RadixOverlay {
-    public var fullRadix: Radix256! { return rawFullRadix }
+    public var fullRadix: FullRadix! { return rawFullRadix }
     
     public typealias FullRadix = Radix256
     
