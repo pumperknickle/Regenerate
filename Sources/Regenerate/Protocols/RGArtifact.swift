@@ -3,6 +3,7 @@ import CryptoStarterPack
 
 public protocol RGArtifact: Codable, BinaryEncodable {
     associatedtype Digest: FixedWidthInteger, Stringable
+    
     typealias Edge = String
     typealias Path = [Edge]
     

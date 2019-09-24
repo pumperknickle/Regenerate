@@ -30,9 +30,12 @@ public extension RGArray {
         self.init(core: core, length: finalIndexingResult.1, mapping: mapping, complete: complete)
     }
     
-    init(digest: Digest, length: Index) {
-        let cutCore = CoreType(digest: digest)
-        self.init(core: cutCore, length: length, mapping: [:], complete: Set([]))
+    init(root: CoreRootType, length: Index) {
+        self.init(core: CoreType(root: root), length: length)
+    }
+    
+    init(core: CoreType, length: Index) {
+        self.init(core: core, length: length, mapping: [:], complete: Set([]))
     }
     
     func indexToRouteSegment(_ index: Index) -> Edge {
@@ -48,9 +51,7 @@ public extension RGArray {
     }
     
     func pruning() -> Self {
-        let prunedRoot = CoreRootType(digest: core.digest)
-        let prunedCore = CoreType(root: prunedRoot)
-        return Self(core: prunedCore, length: length, mapping: [:], complete: Set([]))
+        return Self(core: CoreType(root: core.root.empty()), length: length, mapping: [:], complete: Set([]))
     }
     
     func changing(core: CoreType? = nil, mapping: [Index: Element]? = nil, complete: Set<Index>? = nil) -> Self {
@@ -106,7 +107,6 @@ public extension RGArray {
         if !isComplete() || !element.complete { return nil }
         guard let modifiedCore = core.setting(key: length, to: element.digest) else { return nil }
         let newLength = length.advanced(by: 1)
-        let modifiedMapping = mapping.setting(newLength, withValue: element)
-        return Self(core: modifiedCore, length: newLength, mapping: modifiedMapping, complete: completeChildren.union([newLength]))
+        return Self(core: modifiedCore, length: newLength, mapping: mapping.setting(newLength, withValue: element), complete: completeChildren.union([newLength]))
     }
 }

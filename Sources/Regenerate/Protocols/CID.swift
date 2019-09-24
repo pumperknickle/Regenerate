@@ -1,7 +1,7 @@
 import Foundation
 import CryptoStarterPack
 
-public protocol CID: Codable {
+public protocol CID: Codable, BinaryEncodable {
     associatedtype Artifact: RGArtifact
     associatedtype CryptoDelegateType: CryptoDelegate
     
@@ -46,6 +46,17 @@ public extension CID {
         self.init(artifact: artifact, complete: artifact.isComplete())
     }
     
+    init?(raw: [Bool]) {
+        guard let data = Data(raw: raw) else { return nil }
+        guard let object = try? JSONDecoder().decode(Self.self, from: data) else { return nil }
+        self = object
+    }
+    
+    func toBoolArray() -> [Bool] {
+        let data = try! JSONEncoder().encode(empty())
+        return data.toBoolArray()
+    }
+    
     func computedCompleteness() -> Bool {
         guard let node = artifact else { return false }
         return node.isComplete()
@@ -72,5 +83,9 @@ public extension CID {
         guard let node = artifact else { return nil }
         guard let nodeResult = node.capture(digest: digest, content: content, at: route) else { return nil }
         return (changing(digest: nil, artifact: nodeResult.0, complete: nodeResult.0.isComplete()), nodeResult.1)
+    }
+    
+    func empty() -> Self {
+        return Self(digest: digest)
     }
 }

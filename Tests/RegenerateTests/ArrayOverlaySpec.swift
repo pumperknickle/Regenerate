@@ -28,8 +28,8 @@ final class ArrayOverlaySpec: QuickSpec {
                     expect(arrayRoot!.contents()).toNot(beNil())
                     expect(arrayRoot!.contents()!).toNot(beEmpty())
                 }
-                
-                let emptyArrayOverlayNode = ArrayOverlayNodeType(digest: arrayNode!.core.digest, length: UInt256(2))
+                let overlayRoot = ArrayOverlayNodeType.CoreRootType(digest: arrayNode!.core.digest)
+                let emptyArrayOverlayNode = ArrayOverlayNodeType(root: overlayRoot, length: UInt256(2))
                 let configuredArrayOverlayNode = emptyArrayOverlayNode.targeting([UInt256(0)])
                 let emptyArrayOverlayCID = ArrayOverlayCIDType(artifact: configuredArrayOverlayNode!)
                 let emptyArrayOverlayObject = ArrayOverlayObjectType(root: emptyArrayOverlayCID!)

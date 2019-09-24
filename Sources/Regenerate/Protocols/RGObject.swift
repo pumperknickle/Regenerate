@@ -11,46 +11,19 @@ public protocol RGObject: Codable {
     var root: Root { get }
     var keyPaths: [Digest: [Path]] { get }
     
-    init(root: Root, paths: [Digest: [Path]])
-    init?(pieces: [[Bool]])
-    
-    func pieces() -> [[Bool]]?
+    init(root: Root, paths: [Digest: [Path]])    
 }
 
 public extension RGObject {
-    init(digest: Digest) {
-        let cutRoot = Root(digest: digest)
-        self.init(root: cutRoot, paths: cutRoot.missing())
-    }
-    
-    func pieces() -> [[Bool]]? {
-        guard let firstData = Data(raw: root.digest.toBoolArray()) else { return [] }
-        guard let contents = contents() else { return nil }
-        return [firstData.toBoolArray()] + Array(contents.values)
-    }
-    
-    init?(pieces: [[Bool]]) {
-        guard let firstPiece = pieces.first else { return nil }
-        guard let rootDigest = Digest(raw: firstPiece.toBoolArray()) else { return nil }
-        self.init(root: Root(digest: rootDigest), data: Array(pieces.dropFirst()))
-    }
-    
-    init?(root: Root, data: [[Bool]]) {
-        guard let newObject = Self(root: root).capture(info: data) else { return nil }
-        self = newObject
-    }
-    
     init(root: Root) { self.init(root: root, paths: root.missing()) }
     
     func complete() -> Bool { return root.complete }
     
     func missingDigests() -> Set<Digest> { return Set(keyPaths.keys) }
     
-    func contents() -> [Digest: [Bool]]? {
-        return root.contents()
-    }
+    func contents() -> [Digest: [Bool]]? { return root.contents() }
     
-    func cuttingAllNodes() -> Self { return Self(root: Root(digest: root.digest)) }
+    func cuttingAllNodes() -> Self { return Self(root: root.empty()) }
     
     func capture(info: [[Bool]]) -> Self? {
         let optionalDigests = info.reduce([:]) { (result, entry) -> [Digest: [Bool]]? in
