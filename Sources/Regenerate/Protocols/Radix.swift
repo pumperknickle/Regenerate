@@ -3,21 +3,16 @@ import CryptoStarterPack
 
 public protocol Radix: RGArtifact where Child.Artifact == Self {
     associatedtype Child: Stem
-    associatedtype Symbol: Stringable
     
-    var prefix: [Symbol] { get }
-    var value: [Symbol] { get }
-    var children: [Symbol: Child] { get }
+    var prefix: [Edge] { get }
+    var value: [Edge] { get }
+    var children: [Edge: Child] { get }
     
-    init(prefix: [Symbol], value: [Symbol], children: [Symbol: Child])
+    init(prefix: [Edge], value: [Edge], children: [Edge: Child])
 }
 
 public extension Radix {
     init() { self.init(prefix: [], value: [], children: [:]) }
-    
-    func convertToSymbol(_ edge: Edge) -> Symbol? {
-        return Symbol(stringValue: edge)
-    }
     
     func isValid() -> Bool {
         return !children.values.contains(where: { !$0.computedValidity() })
@@ -27,15 +22,15 @@ public extension Radix {
         return !children.values.contains(where: { !$0.complete })
     }
     
-    func changing(prefix: [Symbol]? = nil, value: [Symbol]? = nil, children: [Symbol: Child]? = nil) -> Self {
+    func changing(prefix: [Edge]? = nil, value: [Edge]? = nil, children: [Edge: Child]? = nil) -> Self {
         return Self(prefix: prefix == nil ? self.prefix : prefix!, value: value == nil ? self.value : value!, children: children == nil ? self.children : children!)
     }
     
-    func values() -> [[Symbol]] {
+    func values() -> [[Edge]] {
         return children.values.map { $0.values() }.reduce([], +) + (value.isEmpty ? [] : [value])
     }
     
-    func keys() -> [[Symbol]] {
+    func keys() -> [[Edge]] {
         return children.values.map { $0.keys().map { prefix + $0 } }.reduce([], +) + (value.isEmpty ? [] : [prefix])
     }
     
@@ -43,14 +38,14 @@ public extension Radix {
         return changing(children: cuttingChildStems())
     }
     
-    func cuttingChildStems() -> [Symbol: Child] {
-        return children.reduce([:] as [Symbol: Child], { (result, entry) -> [Symbol: Child] in
+    func cuttingChildStems() -> [Edge: Child] {
+        return children.reduce([:] as [Edge: Child], { (result, entry) -> [Edge: Child] in
             return result.setting(entry.key, withValue: Child(digest: entry.value.digest))
         })
     }
     
-    func cuttingGrandchildStems() -> [Symbol: Child]? {
-        return children.reduce([:] as [Symbol: Child], { (result, entry) -> [Symbol: Child]? in
+    func cuttingGrandchildStems() -> [Edge: Child]? {
+        return children.reduce([:] as [Edge: Child], { (result, entry) -> [Edge: Child]? in
             guard let result = result else { return nil }
             guard let node = entry.value.artifact else { return nil }
             guard let newChild = Child(artifact: node.pruning()) else { return nil }
@@ -63,7 +58,7 @@ public extension Radix {
         return changing(children: prunedChildren)
     }
     
-    func get(key: [Symbol]) -> [Symbol]? {
+    func get(key: [Edge]) -> [Edge]? {
         if !key.starts(with: prefix) { return [] }
         let suffix = key - prefix
         guard let firstSymbol = suffix.first else { return value }
@@ -71,7 +66,7 @@ public extension Radix {
         return childStem.get(key: suffix)
     }
     
-    func setting(key: [Symbol], to value: [Symbol]) -> Self? {
+    func setting(key: [Edge], to value: [Edge]) -> Self? {
         if !key.starts(with: prefix) {
             if prefix.starts(with: key) {
                 let childSuffix = prefix - key
@@ -98,7 +93,7 @@ public extension Radix {
         return changing(children: children.setting(firstSymbol, withValue: newStem))
     }
     
-    func deleting(key: [Symbol]) -> Self? {
+    func deleting(key: [Edge]) -> Self? {
         if !key.starts(with: prefix) { return nil }
         let suffix = key - prefix
         guard let firstSymbol = suffix.first else {
@@ -121,7 +116,7 @@ public extension Radix {
         return changing(children: children.setting(firstSymbol, withValue: result))
     }
     
-    func transitionProof(proofType: TransitionProofType, key: [Symbol]) -> Self? {
+    func transitionProof(proofType: TransitionProofType, key: [Edge]) -> Self? {
         if !key.starts(with: prefix) {
             if proofType == .mutation || proofType == .deletion { return nil }
             return pruning()
@@ -146,7 +141,7 @@ public extension Radix {
     }
     
     func merging(right: Self) -> Self {
-        let newChildren = children.reduce([:] as [Symbol: Child]) { (result, entry) -> [Symbol: Child] in
+        let newChildren = children.reduce([:] as [Edge: Child]) { (result, entry) -> [Edge: Child] in
             let mergedChildStem = self.children[entry.key]!.merging(right: right.children[entry.key]!)
             return result.setting(entry.key, withValue: mergedChildStem)
         }
@@ -154,17 +149,15 @@ public extension Radix {
     }
     
     func nodeInfoAlong(firstLeg: Edge, path route: Path) -> [[Bool]]? {
-        guard let childKey = convertToSymbol(firstLeg) else { return nil }
-        guard let child = children[childKey] else { return nil }
+        guard let child = children[firstLeg] else { return nil }
         return child.nodeInfoAlong(path: route)
     }
     
     func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, [Digest: [Path]])? {
         guard let firstLeg = route.first else { return nil }
-        guard let childSymbol = convertToSymbol(firstLeg) else { return nil }
-        guard let childStem = children[childSymbol] else { return nil }
+        guard let childStem = children[firstLeg] else { return nil }
         guard let childStemResult = childStem.capture(digest: digest, content: content, at: Array(route.dropFirst())) else { return nil }
-        let modifiedNode = changing(children: children.setting(childSymbol, withValue: childStemResult.0))
+        let modifiedNode = changing(children: children.setting(firstLeg, withValue: childStemResult.0))
         let routes = childStemResult.1.prepend(firstLeg)
         return (modifiedNode, routes)
     }
@@ -199,12 +192,12 @@ public extension Radix {
         if arrayObject.count != 4 { return nil }
         guard let prefixStrings = try? JSONDecoder().decode([String].self, from: arrayObject[0]) else { return nil }
         guard let valueStrings = try? JSONDecoder().decode([String].self, from: arrayObject[1]) else { return nil }
-        let prefix = prefixStrings.map { Symbol(stringValue: $0) }
-        let value = valueStrings.map { Symbol(stringValue: $0) }
+        let prefix = prefixStrings.map { Edge(stringValue: $0) }
+        let value = valueStrings.map { Edge(stringValue: $0) }
         if prefix.contains(nil) || value.contains(nil) { return nil }
         guard let childKeyStrings = try? JSONDecoder().decode([String].self, from: arrayObject[2]) else { return nil }
         guard let childValueStrings = try? JSONDecoder().decode([String].self, from: arrayObject[3]) else { return nil }
-        guard let children = Dictionary<Symbol, Digest>.combine(keys: childKeyStrings, values: childValueStrings) else { return nil }
+        guard let children = Dictionary<Edge, Digest>.combine(keys: childKeyStrings, values: childValueStrings) else { return nil }
         self.init(prefix: prefix.map { $0! }, value: value.map { $0! }, children: children.mapValues { Child(digest: $0) })
     }
 }

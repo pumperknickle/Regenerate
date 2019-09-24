@@ -5,11 +5,13 @@ import CryptoStarterPack
 public protocol RGRT: RGObject where Root: Stem {
     associatedtype Key: BinaryEncodable
     associatedtype Value: BinaryEncodable
-    typealias Symbol = Root.Symbol
-    func decodeKey(_ symbols: [Symbol]) -> [Bool]?
-    func encodeKey(_ key: [Bool]) -> [Symbol]?
-    func decodeValue(_ symbols: [Symbol]) -> [Bool]?
-    func encodeValue(_ value: [Bool]) -> [Symbol]?
+    
+    typealias Edge = Root.Edge
+    
+    func decodeKey(_ symbols: [Edge]) -> [Bool]?
+    func encodeKey(_ key: [Bool]) -> [Edge]?
+    func decodeValue(_ symbols: [Edge]) -> [Bool]?
+    func encodeValue(_ value: [Bool]) -> [Edge]?
 }
 
 public extension RGRT {

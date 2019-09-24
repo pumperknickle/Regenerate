@@ -3,7 +3,7 @@ import CryptoStarterPack
 
 public struct RadixOverlay256: Codable {
     private let rawFullRadix: FullRadix!
-    private let rawChildren: [Symbol : Child]!
+    private let rawChildren: [Edge : Child]!
 }
 
 extension RadixOverlay256: RGArtifact {
@@ -12,10 +12,10 @@ extension RadixOverlay256: RGArtifact {
 }
 
 extension RadixOverlay256: Radix {
-    public typealias Symbol = String
+    public typealias Edge = String
     public typealias Child = StemOverlay256
     
-    public var children: [Symbol : Child] { return rawChildren }
+    public var children: [Edge : Child] { return rawChildren }
 }
 
 extension RadixOverlay256: RadixOverlay {
@@ -23,7 +23,7 @@ extension RadixOverlay256: RadixOverlay {
     
     public typealias FullRadix = Radix256
     
-    public init(fullRadix: FullRadix, children: [Symbol: Child]) {
+    public init(fullRadix: FullRadix, children: [Edge: Child]) {
         self.rawFullRadix = fullRadix
         self.rawChildren = children
     }

@@ -6,19 +6,19 @@ public protocol RadixOverlay: Radix {
     
     var fullRadix: FullRadix! { get }
     
-    init(fullRadix: FullRadix, children: [Symbol: Child])
+    init(fullRadix: FullRadix, children: [Edge: Child])
     
     func missing() -> [Digest: [Path]]
-    func targeting(_ targets: [[Symbol]]) -> (Self, [Digest: [Path]])?
-    func masking(_ masks: [[Symbol]]) -> (Self, [Digest: [Path]])?
+    func targeting(_ targets: [[Edge]]) -> (Self, [Digest: [Path]])?
+    func masking(_ masks: [[Edge]]) -> (Self, [Digest: [Path]])?
     func mask() -> (Self, [Digest: [Path]])?
 }
 
-public extension RadixOverlay where Child: StemOverlay, FullRadix.Symbol == Symbol, FullRadix.Digest == Digest {
-    var prefix: [Symbol] { return fullRadix.prefix }
-    var value: [Symbol] { return fullRadix.value }
+public extension RadixOverlay where Child: StemOverlay, FullRadix.Edge == Edge, FullRadix.Digest == Digest {
+    var prefix: [Edge] { return fullRadix.prefix }
+    var value: [Edge] { return fullRadix.value }
     
-    init(prefix: [Symbol], value: [Symbol], children: [Symbol : Child]) {
+    init(prefix: [Edge], value: [Edge], children: [Edge : Child]) {
         self.init(fullRadix: FullRadix(prefix: prefix, value: value, children: children.mapValues { FullRadix.Child(digest: $0.digest) }), children: children)
     }
     
@@ -40,7 +40,7 @@ public extension RadixOverlay where Child: StemOverlay, FullRadix.Symbol == Symb
         return children.filter { $0.value.targets != nil || $0.value.masks != nil || $0.value.isMasked }.map { $0.value.missing().prepend($0.key.toString()) }.reduce([:] as [Digest: [Path]], +)
     }
     
-    func targeting(_ targets: [[Symbol]]) -> (Self, [Digest: [Path]])? {
+    func targeting(_ targets: [[Edge]]) -> (Self, [Digest: [Path]])? {
         return children.reduce((self, [:]), { (result, entry) -> (Self, [Digest: [Path]])? in
             let childSubs = targets.filter { $0.starts(with: [entry.key]) }
             guard let result = result else { return nil }
@@ -50,7 +50,7 @@ public extension RadixOverlay where Child: StemOverlay, FullRadix.Symbol == Symb
         })
     }
     
-    func masking(_ masks: [[Symbol]]) -> (Self, [Digest: [Path]])? {
+    func masking(_ masks: [[Edge]]) -> (Self, [Digest: [Path]])? {
         return children.reduce((self, [:]), { (result, entry) -> (Self, [Digest: [Path]])? in
             let childSubAlls = masks.filter { $0.starts(with: [entry.key]) }
             guard let result = result else { return nil }
