@@ -176,12 +176,12 @@ public extension Radix {
     }
     
     func toBoolArray() -> [Bool] {
-        let prefixData = try! JSONEncoder().encode(prefix.map { $0.toString() })
-        let valueData = try! JSONEncoder().encode(value.map { $0.toString() })
+        let prefixData = try! JSONEncoder().encode(prefix)
+        let valueData = try! JSONEncoder().encode(value)
         let mappedChildren = children.mapValues { $0.digest! }
         let childKeys = mappedChildren.toSortedKeys()
         let childValues = mappedChildren.toSortedValues()
-        let childKeyData = try! JSONEncoder().encode(childKeys.map { $0.toString() })
+        let childKeyData = try! JSONEncoder().encode(childKeys)
         let childValueData = try! JSONEncoder().encode(childValues.map { $0.toString() })
         return try! JSONEncoder().encode([prefixData, valueData, childKeyData, childValueData]).toBoolArray()
     }
@@ -192,12 +192,9 @@ public extension Radix {
         if arrayObject.count != 4 { return nil }
         guard let prefixStrings = try? JSONDecoder().decode([String].self, from: arrayObject[0]) else { return nil }
         guard let valueStrings = try? JSONDecoder().decode([String].self, from: arrayObject[1]) else { return nil }
-        let prefix = prefixStrings.map { Edge(stringValue: $0) }
-        let value = valueStrings.map { Edge(stringValue: $0) }
-        if prefix.contains(nil) || value.contains(nil) { return nil }
         guard let childKeyStrings = try? JSONDecoder().decode([String].self, from: arrayObject[2]) else { return nil }
         guard let childValueStrings = try? JSONDecoder().decode([String].self, from: arrayObject[3]) else { return nil }
         guard let children = Dictionary<Edge, Digest>.combine(keys: childKeyStrings, values: childValueStrings) else { return nil }
-        self.init(prefix: prefix.map { $0! }, value: value.map { $0! }, children: children.mapValues { Child(digest: $0) })
+        self.init(prefix: prefixStrings, value: valueStrings, children: children.mapValues { Child(digest: $0) })
     }
 }

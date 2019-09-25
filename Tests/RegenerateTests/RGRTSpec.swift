@@ -8,11 +8,16 @@ final class RGRTSpec: QuickSpec {
     override func spec() {
         describe("Regenerative Radix Merkle Trie") {
             describe("Initialization") {
+                
+                // User defined data structure
                 let rgrmt = RGRT256<UInt256, UInt256>()
+                
+                // Values to populate
                 let oneKey = UInt256.min
                 let anotherKey = UInt256.max
                 let oneValue = UInt256.max
                 let anotherValue = UInt256.min
+                
                 it("should initialize empty rrm") {
                     expect(rgrmt).toNot(beNil())
                 }
@@ -41,6 +46,7 @@ final class RGRTSpec: QuickSpec {
                     it("should have unique keys") {
                         expect(oneKey).toNot(equal(anotherKey))
                     }
+                    // These two data structures should be equivalent down to the last bit
                     let oneRRM = rgrmt.setting(key: oneKey, to: oneValue)!.setting(key: anotherKey, to: anotherValue)!
                     let anotherRRM = rgrmt.setting(key: anotherKey, to: anotherValue)!.setting(key: oneKey, to: oneValue)!
                     it("should have the same digest for both rrm, since contents are the same") {
@@ -85,16 +91,19 @@ final class RGRTSpec: QuickSpec {
                     }
                 }
                 describe("Regeneration") {
+                    // Create full data structure
                     let someRRM = rgrmt.setting(key: oneKey, to: oneValue)!.setting(key: anotherKey, to: anotherValue)!
                     it("is complete") {
                         expect(someRRM.complete()).to(beTrue())
                     }
+                    // blocks can be extracted
                     let rrmContents = someRRM.contents()
                     it("can extract node contents from complete") {
                         expect(rrmContents).toNot(beNil())
                         expect(rrmContents!).toNot(beEmpty())
                     }
                     describe("rrm with just root") {
+                        // Start with only the cryptographic link
                         let cutRRM = someRRM.cuttingAllNodes()
                         it("should have same digest as original") {
                             expect(cutRRM.digest).to(equal(someRRM.digest))
@@ -105,6 +114,10 @@ final class RGRTSpec: QuickSpec {
                         describe("inserting back contents") {
                             let resultAfterInserting = cutRRM.capture(info: rrmContents!)
                             let otherResult = cutRRM.capture(info: rrmContents!.map { $0.value })
+                            print(String(bytes: try! JSONEncoder().encode(resultAfterInserting!.0), encoding: .utf8))
+                            print(String(bytes: try! JSONEncoder().encode(someRRM), encoding: .utf8))
+                            print(String(bytes: try! JSONEncoder().encode(resultAfterInserting!.0.contents()!), encoding: .utf8))
+                            print(String(bytes: try! JSONEncoder().encode(someRRM.contents()!), encoding: .utf8))
                             it("should be complete") {
                                 expect(resultAfterInserting).toNot(beNil())
                                 expect(resultAfterInserting!.0.complete()).to(beTrue())
