@@ -1,4 +1,5 @@
 import Foundation
+import Bedrock
 import CryptoStarterPack
 
 public protocol CID: Codable, BinaryEncodable {

@@ -1,5 +1,5 @@
 import Foundation
-import CryptoStarterPack
+import Bedrock
 
 public struct ArrayOverlay256<Element: CID>: Codable where Element.Digest == UInt256 {
     private let rawCore: RTOverlay256<UInt256, UInt256>!

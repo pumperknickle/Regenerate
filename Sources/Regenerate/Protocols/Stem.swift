@@ -29,7 +29,7 @@ public extension Stem {
         guard let hashOutput = CryptoDelegateType.hash(node.toBoolArray()) else { return false }
         guard let nodeHash = Digest(raw: hashOutput) else { return false }
         if digest != nodeHash { return false }
-        return !node.children.values.contains(where: { !$0.computedValidity() })
+        return !node.children.values().contains(where: { !$0.computedValidity() })
     }
     
     // warning, calling this creates a NEW rrm with a new digest

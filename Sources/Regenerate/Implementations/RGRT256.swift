@@ -1,5 +1,5 @@
 import Foundation
-import CryptoStarterPack
+import Bedrock
 
 public struct RGRT256<Key: BinaryEncodable, Value: BinaryEncodable>: Codable {
     private let rawRoot: Stem256!

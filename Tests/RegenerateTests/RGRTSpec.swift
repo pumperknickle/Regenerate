@@ -2,6 +2,7 @@ import Foundation
 import Nimble
 import Quick
 import CryptoStarterPack
+import Bedrock
 @testable import Regenerate
 
 final class RGRTSpec: QuickSpec {
@@ -114,10 +115,6 @@ final class RGRTSpec: QuickSpec {
                         describe("inserting back contents") {
                             let resultAfterInserting = cutRRM.capture(info: rrmContents!)
                             let otherResult = cutRRM.capture(info: rrmContents!.map { $0.value })
-                            print(String(bytes: try! JSONEncoder().encode(resultAfterInserting!.0), encoding: .utf8))
-                            print(String(bytes: try! JSONEncoder().encode(someRRM), encoding: .utf8))
-                            print(String(bytes: try! JSONEncoder().encode(resultAfterInserting!.0.contents()!), encoding: .utf8))
-                            print(String(bytes: try! JSONEncoder().encode(someRRM.contents()!), encoding: .utf8))
                             it("should be complete") {
                                 expect(resultAfterInserting).toNot(beNil())
                                 expect(resultAfterInserting!.0.complete()).to(beTrue())
@@ -139,7 +136,7 @@ final class RGRTSpec: QuickSpec {
                     }
                     describe("malicious insertion") {
                         let cutRRM = someRRM.cuttingAllNodes()
-                        let childNode = someRRM.root.artifact!.children.first!.value.artifact!
+                        let childNode = someRRM.root.artifact!.children.elements().first!.1.artifact!
                         let childNodeContent = childNode.toBoolArray()
                         let rootDigest = someRRM.root.digest
                         let childNodeHash = BaseCrypto.hash(childNode.toBoolArray())

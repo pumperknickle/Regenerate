@@ -1,10 +1,12 @@
 import Foundation
+import Bedrock
 import CryptoStarterPack
+import TMap
 
 public struct Radix256: Codable {
     private let rawPrefix: [Edge]!
     private let rawValue: [Edge]!
-    private let rawChildren: [Edge: Child]!
+    private let rawChildren: [TMap<Edge, Child>]!
 }
 
 extension Radix256: RGArtifact {
@@ -18,11 +20,11 @@ extension Radix256: Radix {
     
     public var prefix: [Edge] { return rawPrefix }
     public var value: [Edge] { return rawValue }
-    public var children: [Edge : Child] { return rawChildren }
+    public var children: TMap<Edge, Child> { return rawChildren.first! }
     
-    public init(prefix: [Edge], value: [Edge], children: [Edge : Child]) {
+    public init(prefix: [Edge], value: [Edge], children: TMap<Edge, Child>) {
         self.rawPrefix = prefix
         self.rawValue = value
-        self.rawChildren = children
+        self.rawChildren = [children]
     }
 }

@@ -1,5 +1,5 @@
 import Foundation
-import CryptoStarterPack
+import Bedrock
 
 public struct DictionaryOverlay256<Key: Stringable, Value: CID>: Codable where Value.Digest == UInt256 {
     private let rawCore: RTOverlay256<Key, Value>!

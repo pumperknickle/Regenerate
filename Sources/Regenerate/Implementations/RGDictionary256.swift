@@ -1,5 +1,5 @@
 import Foundation
-import CryptoStarterPack
+import Bedrock
 
 public struct RGDictionary256<Key: Stringable, Value: CID>: Codable where Value.Digest == UInt256 {
     private let rawCore: RGRT256<Key, Value>!

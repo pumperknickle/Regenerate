@@ -1,5 +1,5 @@
 import Foundation
-import CryptoStarterPack
+import Bedrock
 
 public protocol RGArtifact: Codable, BinaryEncodable {
     associatedtype Digest: FixedWidthInteger, Stringable

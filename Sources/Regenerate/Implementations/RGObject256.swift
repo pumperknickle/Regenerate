@@ -1,5 +1,5 @@
 import Foundation
-import CryptoStarterPack
+import Bedrock
 
 public struct RGObject256<RootType: CID>: Codable where RootType.Digest == UInt256 {
     private let rawRoot: RootType!

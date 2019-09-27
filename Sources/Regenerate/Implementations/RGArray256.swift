@@ -1,5 +1,5 @@
 import Foundation
-import CryptoStarterPack
+import Bedrock
 
 public struct RGArray256<Element: CID>: Codable where Element.Digest == UInt256 {
     private let rawCore: RGRT256<UInt256, UInt256>!

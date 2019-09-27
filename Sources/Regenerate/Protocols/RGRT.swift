@@ -1,5 +1,5 @@
 import Foundation
-import CryptoStarterPack
+import Bedrock
 
 // regenerative radix tree
 public protocol RGRT: RGObject where Root: Stem {

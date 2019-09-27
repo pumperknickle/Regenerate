@@ -1,5 +1,5 @@
 import Foundation
-import CryptoStarterPack
+import Bedrock
 
 public protocol StemOverlay: Stem {    
     var targets: [[Edge]]? { get }

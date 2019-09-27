@@ -1,4 +1,5 @@
 import Foundation
+import Bedrock
 import CryptoStarterPack
 
 public struct RGScalar256<T: Codable>: Codable {
