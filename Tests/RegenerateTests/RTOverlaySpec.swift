@@ -2,6 +2,7 @@ import Foundation
 import Nimble
 import Quick
 import CryptoStarterPack
+import Bedrock
 @testable import Regenerate
 
 final class RTOverlaySpec: QuickSpec {

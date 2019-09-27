@@ -1,4 +1,5 @@
 import Foundation
+import Bedrock
 import CryptoStarterPack
 
 public struct Stem256: Codable {

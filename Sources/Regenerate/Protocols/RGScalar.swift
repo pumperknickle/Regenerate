@@ -1,4 +1,5 @@
 import Foundation
+import Bedrock
 
 // Leaf node
 public protocol RGScalar: RGArtifact {

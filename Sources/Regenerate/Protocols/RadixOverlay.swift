@@ -1,29 +1,36 @@
 import Foundation
-import CryptoStarterPack
+import Bedrock
+import TMap
 
 public protocol RadixOverlay: Radix {
     associatedtype FullRadix: Radix
     
     var fullRadix: FullRadix! { get }
     
-    init(fullRadix: FullRadix, children: [Symbol: Child])
+    init(fullRadix: FullRadix, children: TMap<Edge, Child>)
     
     func missing() -> [Digest: [Path]]
-    func targeting(_ targets: [[Symbol]]) -> (Self, [Digest: [Path]])?
-    func masking(_ masks: [[Symbol]]) -> (Self, [Digest: [Path]])?
+    func targeting(_ targets: [[Edge]]) -> (Self, [Digest: [Path]])?
+    func masking(_ masks: [[Edge]]) -> (Self, [Digest: [Path]])?
     func mask() -> (Self, [Digest: [Path]])?
 }
 
-public extension RadixOverlay where Child: StemOverlay, FullRadix.Symbol == Symbol, FullRadix.Digest == Digest {
-    var prefix: [Symbol] { return fullRadix.prefix }
-    var value: [Symbol] { return fullRadix.value }
+public extension RadixOverlay where Child: StemOverlay, FullRadix.Digest == Digest {
+    var prefix: [Edge] { return fullRadix.prefix }
+    var value: [Edge] { return fullRadix.value }
     
-    init(prefix: [Symbol], value: [Symbol], children: [Symbol : Child]) {
-        self.init(fullRadix: FullRadix(prefix: prefix, value: value, children: children.mapValues { FullRadix.Child(digest: $0.digest) }), children: children)
+    init(prefix: [Edge], value: [Edge], children: TMap<Edge, Child>) {
+        let newChildren = children.elements().reduce(TMap<Edge, FullRadix.Child>()) { (result, entry) -> TMap<Edge, FullRadix.Child> in
+            return result.setting(key: entry.0, value: FullRadix.Child(digest: entry.1.digest))
+        }
+        self.init(fullRadix: FullRadix(prefix: prefix, value: value, children: newChildren), children: children)
     }
     
     init(fullRadix: FullRadix) {
-        self.init(fullRadix: fullRadix, children: fullRadix.children.mapValues { Child(digest: $0.digest) })
+        let newChildren = fullRadix.children.elements().reduce(TMap<Edge, Child>()) { (result, entry) -> TMap<Edge, Child> in
+            return result.setting(key: entry.0, value: Child(digest: entry.1.digest))
+        }
+        self.init(fullRadix: fullRadix, children: newChildren)
     }
     
     func toBoolArray() -> [Bool] {
@@ -36,35 +43,35 @@ public extension RadixOverlay where Child: StemOverlay, FullRadix.Symbol == Symb
     }
     
     func missing() -> [Digest: [Path]] {
-        if children.isEmpty { return [:] }
-        return children.filter { $0.value.targets != nil || $0.value.masks != nil || $0.value.isMasked }.map { $0.value.missing().prepend($0.key.toString()) }.reduce([:] as [Digest: [Path]], +)
+        if children.isEmpty() { return [:] }
+        return children.elements().filter { $0.1.targets != nil || $0.1.masks != nil || $0.1.isMasked }.map { $0.1.missing().prepend($0.0.toString()) }.reduce([:] as [Digest: [Path]], +)
     }
     
-    func targeting(_ targets: [[Symbol]]) -> (Self, [Digest: [Path]])? {
-        return children.reduce((self, [:]), { (result, entry) -> (Self, [Digest: [Path]])? in
-            let childSubs = targets.filter { $0.starts(with: [entry.key]) }
+    func targeting(_ targets: [[Edge]]) -> (Self, [Digest: [Path]])? {
+        return children.elements().reduce((self, [:]), { (result, entry) -> (Self, [Digest: [Path]])? in
+            let childSubs = targets.filter { $0.starts(with: [entry.0]) }
             guard let result = result else { return nil }
             if childSubs.isEmpty { return result }
-            guard let modifiedChild = entry.value.targeting(childSubs) else { return nil }
-            return (Self(fullRadix: fullRadix, children: result.0.children.setting(entry.key, withValue: modifiedChild.0)), result.1 + modifiedChild.1.prepend(entry.key.toString()))
+            guard let modifiedChild = entry.1.targeting(childSubs) else { return nil }
+            return (Self(fullRadix: fullRadix, children: result.0.children.setting(key: entry.0, value: modifiedChild.0)), result.1 + modifiedChild.1.prepend(entry.0.toString()))
         })
     }
     
-    func masking(_ masks: [[Symbol]]) -> (Self, [Digest: [Path]])? {
-        return children.reduce((self, [:]), { (result, entry) -> (Self, [Digest: [Path]])? in
-            let childSubAlls = masks.filter { $0.starts(with: [entry.key]) }
+    func masking(_ masks: [[Edge]]) -> (Self, [Digest: [Path]])? {
+        return children.elements().reduce((self, [:]), { (result, entry) -> (Self, [Digest: [Path]])? in
+            let childSubAlls = masks.filter { $0.starts(with: [entry.0]) }
             guard let result = result else { return nil }
             if childSubAlls.isEmpty { return result }
-            guard let modifiedChild = entry.value.masking(childSubAlls) else { return nil }
-            return (Self(fullRadix: fullRadix, children: result.0.children.setting(entry.key, withValue: modifiedChild.0)), result.1 + modifiedChild.1.prepend(entry.key.toString()))
+            guard let modifiedChild = entry.1.masking(childSubAlls) else { return nil }
+            return (Self(fullRadix: fullRadix, children: result.0.children.setting(key: entry.0, value: modifiedChild.0)), result.1 + modifiedChild.1.prepend(entry.0.toString()))
         })
     }
     
     func mask() -> (Self, [Digest: [Path]])? {
-        return children.reduce((self, [:]), { (result, entry) -> (Self, [Digest: [Path]])? in
+        return children.elements().reduce((self, [:]), { (result, entry) -> (Self, [Digest: [Path]])? in
             guard let result = result else { return nil }
-            guard let modifiedChild = entry.value.mask() else { return nil }
-            return (Self(fullRadix: fullRadix, children: result.0.children.setting(entry.key, withValue: modifiedChild.0)), result.1 + (modifiedChild.1.prepend(entry.key.toString())))
+            guard let modifiedChild = entry.1.mask() else { return nil }
+            return (Self(fullRadix: fullRadix, children: result.0.children.setting(key: entry.0, value: modifiedChild.0)), result.1 + (modifiedChild.1.prepend(entry.0.toString())))
         })
     }
 }

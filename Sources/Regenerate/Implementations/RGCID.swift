@@ -1,4 +1,5 @@
 import Foundation
+import Bedrock
 import CryptoStarterPack
 
 public struct RGCID<Artifact: RGArtifact>: Codable {

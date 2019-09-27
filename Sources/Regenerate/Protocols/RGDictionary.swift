@@ -1,5 +1,5 @@
 import Foundation
-import CryptoStarterPack
+import Bedrock
 
 public protocol RGDictionary: RGArtifact {
     associatedtype Key: Stringable

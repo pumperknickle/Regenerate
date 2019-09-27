@@ -1,5 +1,5 @@
 import Foundation
-import CryptoStarterPack
+import Bedrock
 
 public struct RGRT256<Key: BinaryEncodable, Value: BinaryEncodable>: Codable {
     private let rawRoot: Stem256!
@@ -19,8 +19,8 @@ extension RGRT256: RGObject {
 }
 
 extension RGRT256: RGRT {
-    public func decodeKey(_ symbols: [Bool]) -> [Bool]? { return symbols }
-    public func encodeKey(_ key: [Bool]) -> [Bool]? { return key }
-    public func decodeValue(_ symbols: [Bool]) -> [Bool]? { return symbols }
-    public func encodeValue(_ value: [Bool]) -> [Bool]? { return value }
+    public func decodeKey(_ symbols: [String]) -> [Bool]? { return symbols.map { $0 == "1" ? true : false } }
+    public func encodeKey(_ key: [Bool]) -> [String]? { return key.map { $0 == false ? "0" : "1" } }
+    public func decodeValue(_ symbols: [String]) -> [Bool]? { return symbols.map { $0 == "1" ? true : false } }
+    public func encodeValue(_ value: [Bool]) -> [String]? { return value.map { $0 == false ? "0" : "1" } }
 }

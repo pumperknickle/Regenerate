@@ -1,18 +1,16 @@
 import Foundation
-import CryptoStarterPack
+import Bedrock
 
-public protocol StemOverlay: Stem {
-    typealias Symbol = Artifact.Symbol
-    
-    var targets: [[Symbol]]? { get }
-    var masks: [[Symbol]]? { get }
+public protocol StemOverlay: Stem {    
+    var targets: [[Edge]]? { get }
+    var masks: [[Edge]]? { get }
     var isMasked: Bool! { get }
     
-    func targeting(_ targets: [[Symbol]]) -> (Self, [Digest: [Path]])?
-    func masking(_ masks: [[Symbol]]) -> (Self, [Digest: [Path]])?
+    func targeting(_ targets: [[Edge]]) -> (Self, [Digest: [Path]])?
+    func masking(_ masks: [[Edge]]) -> (Self, [Digest: [Path]])?
     func mask() -> (Self, [Digest: [Path]])?
     
-    init(digest: Digest, artifact: Artifact?, complete: Bool, targets: [[Symbol]]?, masks: [[Symbol]]?, isMasked: Bool)
+    init(digest: Digest, artifact: Artifact?, complete: Bool, targets: [[Edge]]?, masks: [[Edge]]?, isMasked: Bool)
 }
 
 public extension StemOverlay where Artifact: RadixOverlay, Artifact.Child == Self {
@@ -20,7 +18,7 @@ public extension StemOverlay where Artifact: RadixOverlay, Artifact.Child == Sel
         self.init(digest: digest, artifact: nil, complete: false)
     }
     
-    init(digest: Digest, artifact: Artifact?, targets: [[Symbol]]?, masks: [[Symbol]]?, isMasked: Bool) {
+    init(digest: Digest, artifact: Artifact?, targets: [[Edge]]?, masks: [[Edge]]?, isMasked: Bool) {
         guard let finalArtifact = artifact else {
             self.init(digest: digest, artifact: nil, complete: false, targets: targets, masks: masks, isMasked: isMasked)
             return
@@ -32,7 +30,7 @@ public extension StemOverlay where Artifact: RadixOverlay, Artifact.Child == Sel
         return Self(digest: digest == nil ? self.digest : digest!, artifact: artifact == nil ? self.artifact : artifact!, complete: complete == nil ? self.complete : complete!, targets: self.targets, masks: self.masks, isMasked: self.isMasked)
     }
     
-    func changing(subscribed: [[Symbol]]? = nil, subscribeAll: [[Symbol]]? = nil, allSubscribed: Bool) -> Self {
+    func changing(subscribed: [[Edge]]? = nil, subscribeAll: [[Edge]]? = nil, allSubscribed: Bool) -> Self {
         if complete && self.targets == nil && self.masks == nil && !self.isMasked && (subscribed != nil || subscribeAll != nil || allSubscribed) {
             return Self(digest: digest, artifact: artifact, complete: false, targets: subscribed == nil ? self.targets : subscribed!, masks: subscribeAll == nil ? self.masks : subscribeAll!, isMasked: allSubscribed)
         }
@@ -67,7 +65,7 @@ public extension StemOverlay where Artifact: RadixOverlay, Artifact.Child == Sel
         return (Self(digest: self.digest, artifact: modifiedNode.0, targets: targets, masks: masks, isMasked: isMasked), modifiedNode.1)
     }
     
-    func targeting(_ subs: [[Symbol]]) -> (Self, [Digest: [Path]])? {
+    func targeting(_ subs: [[Edge]]) -> (Self, [Digest: [Path]])? {
         guard let node = artifact else {
             if targets == nil && masks == nil && !isMasked { return (changing(subscribed: (targets ?? []) + subs, allSubscribed: isMasked), [digest: [[]]]) }
             return (changing(subscribed: (targets ?? []) + subs, allSubscribed: isMasked), [:])
@@ -78,7 +76,7 @@ public extension StemOverlay where Artifact: RadixOverlay, Artifact.Child == Sel
         return (Self(digest: digest, artifact: childResult.0, complete: childResult.0.isComplete(), targets: localSubs + (targets ?? []), masks: masks, isMasked: isMasked), childResult.1)
     }
     
-    func masking(_ subAlls: [[Symbol]]) -> (Self, [Digest: [Path]])? {
+    func masking(_ subAlls: [[Edge]]) -> (Self, [Digest: [Path]])? {
         guard let node = artifact else {
             if targets == nil && masks == nil && !isMasked {
                 return (changing(subscribeAll: (masks ?? []) + subAlls, allSubscribed: isMasked), [digest: [[]]])
