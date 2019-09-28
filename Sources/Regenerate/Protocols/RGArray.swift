@@ -10,23 +10,23 @@ public protocol RGArray: RGArtifact {
     
     var core: CoreType! { get }
     var length: Index! { get }
-    var mapping: [Index: Element]! { get }
+    var mapping: TMap<Index, Element>! { get }
     var completeChildren: Set<Index>! { get }
     
-    init(core: CoreType, length: Index, mapping: [Index: Element], complete: Set<Index>)
+    init(core: CoreType, length: Index, mapping: TMap<Index, Element>, complete: Set<Index>)
 }
 
 public extension RGArray {
     init?(_ rawArray: [Element]) {
-        let resultOfIndexing = rawArray.reduce(([:], Index(0))) { (result, entry) -> ([Index: Element], Index)? in
+        let resultOfIndexing = rawArray.reduce((TMap<Index, Element>(), Index(0))) { (result, entry) -> (TMap<Index, Element>, Index)? in
             guard let result = result else { return nil }
-            return (result.0.setting(result.1, withValue: entry), result.1.advanced(by: 1))
+            return (result.0.setting(key: result.1, value: entry), result.1.advanced(by: 1))
         }
         guard let finalIndexingResult = resultOfIndexing else { return nil }
         let mapping = finalIndexingResult.0
-        if mapping.contains(where: { $0.value.digest == nil }) { return nil }
-        let complete = Set(mapping.keys)
-        let coreTuples = mapping.map { ($0.key, $0.value.digest!) }
+        if mapping.elements().contains(where: { $0.1.digest == nil }) { return nil }
+        let complete = Set(mapping.keys())
+        let coreTuples = mapping.elements().map { ($0.0, $0.1.digest!) }
         guard let core = CoreType(raw: coreTuples) else { return nil }
         self.init(core: core, length: finalIndexingResult.1, mapping: mapping, complete: complete)
     }
@@ -36,7 +36,7 @@ public extension RGArray {
     }
     
     init(core: CoreType, length: Index) {
-        self.init(core: core, length: length, mapping: [:], complete: Set([]))
+        self.init(core: core, length: length, mapping: TMap<Index, Element>(), complete: Set([]))
     }
     
     func indexToRouteSegment(_ index: Index) -> Edge {
@@ -52,10 +52,10 @@ public extension RGArray {
     }
     
     func pruning() -> Self {
-        return Self(core: CoreType(root: core.root.empty()), length: length, mapping: [:], complete: Set([]))
+        return Self(core: CoreType(root: core.root.empty()), length: length, mapping: TMap<Index, Element>(), complete: Set([]))
     }
     
-    func changing(core: CoreType? = nil, mapping: [Index: Element]? = nil, complete: Set<Index>? = nil) -> Self {
+    func changing(core: CoreType? = nil, mapping: TMap<Index, Element>? = nil, complete: Set<Index>? = nil) -> Self {
         return Self(core: core == nil ? self.core : core!, length: length, mapping: mapping == nil ? self.mapping : mapping!, complete: complete == nil ? self.completeChildren : complete!)
     }
     
@@ -66,8 +66,8 @@ public extension RGArray {
     func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, TMap<Digest, [Path]>)? {
         guard let firstLeg = route.first else {
             guard let insertionResult = core.capture(content: content, digest: digest) else { return nil }
-            let modifiedMapping = insertionResult.2.reduce(mapping) { (result, entry) -> [Index: Element] in
-                return result.setting(entry.0, withValue: Element(digest: entry.1))
+            let modifiedMapping = insertionResult.2.reduce(mapping) { (result, entry) -> TMap<Index, Element> in
+                return result.setting(key: entry.0, value: Element(digest: entry.1))
             }
             let newMappingRoutes = insertionResult.2.reduce(TMap<Digest, [Path]>()) { (result, entry) -> TMap<Digest, [Path]> in
                 return result.setting(key: entry.1, value: [[indexToRouteSegment(entry.0)]])
@@ -82,7 +82,7 @@ public extension RGArray {
         guard let childElement = mapping[childIndex] else { return nil }
         if childElement.complete { return nil }
         guard let modifiedChildResult = childElement.capture(digest: digest, content: content, at: Array(route.dropFirst())) else { return nil }
-        let modifiedMapping = mapping.setting(childIndex, withValue: modifiedChildResult.0)
+        let modifiedMapping = mapping.setting(key: childIndex, value: modifiedChildResult.0)
         let modifiedRoutes = modifiedChildResult.1.prepend(firstLeg)
         if modifiedChildResult.0.complete { return (changing(mapping: modifiedMapping).completing(indices: [childIndex]), modifiedRoutes) }
         return (changing(mapping: modifiedMapping), modifiedRoutes)
@@ -92,12 +92,12 @@ public extension RGArray {
         let missingChildrenInCore = core.missingDigests().reduce(TMap<Digest, [Path]>()) { (result, entry) -> TMap<Digest, [Path]> in
             return result.setting(key: entry, value: [[]])
         }
-        return mapping.map { $0.value.missing().prepend(indexToRouteSegment($0.key)) }.reduce(missingChildrenInCore, +)
+        return mapping.elements().map { $0.1.missing().prepend(indexToRouteSegment($0.0)) }.reduce(missingChildrenInCore, +)
     }
     
     func contents() -> TMap<Digest, [Bool]>? {
         guard let coreContents = core.contents() else { return nil }
-        return mapping.values.reduce(coreContents, { (result, entry) -> TMap<Digest, [Bool]>? in
+        return mapping.values().reduce(coreContents, { (result, entry) -> TMap<Digest, [Bool]>? in
             guard let result = result else { return nil }
             guard let childContent = entry.contents() else { return nil }
             return result.overwrite(with: childContent)
@@ -108,6 +108,6 @@ public extension RGArray {
         if !isComplete() || !element.complete { return nil }
         guard let modifiedCore = core.setting(key: length, to: element.digest) else { return nil }
         let newLength = length.advanced(by: 1)
-        return Self(core: modifiedCore, length: newLength, mapping: mapping.setting(newLength, withValue: element), complete: completeChildren.union([newLength]))
+        return Self(core: modifiedCore, length: newLength, mapping: mapping.setting(key: newLength, value: element), complete: completeChildren.union([newLength]))
     }
 }

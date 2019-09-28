@@ -85,7 +85,7 @@ final class RGArraySpec: QuickSpec {
                     expect(regeneratedNestedArray!.complete()).to(beTrue())
                     expect(regeneratedNestedArray!.root.digest).to(equal(nestedRegenerative.root.digest))
                     expect(regeneratedNestedArray!.root.artifact!.length).to(equal(UInt256(1)))
-                    expect(regeneratedNestedArray!.root.artifact!.mapping.values.first!.artifact!.length).to(equal(UInt256(2)))
+                    expect(regeneratedNestedArray!.root.artifact!.mapping.values().first!.artifact!.length).to(equal(UInt256(2)))
                 }
             }
         }
