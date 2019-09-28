@@ -1,5 +1,6 @@
 import Foundation
 import Bedrock
+import TMap
 
 public protocol RGObject: Codable {
     associatedtype Root: CID
@@ -21,7 +22,7 @@ public extension RGObject {
     
     func missingDigests() -> Set<Digest> { return Set(keyPaths.keys) }
     
-    func contents() -> [Digest: [Bool]]? { return root.contents() }
+    func contents() -> TMap<Digest, [Bool]>? { return root.contents() }
     
     func cuttingAllNodes() -> Self { return Self(root: root.empty()) }
     

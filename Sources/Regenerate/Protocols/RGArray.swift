@@ -1,5 +1,6 @@
 import Foundation
 import Bedrock
+import TMap
 
 public protocol RGArray: RGArtifact {
     associatedtype Index: FixedWidthInteger, Stringable
@@ -94,12 +95,12 @@ public extension RGArray {
         return mapping.map { $0.value.missing().prepend(indexToRouteSegment($0.key)) }.reduce(missingChildrenInCore, +)
     }
     
-    func contents() -> [Digest : [Bool]]? {
+    func contents() -> TMap<Digest, [Bool]>? {
         guard let coreContents = core.contents() else { return nil }
-        return mapping.values.reduce(coreContents, { (result, entry) -> [Digest: [Bool]]? in
+        return mapping.values.reduce(coreContents, { (result, entry) -> TMap<Digest, [Bool]>? in
             guard let result = result else { return nil }
             guard let childContent = entry.contents() else { return nil }
-            return result.merging(childContent)
+            return result.overwrite(with: childContent)
         })
     }
     

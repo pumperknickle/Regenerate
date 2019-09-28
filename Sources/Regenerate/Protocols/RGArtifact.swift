@@ -1,5 +1,6 @@
 import Foundation
 import Bedrock
+import TMap
 
 public protocol RGArtifact: Codable, BinaryEncodable {
     associatedtype Digest: FixedWidthInteger, Stringable
@@ -10,7 +11,7 @@ public protocol RGArtifact: Codable, BinaryEncodable {
     func isComplete() -> Bool
     func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, [Digest: [Path]])?
     func missing() -> [Digest: [Path]]
-    func contents() -> [Digest: [Bool]]?
+    func contents() -> TMap<Digest, [Bool]>?
     func pruning() -> Self
 }
 

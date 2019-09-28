@@ -1,5 +1,6 @@
 import Foundation
 import Bedrock
+import TMap
 
 // Leaf node
 public protocol RGScalar: RGArtifact {
@@ -12,6 +13,6 @@ public extension RGScalar {
     func isComplete() -> Bool { return true }
     func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, [Digest: [Path]])? { return nil }
     func missing() -> [Digest : [Path]] { return [:] }
-    func contents() -> [Digest : [Bool]]? { return [:] }
+    func contents() -> TMap<Digest, [Bool]>? { return TMap<Digest, [Bool]>() }
     func isValid() -> Bool { return true }
 }

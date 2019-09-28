@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/pumperknickle/TMap.git",
         "state": {
           "branch": null,
-          "revision": "8e6406879aedd59416cd87433ee4aae185fc8dff",
-          "version": "1.0.2"
+          "revision": "8dd81eaec1cdd935550833fe485dbefdf367ca78",
+          "version": "1.0.3"
         }
       }
     ]

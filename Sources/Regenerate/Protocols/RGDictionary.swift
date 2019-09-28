@@ -1,5 +1,6 @@
 import Foundation
 import Bedrock
+import TMap
 
 public protocol RGDictionary: RGArtifact {
     associatedtype Key: Stringable
@@ -92,12 +93,12 @@ public extension RGDictionary {
         return mapping.map { $0.value.missing().prepend(keyToRouteSegment($0.key)) }.reduce(missingChildrenInCore, +)
     }
     
-    func contents() -> [Digest : [Bool]]? {
+    func contents() -> TMap<Digest, [Bool]>? {
         guard let coreContents = core.root.contents() else { return nil }
-        return mapping.values.reduce(coreContents, { (result, entry) -> [Digest: [Bool]]? in
+        return mapping.values.reduce(coreContents, { (result, entry) -> TMap<Digest, [Bool]>? in
             guard let result = result else { return nil }
             guard let childContents = entry.contents() else { return nil }
-            return result.merging(childContents)
+            return result.overwrite(with: childContents)
         })
     }    
 }

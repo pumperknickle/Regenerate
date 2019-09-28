@@ -171,11 +171,11 @@ public extension Radix {
         return children.elements().map { $0.1.missing().prepend($0.0.toString()) }.reduce([:], +)
     }
     
-    func contents() -> [Digest: [Bool]]? {
-        return children.values().reduce([:], { (result, entry) -> [Digest: [Bool]]? in
+    func contents() -> TMap<Digest, [Bool]>? {
+        return children.values().reduce(TMap<Digest, [Bool]>(), { (result, entry) -> TMap<Digest, [Bool]>? in
             guard let result = result else { return nil }
             guard let childContents = entry.contents() else { return nil }
-            return result.merging(childContents)
+            return result.overwrite(with: childContents)
         })
     }
 }

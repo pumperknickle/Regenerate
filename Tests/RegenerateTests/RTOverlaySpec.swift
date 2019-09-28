@@ -21,7 +21,7 @@ final class RTOverlaySpec: QuickSpec {
                 it("root should exist and have node info") {
                     expect(dictionaryRoot).toNot(beNil())
                     expect(dictionaryRoot!.contents()).toNot(beNil())
-                    expect(dictionaryRoot!.contents()!).toNot(beEmpty())
+                    expect(dictionaryRoot!.contents()!.elements()).toNot(beEmpty())
                 }
                 typealias PartialDictionaryNodeType = DictionaryOverlay256<UInt256, ChildStemType>
                 let overlayRoot = PartialDictionaryNodeType.CoreRootType(digest: dictionaryNode!.core.digest)
@@ -34,9 +34,9 @@ final class RTOverlaySpec: QuickSpec {
                 it("should have no dictionary node information") {
                     expect(emptyPartialRegenerative.root.artifact).toNot(beNil())
                     expect(emptyPartialRegenerative.root.artifact!.contents()).toNot(beNil())
-                    expect(emptyPartialRegenerative.root.artifact!.contents()!).to(beEmpty())
+                    expect(emptyPartialRegenerative.root.artifact!.contents()!.elements()).to(beEmpty())
                 }
-                let regeneratedPartialDictionary = emptyPartialRegenerative.capture(info: dictionaryRoot!.contents()!)
+                let regeneratedPartialDictionary = emptyPartialRegenerative.capture(info: Dictionary(uniqueKeysWithValues: dictionaryRoot!.contents()!.elements()))
                 it("should be regenerated, but contain only 1 key value tuple for dictionary") {
                     expect(regeneratedPartialDictionary).toNot(beNil())
                     expect(regeneratedPartialDictionary!.root.artifact).toNot(beNil())
@@ -63,7 +63,7 @@ final class RTOverlaySpec: QuickSpec {
                 it("root should exist and have node info") {
                     expect(dictionaryRoot).toNot(beNil())
                     expect(dictionaryRoot!.contents()).toNot(beNil())
-                    expect(dictionaryRoot!.contents()!).toNot(beEmpty())
+                    expect(dictionaryRoot!.contents()!.elements()).toNot(beEmpty())
                 }
                 typealias PartialDictionaryNodeType = DictionaryOverlay256<String, ChildStemType>
                 let overlayRoot = PartialDictionaryNodeType.CoreRootType(digest: dictionaryNode!.core.digest)
@@ -76,9 +76,9 @@ final class RTOverlaySpec: QuickSpec {
                 it("should have no dictionary node information") {
                     expect(emptyPartialRegenerative.root.artifact).toNot(beNil())
                     expect(emptyPartialRegenerative.root.artifact!.contents()).toNot(beNil())
-                    expect(emptyPartialRegenerative.root.artifact!.contents()!).to(beEmpty())
+                    expect(emptyPartialRegenerative.root.artifact!.contents()!.elements()).to(beEmpty())
                 }
-                let regeneratedPartialDictionary = emptyPartialRegenerative.capture(info: dictionaryRoot!.contents()!)
+                let regeneratedPartialDictionary = emptyPartialRegenerative.capture(info: Dictionary(uniqueKeysWithValues: dictionaryRoot!.contents()!.elements()))
                 it("should be regenerated, and contain 3 key value tuples, tiger, lions, and ligers as dictionary values") {
                     expect(regeneratedPartialDictionary).toNot(beNil())
                     expect(regeneratedPartialDictionary!.root.artifact).toNot(beNil())

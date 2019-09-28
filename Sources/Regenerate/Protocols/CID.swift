@@ -1,6 +1,7 @@
 import Foundation
 import Bedrock
 import CryptoStarterPack
+import TMap
 
 public protocol CID: Codable, BinaryEncodable {
     associatedtype Artifact: RGArtifact
@@ -21,7 +22,7 @@ public protocol CID: Codable, BinaryEncodable {
     func missing() -> [Digest: [Path]]
     func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, [Digest: [Path]])?
     func computedCompleteness() -> Bool
-    func contents() -> [Digest: [Bool]]?
+    func contents() -> TMap<Digest, [Bool]>?
 }
 
 public extension CID {
@@ -63,9 +64,9 @@ public extension CID {
         return node.isComplete()
     }
     
-    func contents() -> [Digest: [Bool]]? {
-        guard let node = artifact else { return [:] }
-        return node.contents()?.setting(digest, withValue: node.toBoolArray())
+    func contents() -> TMap<Digest, [Bool]>? {
+        guard let node = artifact else { return TMap<Digest, [Bool]>() }
+        return node.contents()?.setting(key: digest, value: node.toBoolArray())
     }
     
     func missing() -> [Digest: [Path]] {
