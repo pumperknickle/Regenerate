@@ -19,8 +19,8 @@ public protocol CID: Codable, BinaryEncodable {
     init(digest: Digest, artifact: Artifact?, complete: Bool)
     func changing(digest: Digest?, artifact: Artifact?, complete: Bool?) -> Self
     
-    func missing() -> [Digest: [Path]]
-    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, [Digest: [Path]])?
+    func missing() -> TMap<Digest, [Path]>
+    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, TMap<Digest, [Path]>)?
     func computedCompleteness() -> Bool
     func contents() -> TMap<Digest, [Bool]>?
 }
@@ -69,18 +69,18 @@ public extension CID {
         return node.contents()?.setting(key: digest, value: node.toBoolArray())
     }
     
-    func missing() -> [Digest: [Path]] {
-        guard let node = artifact else { return  [digest: [[]]] }
+    func missing() -> TMap<Digest, [Path]> {
+        guard let node = artifact else { return  TMap<Digest, [Path]>().setting(key: digest, value: [[]]) }
         return node.missing()
     }
     
-    func capture(digest: Digest, content: [Bool]) -> (Self, [Digest: [Path]])? {
+    func capture(digest: Digest, content: [Bool]) -> (Self, TMap<Digest, [Path]>)? {
         guard let decodedNode = Artifact(raw: content) else { return nil }
         if digest != self.digest { return nil }
         return (changing(digest: nil, artifact: decodedNode, complete: decodedNode.isComplete()), decodedNode.missing())
     }
     
-    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, [Digest: [Path]])? {
+    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, TMap<Digest, [Path]>)? {
         if route.isEmpty && artifact == nil { return capture(digest: digest, content: content) }
         guard let node = artifact else { return nil }
         guard let nodeResult = node.capture(digest: digest, content: content, at: route) else { return nil }

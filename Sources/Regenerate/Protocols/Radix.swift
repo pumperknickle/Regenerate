@@ -157,7 +157,7 @@ public extension Radix {
         return child.nodeInfoAlong(path: route)
     }
     
-    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, [Digest: [Path]])? {
+    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, TMap<Digest, [Path]>)? {
         guard let firstLeg = route.first else { return nil }
         guard let childStem = children[firstLeg] else { return nil }
         guard let childStemResult = childStem.capture(digest: digest, content: content, at: Array(route.dropFirst())) else { return nil }
@@ -166,9 +166,9 @@ public extension Radix {
         return (modifiedNode, routes)
     }
     
-    func missing() -> [Digest: [Path]] {
-        if children.isEmpty() { return [:] }
-        return children.elements().map { $0.1.missing().prepend($0.0.toString()) }.reduce([:], +)
+    func missing() -> TMap<Digest, [Path]> {
+        if children.isEmpty() { return TMap<Digest, [Path]>() }
+        return children.elements().map { $0.1.missing().prepend($0.0.toString()) }.reduce(TMap<Digest, [Path]>(), +)
     }
     
     func contents() -> TMap<Digest, [Bool]>? {

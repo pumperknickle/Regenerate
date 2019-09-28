@@ -9,10 +9,10 @@ public protocol RadixOverlay: Radix {
     
     init(fullRadix: FullRadix, children: TMap<Edge, Child>)
     
-    func missing() -> [Digest: [Path]]
-    func targeting(_ targets: [[Edge]]) -> (Self, [Digest: [Path]])?
-    func masking(_ masks: [[Edge]]) -> (Self, [Digest: [Path]])?
-    func mask() -> (Self, [Digest: [Path]])?
+    func missing() -> TMap<Digest, [Path]>
+    func targeting(_ targets: [[Edge]]) -> (Self, TMap<Digest, [Path]>)?
+    func masking(_ masks: [[Edge]]) -> (Self, TMap<Digest, [Path]>)?
+    func mask() -> (Self, TMap<Digest, [Path]>)?
 }
 
 public extension RadixOverlay where Child: StemOverlay, FullRadix.Digest == Digest {
@@ -42,13 +42,13 @@ public extension RadixOverlay where Child: StemOverlay, FullRadix.Digest == Dige
         self.init(fullRadix: fullNode)
     }
     
-    func missing() -> [Digest: [Path]] {
-        if children.isEmpty() { return [:] }
-        return children.elements().filter { $0.1.targets != nil || $0.1.masks != nil || $0.1.isMasked }.map { $0.1.missing().prepend($0.0.toString()) }.reduce([:] as [Digest: [Path]], +)
+    func missing() -> TMap<Digest, [Path]> {
+        if children.isEmpty() { return TMap<Digest, [Path]>() }
+        return children.elements().filter { $0.1.targets != nil || $0.1.masks != nil || $0.1.isMasked }.map { $0.1.missing().prepend($0.0.toString()) }.reduce(TMap<Digest, [Path]>(), +)
     }
     
-    func targeting(_ targets: [[Edge]]) -> (Self, [Digest: [Path]])? {
-        return children.elements().reduce((self, [:]), { (result, entry) -> (Self, [Digest: [Path]])? in
+    func targeting(_ targets: [[Edge]]) -> (Self, TMap<Digest, [Path]>)? {
+        return children.elements().reduce((self, TMap<Digest, [Path]>()), { (result, entry) -> (Self, TMap<Digest, [Path]>)? in
             let childSubs = targets.filter { $0.starts(with: [entry.0]) }
             guard let result = result else { return nil }
             if childSubs.isEmpty { return result }
@@ -57,8 +57,8 @@ public extension RadixOverlay where Child: StemOverlay, FullRadix.Digest == Dige
         })
     }
     
-    func masking(_ masks: [[Edge]]) -> (Self, [Digest: [Path]])? {
-        return children.elements().reduce((self, [:]), { (result, entry) -> (Self, [Digest: [Path]])? in
+    func masking(_ masks: [[Edge]]) -> (Self, TMap<Digest, [Path]>)? {
+        return children.elements().reduce((self, TMap<Digest, [Path]>()), { (result, entry) -> (Self, TMap<Digest, [Path]>)? in
             let childSubAlls = masks.filter { $0.starts(with: [entry.0]) }
             guard let result = result else { return nil }
             if childSubAlls.isEmpty { return result }
@@ -67,8 +67,8 @@ public extension RadixOverlay where Child: StemOverlay, FullRadix.Digest == Dige
         })
     }
     
-    func mask() -> (Self, [Digest: [Path]])? {
-        return children.elements().reduce((self, [:]), { (result, entry) -> (Self, [Digest: [Path]])? in
+    func mask() -> (Self, TMap<Digest, [Path]>)? {
+        return children.elements().reduce((self, TMap<Digest, [Path]>()), { (result, entry) -> (Self, TMap<Digest, [Path]>)? in
             guard let result = result else { return nil }
             guard let modifiedChild = entry.1.mask() else { return nil }
             return (Self(fullRadix: fullRadix, children: result.0.children.setting(key: entry.0, value: modifiedChild.0)), result.1 + (modifiedChild.1.prepend(entry.0.toString())))

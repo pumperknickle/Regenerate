@@ -63,18 +63,18 @@ public extension RGArray {
         return changing(complete: completeChildren.union(indices))
     }
     
-    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, [Digest : [Path]])? {
+    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, TMap<Digest, [Path]>)? {
         guard let firstLeg = route.first else {
             guard let insertionResult = core.capture(content: content, digest: digest) else { return nil }
             let modifiedMapping = insertionResult.2.reduce(mapping) { (result, entry) -> [Index: Element] in
                 return result.setting(entry.0, withValue: Element(digest: entry.1))
             }
-            let newMappingRoutes = insertionResult.2.reduce([:]) { (result, entry) -> [Digest: [Path]] in
-                return result.setting(entry.1, withValue: [[indexToRouteSegment(entry.0)]])
+            let newMappingRoutes = insertionResult.2.reduce(TMap<Digest, [Path]>()) { (result, entry) -> TMap<Digest, [Path]> in
+                return result.setting(key: entry.1, value: [[indexToRouteSegment(entry.0)]])
             }
-            let allRoutes = insertionResult.1.reduce(newMappingRoutes) { (result, entry) -> [Digest: [Path]] in
-                guard let oldRoutes = result[entry] else { return result.setting(entry, withValue: [[]]) }
-                return result.setting(entry, withValue: oldRoutes + [[]])
+            let allRoutes = insertionResult.1.reduce(newMappingRoutes) { (result, entry) -> TMap<Digest, [Path]> in
+                guard let oldRoutes = result[entry] else { return result.setting(key: entry, value: [[]]) }
+                return result.setting(key: entry, value: oldRoutes + [[]])
             }
             return (changing(core: insertionResult.0, mapping: modifiedMapping), allRoutes)
         }
@@ -88,9 +88,9 @@ public extension RGArray {
         return (changing(mapping: modifiedMapping), modifiedRoutes)
     }
     
-    func missing() -> [Digest : [Path]] {
-        let missingChildrenInCore = core.missingDigests().reduce([:]) { (result, entry) -> [Digest: [Path]] in
-            return result.setting(entry, withValue: [[]])
+    func missing() -> TMap<Digest, [Path]> {
+        let missingChildrenInCore = core.missingDigests().reduce(TMap<Digest, [Path]>()) { (result, entry) -> TMap<Digest, [Path]> in
+            return result.setting(key: entry, value: [[]])
         }
         return mapping.map { $0.value.missing().prepend(indexToRouteSegment($0.key)) }.reduce(missingChildrenInCore, +)
     }

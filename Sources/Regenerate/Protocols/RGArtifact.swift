@@ -9,8 +9,8 @@ public protocol RGArtifact: Codable, BinaryEncodable {
     typealias Path = [Edge]
     
     func isComplete() -> Bool
-    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, [Digest: [Path]])?
-    func missing() -> [Digest: [Path]]
+    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, TMap<Digest, [Path]>)?
+    func missing() -> TMap<Digest, [Path]>
     func contents() -> TMap<Digest, [Bool]>?
     func pruning() -> Self
 }

@@ -1,18 +1,19 @@
 import Foundation
 import Bedrock
+import TMap
 
 public struct RGRT256<Key: BinaryEncodable, Value: BinaryEncodable>: Codable {
-    private let rawRoot: Stem256!
-    private let rawPaths: [UInt256: [[String]]]!
+    private let rawRoot: Root!
+    private let rawPaths: TMap<Digest, [Path]>!
 }
 
 extension RGRT256: RGObject {
     public typealias Root = Stem256
     
-    public var root: Stem256 { return rawRoot }
-    public var keyPaths: [UInt256 : [[String]]] { return rawPaths }
+    public var root: Root { return rawRoot }
+    public var keyPaths: TMap<Digest, [Path]> { return rawPaths }
     
-    public init(root: Stem256, paths: [UInt256 : [[String]]]) {
+    public init(root: Root, paths: TMap<Digest, [Path]>) {
         self.rawRoot = root
         self.rawPaths = paths
     }

@@ -10,9 +10,9 @@ public protocol RGObject: Codable {
     typealias Path = Root.Path
     
     var root: Root { get }
-    var keyPaths: [Digest: [Path]] { get }
+    var keyPaths: TMap<Digest, [Path]> { get }
     
-    init(root: Root, paths: [Digest: [Path]])    
+    init(root: Root, paths: TMap<Digest, [Path]>)
 }
 
 public extension RGObject {
@@ -20,7 +20,7 @@ public extension RGObject {
     
     func complete() -> Bool { return root.complete }
     
-    func missingDigests() -> Set<Digest> { return Set(keyPaths.keys) }
+    func missingDigests() -> Set<Digest> { return Set(keyPaths.keys()) }
     
     func contents() -> TMap<Digest, [Bool]>? { return root.contents() }
     
@@ -68,13 +68,13 @@ public extension RGObject {
         }
         guard let routeResult = resultExploringRoutes else { return nil }
         if routeResult.1.contains(digest) { return nil }
-        let finalResult = Self(root: routeResult.0.root, paths: routeResult.0.keyPaths.removing(digest))
+        let finalResult = Self(root: routeResult.0.root, paths: routeResult.0.keyPaths.deleting(key: digest))
         return (finalResult, routeResult.1)
     }
     
     func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, Set<Digest>)? {
         guard let modifiedStem = root.capture(digest: digest, content: content, at: route) else { return nil }
-        let newMissingDigests = modifiedStem.1.keys.filter { !keyPaths.keys.contains($0) }
+        let newMissingDigests = modifiedStem.1.keys().filter { !keyPaths.keys().contains($0) }
         return (Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths), Set(newMissingDigests))
     }
 }
