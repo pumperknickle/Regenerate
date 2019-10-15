@@ -26,7 +26,7 @@ final class DictionaryOverlaySpec: QuickSpec {
                 it("root should exist and have node info") {
                     expect(dictionaryRoot).toNot(beNil())
                     expect(dictionaryRoot!.contents()).toNot(beNil())
-                    expect(dictionaryRoot!.contents()!).toNot(beEmpty())
+                    expect(dictionaryRoot!.contents()!.elements()).toNot(beEmpty())
                 }
                 let overlayRoot = DictionaryOverlayNodeType.CoreRootType(digest: dictionaryNode!.core.root.digest)
                 let emptyDictionaryOverlayNode = DictionaryOverlayNodeType(root: overlayRoot)
@@ -36,9 +36,9 @@ final class DictionaryOverlaySpec: QuickSpec {
                 it("shouldn't have any information since it was created with just a digest and length") {
                     expect(emptyDictionaryOverlayObject.root.artifact).toNot(beNil())
                     expect(emptyDictionaryOverlayObject.root.artifact!.contents()).toNot(beNil())
-                    expect(emptyDictionaryOverlayObject.root.artifact!.contents()!).to(beEmpty())
+                    expect(emptyDictionaryOverlayObject.root.artifact!.contents()!.elements()).to(beEmpty())
                 }
-                let regenerativeDictionaryOverlayObject = emptyDictionaryOverlayObject.capture(info: dictionaryRoot!.contents()!)
+                let regenerativeDictionaryOverlayObject = emptyDictionaryOverlayObject.capture(info: Dictionary(uniqueKeysWithValues: dictionaryRoot!.contents()!.elements()))
                 it("should be regenerated, but contain only 1 key value tuple for dictionary") {
                     expect(regenerativeDictionaryOverlayObject).toNot(beNil())
                     expect(regenerativeDictionaryOverlayObject!.root.artifact).toNot(beNil())
@@ -71,7 +71,7 @@ final class DictionaryOverlaySpec: QuickSpec {
                 it("root should exist and have node info") {
                     expect(dictionaryRoot).toNot(beNil())
                     expect(dictionaryRoot!.contents()).toNot(beNil())
-                    expect(dictionaryRoot!.contents()!).toNot(beEmpty())
+                    expect(dictionaryRoot!.contents()!.elements()).toNot(beEmpty())
                 }
                 let overlayRoot = DictionaryOverlayNodeType.CoreRootType(digest: dictionaryNode!.core.root.digest)
                 let emptyDictionaryOverlayNode = DictionaryOverlayNodeType(root: overlayRoot)
@@ -81,9 +81,9 @@ final class DictionaryOverlaySpec: QuickSpec {
                 it("should have no dictionary node information") {
                     expect(emptyDictionaryOverlayObject.root.artifact).toNot(beNil())
                     expect(emptyDictionaryOverlayObject.root.artifact!.contents()).toNot(beNil())
-                    expect(emptyDictionaryOverlayObject.root.artifact!.contents()!).to(beEmpty())
+                    expect(emptyDictionaryOverlayObject.root.artifact!.contents()!.elements()).to(beEmpty())
                 }
-                let regeneratedDictionaryOverlayObject = emptyDictionaryOverlayObject.capture(info: dictionaryRoot!.contents()!)
+                let regeneratedDictionaryOverlayObject = emptyDictionaryOverlayObject.capture(info: Dictionary(uniqueKeysWithValues: dictionaryRoot!.contents()!.elements()))
                 it("should be regenerated, and contain 3 key value tuples, tiger, lions, and ligers as dictionary values") {
                     expect(regeneratedDictionaryOverlayObject).toNot(beNil())
                     expect(regeneratedDictionaryOverlayObject!.root.artifact).toNot(beNil())

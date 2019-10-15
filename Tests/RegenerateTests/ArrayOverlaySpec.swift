@@ -27,7 +27,7 @@ final class ArrayOverlaySpec: QuickSpec {
                 it("root should exist have contents") {
                     expect(arrayRoot).toNot(beNil())
                     expect(arrayRoot!.contents()).toNot(beNil())
-                    expect(arrayRoot!.contents()!).toNot(beEmpty())
+                    expect(arrayRoot!.contents()!.elements()).toNot(beEmpty())
                 }
                 let overlayRoot = ArrayOverlayNodeType.CoreRootType(digest: arrayNode!.core.digest)
                 let emptyArrayOverlayNode = ArrayOverlayNodeType(root: overlayRoot, length: UInt256(2))
@@ -37,14 +37,14 @@ final class ArrayOverlaySpec: QuickSpec {
                 it("shouldn't have any information since it was created with just a digest") {
                     expect(emptyArrayOverlayObject.root.artifact).toNot(beNil())
                     expect(emptyArrayOverlayObject.root.contents()).toNot(beNil())
-                    expect(emptyArrayOverlayObject.root.artifact!.contents()!).to(beEmpty())
+                    expect(emptyArrayOverlayObject.root.artifact!.contents()!.elements()).to(beEmpty())
                     
                 }
-                let regeneratedArrayOverlayObject = emptyArrayOverlayObject.capture(info: arrayRoot!.contents()!)
+                let regeneratedArrayOverlayObject = emptyArrayOverlayObject.capture(info: Dictionary(uniqueKeysWithValues: arrayRoot!.contents()!.elements()))
                 it("should be regenerated, but contain only 1 element in the array") {
                     expect(regeneratedArrayOverlayObject).toNot(beNil())
                     expect(regeneratedArrayOverlayObject!.root.artifact).toNot(beNil())
-                    expect(regeneratedArrayOverlayObject!.root.artifact!.mapping.count).to(equal(1))
+                    expect(regeneratedArrayOverlayObject!.root.artifact!.mapping.elements().count).to(equal(1))
                     expect(regeneratedArrayOverlayObject!.complete()).to(beFalse())
                     expect(regeneratedArrayOverlayObject!.missingDigests()).to(beEmpty())
                 }

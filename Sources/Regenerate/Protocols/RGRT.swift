@@ -1,5 +1,6 @@
 import Foundation
 import Bedrock
+import AwesomeDictionary
 
 // regenerative radix tree
 public protocol RGRT: RGObject where Root: Stem {
@@ -25,7 +26,7 @@ public extension RGRT {
     }
     
     // Empty Tree
-    init() { self.init(root: Root(), paths: [:]) }
+    init() { self.init(root: Root(), paths: Mapping<Digest, [Path]>()) }
     
     var digest: Digest! { return root.digest }
     
@@ -98,7 +99,7 @@ public extension RGRT {
     }
     
     func capture(info: [Digest: [Bool]]) -> (Self, [(Key, Value)])? {
-        let insertions = keyPaths.keys.map { (digest: $0, content: info[$0]) }
+        let insertions = keyPaths.keys().map { (digest: $0, content: info[$0]) }
         if insertions.isEmpty || !insertions.contains(where: { $0.content != nil }) { return (self, []) }
         let nextStep = insertions.reduce((self, [])) { (result, entry) -> (Self, [(Key, Value)])? in
             guard let result = result else { return nil }
@@ -129,7 +130,7 @@ public extension RGRT {
         }
         guard let finalResult = resultAfterExploringRoutes else { return nil }
         if finalResult.1.contains(digest) { return nil }
-        let finalRRM = Self(root: finalResult.0.root, paths: finalResult.0.keyPaths.removing(digest))
+        let finalRRM = Self(root: finalResult.0.root, paths: finalResult.0.keyPaths.deleting(key: digest))
         guard let insertedNode = Root.Artifact(raw: content) else { return nil }
         if insertedNode.value.isEmpty { return (finalRRM, finalResult.1, []) }
         guard let binaryDecodedValue = decodeValue(insertedNode.value) else { return nil }
@@ -144,8 +145,8 @@ public extension RGRT {
         if nodes.contains(where: { $0 == nil }) { return nil }
         let allSymbolsAlongPath = nodes.map { $0!.prefix }.reduce([], +)
         guard let binaryDecodedKey = decodeKey(allSymbolsAlongPath) else { return nil }
-        if binaryDecodedKey.isEmpty { return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys), nil)  }
+        if binaryDecodedKey.isEmpty { return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys()), nil)  }
         guard let key = Key(raw: binaryDecodedKey) else { return nil }
-        return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys), key)
+        return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys()), key)
     }
 }

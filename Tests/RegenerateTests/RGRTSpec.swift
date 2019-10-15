@@ -101,7 +101,7 @@ final class RGRTSpec: QuickSpec {
                     let rrmContents = someRRM.contents()
                     it("can extract node contents from complete") {
                         expect(rrmContents).toNot(beNil())
-                        expect(rrmContents!).toNot(beEmpty())
+                        expect(rrmContents!.elements()).toNot(beEmpty())
                     }
                     describe("rrm with just root") {
                         // Start with only the cryptographic link
@@ -110,11 +110,11 @@ final class RGRTSpec: QuickSpec {
                             expect(cutRRM.digest).to(equal(someRRM.digest))
                         }
                         it("should have no contents") {
-                            expect(cutRRM.contents()!).to(beEmpty())
+                            expect(cutRRM.contents()!.elements()).to(beEmpty())
                         }
                         describe("inserting back contents") {
-                            let resultAfterInserting = cutRRM.capture(info: rrmContents!)
-                            let otherResult = cutRRM.capture(info: rrmContents!.map { $0.value })
+                            let resultAfterInserting = cutRRM.capture(info: Dictionary(uniqueKeysWithValues: rrmContents!.elements()))
+                            let otherResult = cutRRM.capture(info: rrmContents!.elements().map { $0.1 })
                             it("should be complete") {
                                 expect(resultAfterInserting).toNot(beNil())
                                 expect(resultAfterInserting!.0.complete()).to(beTrue())

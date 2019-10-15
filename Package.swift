@@ -11,7 +11,7 @@ let package = Package(
             targets: ["Regenerate"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/pumperknickle/TMap.git", from: "1.0.2"),
+        .package(url: "https://github.com/pumperknickle/AwesomeDictionary.git", from: "0.0.1"),
         .package(url: "https://github.com/pumperknickle/CryptoStarterPack.git", from: "1.0.9"),
         .package(url: "https://github.com/pumperknickle/Bedrock.git", from: "0.0.3"),
         .package(url: "https://github.com/Quick/Quick.git", from: "2.1.0"),
@@ -23,6 +23,6 @@ let package = Package(
             dependencies: ["CryptoStarterPack", "Bedrock"]),
         .testTarget(
             name: "RegenerateTests",
-            dependencies: ["Regenerate", "Quick", "Nimble", "CryptoStarterPack", "Bedrock", "TMap"]),
+            dependencies: ["Regenerate", "Quick", "Nimble", "CryptoStarterPack", "Bedrock", "AwesomeDictionary"]),
     ]
 )

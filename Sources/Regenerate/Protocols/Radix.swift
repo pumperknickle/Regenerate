@@ -1,19 +1,19 @@
 import Foundation
 import Bedrock
-import TMap
+import AwesomeDictionary
 
 public protocol Radix: RGArtifact where Child.Artifact == Self {
     associatedtype Child: Stem
 
     var prefix: [Edge] { get }
     var value: [Edge] { get }
-    var children: TMap<Edge, Child> { get }
+    var children: Mapping<Edge, Child> { get }
     
-    init(prefix: [Edge], value: [Edge], children: TMap<Edge, Child>)
+    init(prefix: [Edge], value: [Edge], children: Mapping<Edge, Child>)
 }
 
 public extension Radix {
-    init() { self.init(prefix: [], value: [], children: TMap<Edge, Child>()) }
+    init() { self.init(prefix: [], value: [], children: Mapping<Edge, Child>()) }
     
     func isValid() -> Bool {
         return !children.values().contains(where: { !$0.computedValidity() })
@@ -23,7 +23,7 @@ public extension Radix {
         return !children.values().contains(where: { !$0.complete })
     }
     
-    func changing(prefix: [Edge]? = nil, value: [Edge]? = nil, children: TMap<Edge, Child>? = nil) -> Self {
+    func changing(prefix: [Edge]? = nil, value: [Edge]? = nil, children: Mapping<Edge, Child>? = nil) -> Self {
         return Self(prefix: prefix == nil ? self.prefix : prefix!, value: value == nil ? self.value : value!, children: children == nil ? self.children : children!)
     }
     
@@ -39,14 +39,14 @@ public extension Radix {
         return changing(children: cuttingChildStems())
     }
     
-    func cuttingChildStems() -> TMap<Edge, Child> {
-        return children.elements().reduce(TMap<Edge, Child>(), { (result, entry) -> TMap<Edge, Child> in
+    func cuttingChildStems() -> Mapping<Edge, Child> {
+        return children.elements().reduce(Mapping<Edge, Child>(), { (result, entry) -> Mapping<Edge, Child> in
             return result.setting(key: entry.0, value: entry.1.empty())
         })
     }
     
-    func cuttingGrandchildStems() -> TMap<Edge, Child>? {
-        return children.elements().reduce(TMap<Edge, Child>(), { (result, entry) -> TMap<Edge, Child>? in
+    func cuttingGrandchildStems() -> Mapping<Edge, Child>? {
+        return children.elements().reduce(Mapping<Edge, Child>(), { (result, entry) -> Mapping<Edge, Child>? in
             guard let result = result else { return nil }
             guard let node = entry.1.artifact else { return nil }
             guard let newChild = Child(artifact: node.pruning()) else { return nil }
@@ -73,22 +73,22 @@ public extension Radix {
                 let childSuffix = prefix - key
                 guard let firstChild = childSuffix.first else { return nil }
                 guard let newChild = Child(artifact: changing(prefix: childSuffix)) else { return nil }
-                return Self(prefix: key, value: value, children: TMap<Edge, Child>().setting(key: firstChild, value: newChild))
+                return Self(prefix: key, value: value, children: Mapping<Edge, Child>().setting(key: firstChild, value: newChild))
             }
             let sharedPrefix = prefix ~> key
             let keySuffix = key - sharedPrefix
             let nodeSuffix = prefix - sharedPrefix
             guard let firstKeySuffix = keySuffix.first else { return nil }
             guard let firstNodeSuffix = nodeSuffix.first else { return nil }
-            guard let keyChild = Child(artifact: Self(prefix: keySuffix, value: value, children: TMap<Edge, Child>())) else { return nil }
+            guard let keyChild = Child(artifact: Self(prefix: keySuffix, value: value, children: Mapping<Edge, Child>())) else { return nil }
             guard let nodeChild = Child(artifact: changing(prefix: nodeSuffix)) else { return nil }
-            let newChildren = TMap<Edge, Child>().setting(key: firstKeySuffix, value: keyChild).setting(key: firstNodeSuffix, value: nodeChild)
+            let newChildren = Mapping<Edge, Child>().setting(key: firstKeySuffix, value: keyChild).setting(key: firstNodeSuffix, value: nodeChild)
             return Self(prefix: sharedPrefix, value: [], children: newChildren)
         }
         let suffix = key - prefix
         guard let firstSymbol = suffix.first else { return changing(value: value) }
         guard let firstStem = children[firstSymbol] else {
-            guard let newStem = Child(artifact: Self(prefix: suffix, value: value, children: TMap<Edge, Child>())) else { return nil }
+            guard let newStem = Child(artifact: Self(prefix: suffix, value: value, children: Mapping<Edge, Child>())) else { return nil }
             return changing(children: children.setting(key: firstSymbol, value: newStem))
         }
         guard let newStem = firstStem.setting(key: suffix, to: value) else { return nil }
@@ -145,7 +145,7 @@ public extension Radix {
     }
     
     func merging(right: Self) -> Self {
-        let newChildren = children.keys().reduce(TMap<Edge, Child>()) { (result, entry) -> TMap<Edge, Child> in
+        let newChildren = children.keys().reduce(Mapping<Edge, Child>()) { (result, entry) -> Mapping<Edge, Child> in
             let mergedChildStem = self.children[entry]!.merging(right: right.children[entry]!)
             return result.setting(key: entry, value: mergedChildStem)
         }
@@ -157,7 +157,7 @@ public extension Radix {
         return child.nodeInfoAlong(path: route)
     }
     
-    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, [Digest: [Path]])? {
+    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, Mapping<Digest, [Path]>)? {
         guard let firstLeg = route.first else { return nil }
         guard let childStem = children[firstLeg] else { return nil }
         guard let childStemResult = childStem.capture(digest: digest, content: content, at: Array(route.dropFirst())) else { return nil }
@@ -166,16 +166,16 @@ public extension Radix {
         return (modifiedNode, routes)
     }
     
-    func missing() -> [Digest: [Path]] {
-        if children.isEmpty() { return [:] }
-        return children.elements().map { $0.1.missing().prepend($0.0.toString()) }.reduce([:], +)
+    func missing() -> Mapping<Digest, [Path]> {
+        if children.isEmpty() { return Mapping<Digest, [Path]>() }
+        return children.elements().map { $0.1.missing().prepend($0.0.toString()) }.reduce(Mapping<Digest, [Path]>(), +)
     }
     
-    func contents() -> [Digest: [Bool]]? {
-        return children.values().reduce([:], { (result, entry) -> [Digest: [Bool]]? in
+    func contents() -> Mapping<Digest, [Bool]>? {
+        return children.values().reduce(Mapping<Digest, [Bool]>(), { (result, entry) -> Mapping<Digest, [Bool]>? in
             guard let result = result else { return nil }
             guard let childContents = entry.contents() else { return nil }
-            return result.merging(childContents)
+            return result.overwrite(with: childContents)
         })
     }
 }

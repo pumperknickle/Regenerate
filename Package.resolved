@@ -2,12 +2,21 @@
   "object": {
     "pins": [
       {
+        "package": "AwesomeDictionary",
+        "repositoryURL": "https://github.com/pumperknickle/AwesomeDictionary.git",
+        "state": {
+          "branch": null,
+          "revision": "4521fd032e866239e6da8a07a02831f8326d8404",
+          "version": "0.0.1"
+        }
+      },
+      {
         "package": "Bedrock",
         "repositoryURL": "https://github.com/pumperknickle/Bedrock.git",
         "state": {
           "branch": null,
-          "revision": "cfa573aecaefae4c4673b03eb43e0083c3bc5e8d",
-          "version": "0.0.3"
+          "revision": "44dee0b98048a7aec35216e2e6b13f90d85d3080",
+          "version": "0.0.4"
         }
       },
       {
@@ -98,15 +107,6 @@
           "branch": null,
           "revision": "37760e9a52030bb9011972c5213c3350fa9d41fd",
           "version": "1.0.0"
-        }
-      },
-      {
-        "package": "TMap",
-        "repositoryURL": "https://github.com/pumperknickle/TMap.git",
-        "state": {
-          "branch": null,
-          "revision": "8e6406879aedd59416cd87433ee4aae185fc8dff",
-          "version": "1.0.2"
         }
       }
     ]

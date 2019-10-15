@@ -38,25 +38,25 @@ final class RGArraySpec: QuickSpec {
             it("should have node content and not be nil") {
                 expect(arrayRoot).toNot(beNil())
                 expect(arrayRoot!.contents()).toNot(beNil())
-                expect(arrayRoot!.contents()!).toNot(beEmpty())
+                expect(arrayRoot!.contents()!.elements()).toNot(beEmpty())
             }
             let regenerativeArray = RegenerativeArrayType(root: arrayRoot!)
             it("can extract node information") {
                 expect(regenerativeArray.contents()).toNot(beNil())
-                expect(regenerativeArray.contents()!).toNot(beEmpty())
+                expect(regenerativeArray.contents()!.elements()).toNot(beEmpty())
             }
             let cutRegenerativeArray = regenerativeArray.cuttingAllNodes()
             it("can have just digest") {
                 expect(cutRegenerativeArray.root.digest).to(equal(regenerativeArray.root.digest))
                 expect(cutRegenerativeArray.contents()).toNot(beNil())
-                expect(cutRegenerativeArray.contents()!).to(beEmpty())
+                expect(cutRegenerativeArray.contents()!.elements()).to(beEmpty())
             }
-            let regeneratedArray = cutRegenerativeArray.capture(info: regenerativeArray.contents()!)
+            let regeneratedArray = cutRegenerativeArray.capture(info: Dictionary(uniqueKeysWithValues: regenerativeArray.contents()!.elements()))
             it("can regenerate") {
                 expect(regeneratedArray).toNot(beNil())
                 expect(regeneratedArray!.complete()).to(beTrue())
                 expect(regeneratedArray!.contents()).toNot(beNil())
-                expect(regeneratedArray!.contents()!.count).to(equal(arrayRoot!.contents()!.count))
+                expect(regeneratedArray!.contents()!.elements().count).to(equal(arrayRoot!.contents()!.elements().count))
                 expect(regeneratedArray!.root.digest).to(equal(regenerativeArray.root.digest))
             }
             describe("2D RGArrays or nested RGArrays") {
@@ -76,16 +76,16 @@ final class RGArraySpec: QuickSpec {
                 it("should have all node contents") {
                     expect(nestedRegenerative.complete()).to(beTrue())
                     expect(nestedRegenerative.contents()).toNot(beNil())
-                    expect(nestedRegenerative.contents()!).toNot(beEmpty())
+                    expect(nestedRegenerative.contents()!.elements()).toNot(beEmpty())
                 }
                 let cutNestedRegenerative = nestedRegenerative.cuttingAllNodes()
-                let regeneratedNestedArray = cutNestedRegenerative.capture(info: nestedRegenerative.contents()!)
+                let regeneratedNestedArray = cutNestedRegenerative.capture(info: Dictionary(uniqueKeysWithValues: nestedRegenerative.contents()!.elements()))
                 it("can be regenerated fully and completely, bit for bit") {
                     expect(regeneratedNestedArray).toNot(beNil())
                     expect(regeneratedNestedArray!.complete()).to(beTrue())
                     expect(regeneratedNestedArray!.root.digest).to(equal(nestedRegenerative.root.digest))
                     expect(regeneratedNestedArray!.root.artifact!.length).to(equal(UInt256(1)))
-                    expect(regeneratedNestedArray!.root.artifact!.mapping.values.first!.artifact!.length).to(equal(UInt256(2)))
+                    expect(regeneratedNestedArray!.root.artifact!.mapping.values().first!.artifact!.length).to(equal(UInt256(2)))
                 }
             }
         }

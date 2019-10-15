@@ -34,26 +34,26 @@ final class RGDictionarySpec: QuickSpec {
             it("should have node content and not be nil") {
                 expect(dictionaryRoot).toNot(beNil())
                 expect(dictionaryRoot!.contents()).toNot(beNil())
-                expect(dictionaryRoot!.contents()).toNot(beEmpty())
+                expect(dictionaryRoot!.contents()!.elements()).toNot(beEmpty())
             }
             typealias RegenerativeDictionaryType = RGObject256<DictionaryStemType>
             let regenerativeDictionary = RegenerativeDictionaryType(root: dictionaryRoot!)
             it("can extract node information") {
                 expect(regenerativeDictionary.contents()).toNot(beNil())
-                expect(regenerativeDictionary.contents()!).toNot(beEmpty())
+                expect(regenerativeDictionary.contents()!.elements()).toNot(beEmpty())
             }
             let cutRegenerativeDictionary = regenerativeDictionary.cuttingAllNodes()
             it("can have just a digest") {
                 expect(cutRegenerativeDictionary.root.digest).to(equal(regenerativeDictionary.root.digest))
                 expect(cutRegenerativeDictionary.contents()).toNot(beNil())
-                expect(cutRegenerativeDictionary.contents()!).to(beEmpty())
+                expect(cutRegenerativeDictionary.contents()!.elements()).to(beEmpty())
             }
-            let regeneratedDictionary = cutRegenerativeDictionary.capture(info: regenerativeDictionary.contents()!)
+            let regeneratedDictionary = cutRegenerativeDictionary.capture(info: Dictionary(uniqueKeysWithValues: regenerativeDictionary.contents()!.elements()))
             it("can regenerate"){
                 expect(regeneratedDictionary).toNot(beNil())
                 expect(regeneratedDictionary!.complete()).to(beTrue())
                 expect(regeneratedDictionary!.contents()).toNot(beNil())
-                expect(regeneratedDictionary!.contents()!.count).to(equal(dictionaryRoot!.contents()!.count))
+                expect(regeneratedDictionary!.contents()!.elements().count).to(equal(dictionaryRoot!.contents()!.elements().count))
                 expect(regeneratedDictionary!.root.digest).to(equal(regenerativeDictionary.root.digest))
             }
             describe("2D RGDictionaries or nested RGDictionaries") {
@@ -73,10 +73,10 @@ final class RGDictionarySpec: QuickSpec {
                 it("should have all node contents") {
                     expect(nestedRegenerative.complete()).to(beTrue())
                     expect(nestedRegenerative.contents()).toNot(beNil())
-                    expect(nestedRegenerative.contents()!).toNot(beEmpty())
+                    expect(nestedRegenerative.contents()!.elements()).toNot(beEmpty())
                 }
                 let cutNestedRegenerative = nestedRegenerative.cuttingAllNodes()
-                let regeneratedNestedDictionary = cutNestedRegenerative.capture(info: nestedRegenerative.contents()!)
+                let regeneratedNestedDictionary = cutNestedRegenerative.capture(info: Dictionary(uniqueKeysWithValues: nestedRegenerative.contents()!.elements()))
                 it("can be regenerated fully and completely, bit for bit") {
                     expect(regeneratedNestedDictionary).toNot(beNil())
                     expect(regeneratedNestedDictionary!.complete()).to(beTrue())

@@ -1,5 +1,6 @@
 import Foundation
 import Bedrock
+import AwesomeDictionary
 
 public protocol RGDictionary: RGArtifact {
     associatedtype Key: Stringable
@@ -58,18 +59,18 @@ public extension RGDictionary {
         return changing(incompleteChildren: incompleteChildren.subtracting(keys))
     }
     
-    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, [Digest : [Path]])? {
+    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, Mapping<Digest, [Path]>)? {
         guard let firstLeg = route.first else {
             guard let insertionResult = core.capture(content: content, digest: digest) else { return nil }
             let modifiedMapping = insertionResult.2.reduce(mapping, { (result, entry) -> [Key: Value] in
                 return result.setting(entry.0, withValue: entry.1)
             })
-            let newMappingRoutes = insertionResult.2.reduce([:]) { (result, entry) -> [Digest: [Path]] in
-                return result.setting(entry.1.digest, withValue: [[keyToRouteSegment(entry.0)]])
+            let newMappingRoutes = insertionResult.2.reduce(Mapping<Digest, [Path]>()) { (result, entry) -> Mapping<Digest, [Path]> in
+                return result.setting(key: entry.1.digest, value: [[keyToRouteSegment(entry.0)]])
             }
-            let newRoutes = insertionResult.1.reduce(newMappingRoutes) { (result, entry) -> [Digest: [Path]] in
-                guard let oldRoutes = result[entry] else { return result.setting(entry, withValue: [[]]) }
-                return result.setting(entry, withValue: oldRoutes + [[]])
+            let newRoutes = insertionResult.1.reduce(newMappingRoutes) { (result, entry) -> Mapping<Digest, [Path]> in
+                guard let oldRoutes = result[entry] else { return result.setting(key: entry, value: [[]]) }
+                return result.setting(key: entry, value: oldRoutes + [[]])
             }
             let keysDiscoveredIncomplete = insertionResult.2.map { $0.0 }
             return (changing(core: insertionResult.0, mapping: modifiedMapping).discover(incompleteKeys: keysDiscoveredIncomplete), newRoutes)
@@ -85,19 +86,19 @@ public extension RGDictionary {
         return (changing(mapping: modifiedMapping), modifiedChildResult.1.prepend(firstLeg))
     }
     
-    func missing() -> [Digest : [Path]] {
-        let missingChildrenInCore = core.missingDigests().reduce([:]) { (result, entry) -> [Digest: [Path]] in
-            return result.setting(entry, withValue: [[]])
+    func missing() -> Mapping<Digest, [Path]> {
+        let missingChildrenInCore = core.missingDigests().reduce(Mapping<Digest, [Path]>()) { (result, entry) -> Mapping<Digest, [Path]> in
+            return result.setting(key: entry, value: [[]])
         }
         return mapping.map { $0.value.missing().prepend(keyToRouteSegment($0.key)) }.reduce(missingChildrenInCore, +)
     }
     
-    func contents() -> [Digest : [Bool]]? {
+    func contents() -> Mapping<Digest, [Bool]>? {
         guard let coreContents = core.root.contents() else { return nil }
-        return mapping.values.reduce(coreContents, { (result, entry) -> [Digest: [Bool]]? in
+        return mapping.values.reduce(coreContents, { (result, entry) -> Mapping<Digest, [Bool]>? in
             guard let result = result else { return nil }
             guard let childContents = entry.contents() else { return nil }
-            return result.merging(childContents)
+            return result.overwrite(with: childContents)
         })
     }    
 }
