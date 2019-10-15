@@ -1,6 +1,6 @@
 import Foundation
 import Bedrock
-import TMap
+import AwesomeDictionary
 
 // regenerative radix tree
 public protocol RGRT: RGObject where Root: Stem {
@@ -26,7 +26,7 @@ public extension RGRT {
     }
     
     // Empty Tree
-    init() { self.init(root: Root(), paths: TMap<Digest, [Path]>()) }
+    init() { self.init(root: Root(), paths: Mapping<Digest, [Path]>()) }
     
     var digest: Digest! { return root.digest }
     

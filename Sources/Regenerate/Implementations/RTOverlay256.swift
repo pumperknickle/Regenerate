@@ -1,20 +1,20 @@
 import Foundation
 import Bedrock
 import CryptoStarterPack
-import TMap
+import AwesomeDictionary
 
 public struct RTOverlay256<Key: BinaryEncodable, Value: BinaryEncodable>: Codable {
     private let rawRoot: Root!
-    private let rawPaths: TMap<Digest, [Path]>!
+    private let rawPaths: Mapping<Digest, [Path]>!
 }
 
 extension RTOverlay256: RGObject {
     public typealias Root = StemOverlay256
     
     public var root: Root { return rawRoot }
-    public var keyPaths: TMap<Digest, [Path]> { return rawPaths }
+    public var keyPaths: Mapping<Digest, [Path]> { return rawPaths }
     
-    public init(root: Root, paths: TMap<Digest, [Path]>) {
+    public init(root: Root, paths: Mapping<Digest, [Path]>) {
         self.rawRoot = root
         self.rawPaths = paths
     }

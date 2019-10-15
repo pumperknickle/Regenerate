@@ -1,6 +1,6 @@
 import Foundation
 import Bedrock
-import TMap
+import AwesomeDictionary
 
 public protocol RGObject: Codable {
     associatedtype Root: CID
@@ -10,9 +10,9 @@ public protocol RGObject: Codable {
     typealias Path = Root.Path
     
     var root: Root { get }
-    var keyPaths: TMap<Digest, [Path]> { get }
+    var keyPaths: Mapping<Digest, [Path]> { get }
     
-    init(root: Root, paths: TMap<Digest, [Path]>)
+    init(root: Root, paths: Mapping<Digest, [Path]>)
 }
 
 public extension RGObject {
@@ -22,7 +22,7 @@ public extension RGObject {
     
     func missingDigests() -> Set<Digest> { return Set(keyPaths.keys()) }
     
-    func contents() -> TMap<Digest, [Bool]>? { return root.contents() }
+    func contents() -> Mapping<Digest, [Bool]>? { return root.contents() }
     
     func cuttingAllNodes() -> Self { return Self(root: root.empty()) }
     

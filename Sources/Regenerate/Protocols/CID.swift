@@ -1,7 +1,7 @@
 import Foundation
 import Bedrock
 import CryptoStarterPack
-import TMap
+import AwesomeDictionary
 
 public protocol CID: Codable, BinaryEncodable {
     associatedtype Artifact: RGArtifact
@@ -19,10 +19,10 @@ public protocol CID: Codable, BinaryEncodable {
     init(digest: Digest, artifact: Artifact?, complete: Bool)
     func changing(digest: Digest?, artifact: Artifact?, complete: Bool?) -> Self
     
-    func missing() -> TMap<Digest, [Path]>
-    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, TMap<Digest, [Path]>)?
+    func missing() -> Mapping<Digest, [Path]>
+    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, Mapping<Digest, [Path]>)?
     func computedCompleteness() -> Bool
-    func contents() -> TMap<Digest, [Bool]>?
+    func contents() -> Mapping<Digest, [Bool]>?
 }
 
 public extension CID {
@@ -64,23 +64,23 @@ public extension CID {
         return node.isComplete()
     }
     
-    func contents() -> TMap<Digest, [Bool]>? {
-        guard let node = artifact else { return TMap<Digest, [Bool]>() }
+    func contents() -> Mapping<Digest, [Bool]>? {
+        guard let node = artifact else { return Mapping<Digest, [Bool]>() }
         return node.contents()?.setting(key: digest, value: node.toBoolArray())
     }
     
-    func missing() -> TMap<Digest, [Path]> {
-        guard let node = artifact else { return  TMap<Digest, [Path]>().setting(key: digest, value: [[]]) }
+    func missing() -> Mapping<Digest, [Path]> {
+        guard let node = artifact else { return  Mapping<Digest, [Path]>().setting(key: digest, value: [[]]) }
         return node.missing()
     }
     
-    func capture(digest: Digest, content: [Bool]) -> (Self, TMap<Digest, [Path]>)? {
+    func capture(digest: Digest, content: [Bool]) -> (Self, Mapping<Digest, [Path]>)? {
         guard let decodedNode = Artifact(raw: content) else { return nil }
         if digest != self.digest { return nil }
         return (changing(digest: nil, artifact: decodedNode, complete: decodedNode.isComplete()), decodedNode.missing())
     }
     
-    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, TMap<Digest, [Path]>)? {
+    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, Mapping<Digest, [Path]>)? {
         if route.isEmpty && artifact == nil { return capture(digest: digest, content: content) }
         guard let node = artifact else { return nil }
         guard let nodeResult = node.capture(digest: digest, content: content, at: route) else { return nil }

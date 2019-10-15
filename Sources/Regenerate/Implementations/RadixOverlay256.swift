@@ -1,11 +1,11 @@
 import Foundation
 import Bedrock
 import CryptoStarterPack
-import TMap
+import AwesomeDictionary
 
 public struct RadixOverlay256: Codable {
     private let rawFullRadix: FullRadix!
-    private let rawChildren: TMap<Edge, Child>!
+    private let rawChildren: Mapping<Edge, Child>!
 }
 
 extension RadixOverlay256: RGArtifact {
@@ -17,7 +17,7 @@ extension RadixOverlay256: Radix {
     public typealias Edge = String
     public typealias Child = StemOverlay256
     
-    public var children: TMap<Edge, Child> { return rawChildren }
+    public var children: Mapping<Edge, Child> { return rawChildren }
 }
 
 extension RadixOverlay256: RadixOverlay {
@@ -25,7 +25,7 @@ extension RadixOverlay256: RadixOverlay {
     
     public typealias FullRadix = Radix256
     
-    public init(fullRadix: FullRadix, children: TMap<Edge, Child>) {
+    public init(fullRadix: FullRadix, children: Mapping<Edge, Child>) {
         self.rawFullRadix = fullRadix
         self.rawChildren = children
     }

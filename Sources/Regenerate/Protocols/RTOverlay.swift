@@ -1,6 +1,6 @@
 import Foundation
 import Bedrock
-import TMap
+import AwesomeDictionary
 
 public protocol RTOverlay: RGRT where Root: StemOverlay {
     func targeting(_ targets: [Key]) -> Self?

@@ -1,11 +1,11 @@
 import Foundation
 import Bedrock
-import TMap
+import AwesomeDictionary
 
 public struct ArrayOverlay256<Element: CID>: Codable where Element.Digest == UInt256 {
     private let rawCore: CoreType!
     private let rawLength: Digest!
-    private let rawMapping: TMap<Digest, Element>!
+    private let rawMapping: Mapping<Digest, Element>!
     private let rawCompleteChildren: Set<Digest>!
 }
 
@@ -20,10 +20,10 @@ extension ArrayOverlay256: RGArray {
     
     public var core: CoreType! { return rawCore }
     public var length: Index! { return rawLength }
-    public var mapping: TMap<Digest, Element>! { return rawMapping }
+    public var mapping: Mapping<Digest, Element>! { return rawMapping }
     public var completeChildren: Set<Digest>! { return rawCompleteChildren }
     
-    public init(core: CoreType, length: Index, mapping: TMap<Digest, Element>, complete: Set<UInt256>) {
+    public init(core: CoreType, length: Index, mapping: Mapping<Digest, Element>, complete: Set<UInt256>) {
         self.rawCore = core
         self.rawLength = length
         self.rawMapping = mapping

@@ -1,6 +1,6 @@
 import Foundation
 import Bedrock
-import TMap
+import AwesomeDictionary
 
 public protocol RGDictionary: RGArtifact {
     associatedtype Key: Stringable
@@ -59,16 +59,16 @@ public extension RGDictionary {
         return changing(incompleteChildren: incompleteChildren.subtracting(keys))
     }
     
-    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, TMap<Digest, [Path]>)? {
+    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, Mapping<Digest, [Path]>)? {
         guard let firstLeg = route.first else {
             guard let insertionResult = core.capture(content: content, digest: digest) else { return nil }
             let modifiedMapping = insertionResult.2.reduce(mapping, { (result, entry) -> [Key: Value] in
                 return result.setting(entry.0, withValue: entry.1)
             })
-            let newMappingRoutes = insertionResult.2.reduce(TMap<Digest, [Path]>()) { (result, entry) -> TMap<Digest, [Path]> in
+            let newMappingRoutes = insertionResult.2.reduce(Mapping<Digest, [Path]>()) { (result, entry) -> Mapping<Digest, [Path]> in
                 return result.setting(key: entry.1.digest, value: [[keyToRouteSegment(entry.0)]])
             }
-            let newRoutes = insertionResult.1.reduce(newMappingRoutes) { (result, entry) -> TMap<Digest, [Path]> in
+            let newRoutes = insertionResult.1.reduce(newMappingRoutes) { (result, entry) -> Mapping<Digest, [Path]> in
                 guard let oldRoutes = result[entry] else { return result.setting(key: entry, value: [[]]) }
                 return result.setting(key: entry, value: oldRoutes + [[]])
             }
@@ -86,16 +86,16 @@ public extension RGDictionary {
         return (changing(mapping: modifiedMapping), modifiedChildResult.1.prepend(firstLeg))
     }
     
-    func missing() -> TMap<Digest, [Path]> {
-        let missingChildrenInCore = core.missingDigests().reduce(TMap<Digest, [Path]>()) { (result, entry) -> TMap<Digest, [Path]> in
+    func missing() -> Mapping<Digest, [Path]> {
+        let missingChildrenInCore = core.missingDigests().reduce(Mapping<Digest, [Path]>()) { (result, entry) -> Mapping<Digest, [Path]> in
             return result.setting(key: entry, value: [[]])
         }
         return mapping.map { $0.value.missing().prepend(keyToRouteSegment($0.key)) }.reduce(missingChildrenInCore, +)
     }
     
-    func contents() -> TMap<Digest, [Bool]>? {
+    func contents() -> Mapping<Digest, [Bool]>? {
         guard let coreContents = core.root.contents() else { return nil }
-        return mapping.values.reduce(coreContents, { (result, entry) -> TMap<Digest, [Bool]>? in
+        return mapping.values.reduce(coreContents, { (result, entry) -> Mapping<Digest, [Bool]>? in
             guard let result = result else { return nil }
             guard let childContents = entry.contents() else { return nil }
             return result.overwrite(with: childContents)

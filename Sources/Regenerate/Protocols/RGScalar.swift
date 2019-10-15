@@ -1,6 +1,6 @@
 import Foundation
 import Bedrock
-import TMap
+import AwesomeDictionary
 
 // Leaf node
 public protocol RGScalar: RGArtifact {
@@ -11,8 +11,8 @@ public protocol RGScalar: RGArtifact {
 
 public extension RGScalar {
     func isComplete() -> Bool { return true }
-    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, TMap<Digest, [Path]>)? { return nil }
-    func missing() -> TMap<Digest, [Path]> { return TMap<Digest, [Path]>() }
-    func contents() -> TMap<Digest, [Bool]>? { return TMap<Digest, [Bool]>() }
+    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, Mapping<Digest, [Path]>)? { return nil }
+    func missing() -> Mapping<Digest, [Path]> { return Mapping<Digest, [Path]>() }
+    func contents() -> Mapping<Digest, [Bool]>? { return Mapping<Digest, [Bool]>() }
     func isValid() -> Bool { return true }
 }

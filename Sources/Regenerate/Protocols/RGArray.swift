@@ -1,6 +1,6 @@
 import Foundation
 import Bedrock
-import TMap
+import AwesomeDictionary
 
 public protocol RGArray: RGArtifact {
     associatedtype Index: FixedWidthInteger, Stringable
@@ -10,15 +10,15 @@ public protocol RGArray: RGArtifact {
     
     var core: CoreType! { get }
     var length: Index! { get }
-    var mapping: TMap<Index, Element>! { get }
+    var mapping: Mapping<Index, Element>! { get }
     var completeChildren: Set<Index>! { get }
     
-    init(core: CoreType, length: Index, mapping: TMap<Index, Element>, complete: Set<Index>)
+    init(core: CoreType, length: Index, mapping: Mapping<Index, Element>, complete: Set<Index>)
 }
 
 public extension RGArray {
     init?(_ rawArray: [Element]) {
-        let resultOfIndexing = rawArray.reduce((TMap<Index, Element>(), Index(0))) { (result, entry) -> (TMap<Index, Element>, Index)? in
+        let resultOfIndexing = rawArray.reduce((Mapping<Index, Element>(), Index(0))) { (result, entry) -> (Mapping<Index, Element>, Index)? in
             guard let result = result else { return nil }
             return (result.0.setting(key: result.1, value: entry), result.1.advanced(by: 1))
         }
@@ -36,7 +36,7 @@ public extension RGArray {
     }
     
     init(core: CoreType, length: Index) {
-        self.init(core: core, length: length, mapping: TMap<Index, Element>(), complete: Set([]))
+        self.init(core: core, length: length, mapping: Mapping<Index, Element>(), complete: Set([]))
     }
     
     func indexToRouteSegment(_ index: Index) -> Edge {
@@ -52,10 +52,10 @@ public extension RGArray {
     }
     
     func pruning() -> Self {
-        return Self(core: CoreType(root: core.root.empty()), length: length, mapping: TMap<Index, Element>(), complete: Set([]))
+        return Self(core: CoreType(root: core.root.empty()), length: length, mapping: Mapping<Index, Element>(), complete: Set([]))
     }
     
-    func changing(core: CoreType? = nil, mapping: TMap<Index, Element>? = nil, complete: Set<Index>? = nil) -> Self {
+    func changing(core: CoreType? = nil, mapping: Mapping<Index, Element>? = nil, complete: Set<Index>? = nil) -> Self {
         return Self(core: core == nil ? self.core : core!, length: length, mapping: mapping == nil ? self.mapping : mapping!, complete: complete == nil ? self.completeChildren : complete!)
     }
     
@@ -63,16 +63,16 @@ public extension RGArray {
         return changing(complete: completeChildren.union(indices))
     }
     
-    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, TMap<Digest, [Path]>)? {
+    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, Mapping<Digest, [Path]>)? {
         guard let firstLeg = route.first else {
             guard let insertionResult = core.capture(content: content, digest: digest) else { return nil }
-            let modifiedMapping = insertionResult.2.reduce(mapping) { (result, entry) -> TMap<Index, Element> in
+            let modifiedMapping = insertionResult.2.reduce(mapping) { (result, entry) -> Mapping<Index, Element> in
                 return result.setting(key: entry.0, value: Element(digest: entry.1))
             }
-            let newMappingRoutes = insertionResult.2.reduce(TMap<Digest, [Path]>()) { (result, entry) -> TMap<Digest, [Path]> in
+            let newMappingRoutes = insertionResult.2.reduce(Mapping<Digest, [Path]>()) { (result, entry) -> Mapping<Digest, [Path]> in
                 return result.setting(key: entry.1, value: [[indexToRouteSegment(entry.0)]])
             }
-            let allRoutes = insertionResult.1.reduce(newMappingRoutes) { (result, entry) -> TMap<Digest, [Path]> in
+            let allRoutes = insertionResult.1.reduce(newMappingRoutes) { (result, entry) -> Mapping<Digest, [Path]> in
                 guard let oldRoutes = result[entry] else { return result.setting(key: entry, value: [[]]) }
                 return result.setting(key: entry, value: oldRoutes + [[]])
             }
@@ -88,16 +88,16 @@ public extension RGArray {
         return (changing(mapping: modifiedMapping), modifiedRoutes)
     }
     
-    func missing() -> TMap<Digest, [Path]> {
-        let missingChildrenInCore = core.missingDigests().reduce(TMap<Digest, [Path]>()) { (result, entry) -> TMap<Digest, [Path]> in
+    func missing() -> Mapping<Digest, [Path]> {
+        let missingChildrenInCore = core.missingDigests().reduce(Mapping<Digest, [Path]>()) { (result, entry) -> Mapping<Digest, [Path]> in
             return result.setting(key: entry, value: [[]])
         }
         return mapping.elements().map { $0.1.missing().prepend(indexToRouteSegment($0.0)) }.reduce(missingChildrenInCore, +)
     }
     
-    func contents() -> TMap<Digest, [Bool]>? {
+    func contents() -> Mapping<Digest, [Bool]>? {
         guard let coreContents = core.contents() else { return nil }
-        return mapping.values().reduce(coreContents, { (result, entry) -> TMap<Digest, [Bool]>? in
+        return mapping.values().reduce(coreContents, { (result, entry) -> Mapping<Digest, [Bool]>? in
             guard let result = result else { return nil }
             guard let childContent = entry.contents() else { return nil }
             return result.overwrite(with: childContent)
