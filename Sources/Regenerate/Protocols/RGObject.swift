@@ -1,6 +1,7 @@
 import Foundation
 import Bedrock
 import AwesomeDictionary
+import AwesomeTrie
 
 public protocol RGObject: Codable {
     associatedtype Root: CID
@@ -13,14 +14,16 @@ public protocol RGObject: Codable {
     var keyPaths: Mapping<Digest, [Path]> { get }
     
     init(root: Root, paths: Mapping<Digest, [Path]>)
+	func targeting(_ targets: TrieSet<Edge>) -> Self
+	func masking(_ masks: TrieSet<Edge>) -> Self
 }
 
 public extension RGObject {
-    init(root: Root) { self.init(root: root, paths: root.missing()) }
+	init(root: Root) { self.init(root: root, paths: root.missing(prefix: [])) }
     
     func complete() -> Bool { return root.complete }
     
-    func missingDigests() -> Set<Digest> { return Set(keyPaths.keys()) }
+	func missingDigests() -> Set<Digest> { return Set(keyPaths.keys()) }
     
     func contents() -> Mapping<Digest, [Bool]>? { return root.contents() }
     
@@ -73,8 +76,23 @@ public extension RGObject {
     }
     
     func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, Set<Digest>)? {
-        guard let modifiedStem = root.capture(digest: digest, content: content, at: route) else { return nil }
+		guard let modifiedStem = root.capture(digest: digest, content: content, at: route, prefix: []) else { return nil }
         let newMissingDigests = modifiedStem.1.keys().filter { !keyPaths.keys().contains($0) }
         return (Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths), Set(newMissingDigests))
     }
+
+	func targeting(_ targets: TrieSet<Edge>) -> Self {
+		let modifiedStem = root.targeting(targets, prefix: [])
+        return Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths)
+	}
+
+	func masking(_ masks: TrieSet<Edge>) -> Self {
+		let modifiedStem = root.masking(masks, prefix: [])
+        return Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths)
+	}
+	
+	func mask() -> Self {
+		let modifiedStem = root.mask(prefix: [])
+		return Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths)
+	}
 }

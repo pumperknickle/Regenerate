@@ -91,6 +91,11 @@ final class RGRTSpec: QuickSpec {
                         }
                     }
                 }
+//				describe("DSQL") {
+//                    let someRRM = rgrmt.setting(key: oneKey, to: oneValue)!.setting(key: anotherKey, to: anotherValue)!
+//					let cutRRM = someRRM.cuttingAllNodes()
+//
+//				}
                 describe("Regeneration") {
                     // Create full data structure
                     let someRRM = rgrmt.setting(key: oneKey, to: oneValue)!.setting(key: anotherKey, to: anotherValue)!
@@ -105,7 +110,7 @@ final class RGRTSpec: QuickSpec {
                     }
                     describe("rrm with just root") {
                         // Start with only the cryptographic link
-                        let cutRRM = someRRM.cuttingAllNodes()
+						let cutRRM = someRRM.cuttingAllNodes().mask()
                         it("should have same digest as original") {
                             expect(cutRRM.digest).to(equal(someRRM.digest))
                         }
@@ -135,7 +140,7 @@ final class RGRTSpec: QuickSpec {
                         }
                     }
                     describe("malicious insertion") {
-                        let cutRRM = someRRM.cuttingAllNodes()
+						let cutRRM = someRRM.cuttingAllNodes().mask()
                         let childNode = someRRM.root.artifact!.children.elements().first!.1.artifact!
                         let childNodeContent = childNode.toBoolArray()
                         let rootDigest = someRRM.root.digest

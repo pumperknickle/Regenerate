@@ -84,7 +84,7 @@ public extension RGRT {
     
     func merging(_ right: Self) -> Self {
         let mergedRoots = root.merging(right: right.root)
-        return Self(root: mergedRoots, paths: mergedRoots.missing())
+		return Self(root: mergedRoots, paths: mergedRoots.missing(prefix: []))
     }
     
     func capture(info: [[Bool]]) -> (Self, [(Key, Value)])? {
@@ -139,7 +139,7 @@ public extension RGRT {
     }
     
     func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, Set<Digest>, Key?)? {
-        guard let modifiedRootResult = root.capture(digest: digest, content: content, at: route) else { return nil }
+		guard let modifiedRootResult = root.capture(digest: digest, content: content, at: route, prefix: []) else { return nil }
         guard let nodeInfo = modifiedRootResult.0.nodeInfoAlong(path: route) else { return nil }
         let nodes = nodeInfo.map { Root.Artifact(raw: $0) }
         if nodes.contains(where: { $0 == nil }) { return nil }
@@ -148,5 +148,5 @@ public extension RGRT {
         if binaryDecodedKey.isEmpty { return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys()), nil)  }
         guard let key = Key(raw: binaryDecodedKey) else { return nil }
         return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys()), key)
-    }
+    }	
 }

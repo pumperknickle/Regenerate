@@ -1,6 +1,7 @@
 import Foundation
 import Bedrock
 import AwesomeDictionary
+import AwesomeTrie
 
 public protocol RGArtifact: Codable, BinaryEncodable {
     associatedtype Digest: FixedWidthInteger, Stringable
@@ -9,10 +10,13 @@ public protocol RGArtifact: Codable, BinaryEncodable {
     typealias Path = [Edge]
     
     func isComplete() -> Bool
-    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, Mapping<Digest, [Path]>)?
-    func missing() -> Mapping<Digest, [Path]>
+	func capture(digest: Digest, content: [Bool], at route: Path, prefix: Path) -> (Self, Mapping<Digest, [Path]>)?
+    func missing(prefix: Path) -> Mapping<Digest, [Path]>
     func contents() -> Mapping<Digest, [Bool]>?
     func pruning() -> Self
+	func targeting(_ targets: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<Digest, [Path]>)
+	func masking(_ masks: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<Digest, [Path]>)
+	func mask(prefix: [Edge]) -> (Self, Mapping<Digest, [Path]>)
 }
 
 public extension RGArtifact {
