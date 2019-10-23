@@ -14,8 +14,9 @@ public protocol RGObject: Codable {
     var keyPaths: Mapping<Digest, [Path]> { get }
     
     init(root: Root, paths: Mapping<Digest, [Path]>)
-	func targeting(_ targets: TrieSet<Edge>) -> Self
-	func masking(_ masks: TrieSet<Edge>) -> Self
+	func targeting(_ targets: TrieSet<Edge>) -> (Self, Set<Digest>)
+	func masking(_ masks: TrieSet<Edge>) -> (Self, Set<Digest>)
+	func mask() -> (Self, Set<Digest>)
 }
 
 public extension RGObject {
@@ -81,18 +82,18 @@ public extension RGObject {
         return (Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths), Set(newMissingDigests))
     }
 
-	func targeting(_ targets: TrieSet<Edge>) -> Self {
+	func targeting(_ targets: TrieSet<Edge>) -> (Self, Set<Digest>) {
 		let modifiedStem = root.targeting(targets, prefix: [])
-        return Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths)
+		return (Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths), Set<Digest>(modifiedStem.1.keys()))
 	}
 
-	func masking(_ masks: TrieSet<Edge>) -> Self {
+	func masking(_ masks: TrieSet<Edge>) -> (Self, Set<Digest>) {
 		let modifiedStem = root.masking(masks, prefix: [])
-        return Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths)
+		return (Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths), Set<Digest>(modifiedStem.1.keys()))
 	}
 	
-	func mask() -> Self {
+	func mask() -> (Self, Set<Digest>) {
 		let modifiedStem = root.mask(prefix: [])
-		return Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths)
+		return (Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths), Set<Digest>(modifiedStem.1.keys()))
 	}
 }

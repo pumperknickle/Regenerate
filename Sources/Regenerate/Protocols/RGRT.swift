@@ -1,6 +1,7 @@
 import Foundation
 import Bedrock
 import AwesomeDictionary
+import AwesomeTrie
 
 // regenerative radix tree
 public protocol RGRT: RGObject where Root: Stem {
@@ -148,5 +149,21 @@ public extension RGRT {
         if binaryDecodedKey.isEmpty { return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys()), nil)  }
         guard let key = Key(raw: binaryDecodedKey) else { return nil }
         return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys()), key)
-    }	
+    }
+	
+	func targeting(keys: [Key]) -> (Self, Set<Digest>) {
+		let targets = keys.reduce(TrieSet<Edge>()) { (result, entry) -> TrieSet<Edge> in
+			guard let symbolEncodedKey = encodeKey(entry.toBoolArray()) else { return result }
+			return result.adding(symbolEncodedKey)
+		}
+		return targeting(targets)
+	}
+	
+	func masking(keys: [Key]) -> (Self, Set<Digest>) {
+		let masks = keys.reduce(TrieSet<Edge>()) { (result, entry) -> TrieSet<Edge> in
+			guard let symbolEncodedKey = encodeKey(entry.toBoolArray()) else { return result }
+			return result.adding(symbolEncodedKey)
+		}
+		return masking(masks)
+	}
 }

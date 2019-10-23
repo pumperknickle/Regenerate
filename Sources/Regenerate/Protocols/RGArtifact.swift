@@ -17,6 +17,7 @@ public protocol RGArtifact: Codable, BinaryEncodable {
 	func targeting(_ targets: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<Digest, [Path]>)
 	func masking(_ masks: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<Digest, [Path]>)
 	func mask(prefix: [Edge]) -> (Self, Mapping<Digest, [Path]>)
+	func shouldMask(_ masks: TrieSet<Edge>, prefix: [Edge]) -> Bool
 }
 
 public extension RGArtifact {
@@ -29,4 +30,9 @@ public extension RGArtifact {
     func toBoolArray() -> [Bool] {
         return try! JSONEncoder().encode(pruning()).toBoolArray()
     }
+	
+	func shouldMask(_ masks: TrieSet<Edge>, prefix: [Edge]) -> Bool {
+		guard let lastPrefix = prefix.last else { return false }
+		return masks.contains([lastPrefix])
+	}
 }

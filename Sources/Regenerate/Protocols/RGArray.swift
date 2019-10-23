@@ -1,6 +1,148 @@
 //import Foundation
 //import Bedrock
 //import AwesomeDictionary
+//import AwesomeTrie
+//
+//public protocol RGArray: RGArtifact {
+//	associatedtype Index: FixedWidthInteger, Stringable
+//	associatedtype Element: CID where Element.Digest == Digest
+//	associatedtype CoreType: RGRT where CoreType.Key == Index, CoreType.Value == Element.Digest, CoreType.Digest == Digest
+//	typealias CoreRoot = CoreType.Root
+//	
+//	var core: CoreType! { get }
+//	var length: Index! { get }
+//	var incompleteChildren: Set<Index>! { get }
+//	var children: Mapping<Index, Element>! { get }
+//	var targets: TrieSet<Edge>! { get }
+//	var masks: TrieSet<Edge>! { get }
+//	var isMasked: Bool! { get }
+//	
+//	init(core: CoreType, length: Index, incompleteChildren: Set<Index>, children: Mapping<Index, Element>, targets: TrieSet<Edge>, masks: TrieSet<Edge>, isMasked: Bool)
+//}
+//
+//public extension RGArray {
+//	init?(_ rawArray: [Element]) {
+//		let indexing = rawArray.reduce((Mapping<Index, Element>(), Index(0))) { (result, entry) -> (Mapping<Index, Element>, Index)? in
+//			guard let result = result else { return nil }
+//			return (result.0.setting(key: result.1, value: entry), result.1.advanced(by: 1))
+//		}
+//		guard let indexedResult = indexing else { return nil }
+//		let coreTuples = indexedResult.0.elements().map { ($0.0, $0.1.digest!) }
+//		guard let core = CoreType(raw: coreTuples) else { return nil }
+//		self.init(core: core, length: indexedResult.1, incompleteChildren: Set<Index>([]), children: indexedResult.0, targets: TrieSet<String>(), masks: TrieSet<String>(), isMasked: false)
+//	}
+//	
+//	init(core: CoreType, length: Index, incompleteChildren: Set<Index>, children: Mapping<Index, Element>) {
+//		self.init(core: core, length: length, incompleteChildren: incompleteChildren, children: children, targets: TrieSet<Edge>(), masks: TrieSet<Edge>(), isMasked: false)
+//	}
+//	
+//	init(core: CoreType, length: Index) {
+//		self.init(core: core, length: length, incompleteChildren: Set<Index>([]), children: Mapping<Index, Element>(), targets: TrieSet<String>(), masks: TrieSet<String>(), isMasked: false)
+//	}
+//	
+//	init(root: CoreRoot, length: Index) {
+//		self.init(core: CoreType(root: root), length: length)
+//	}
+//	
+//	func isComplete() -> Bool {
+//		return core.complete() && !children.values().contains(where: { !$0.complete })
+//	}
+//	
+//	func pruning() -> Self {
+//		return Self(core: CoreType(root: core.root.empty()), length: length)
+//	}
+//	
+//	func changing(core: CoreType? = nil, incompleteChildren: Set<Index>? = nil, children: Mapping<Index, Element>? = nil, targets: TrieSet<String>? = nil, masks: TrieSet<String>? = nil, isMasked: Bool? = nil) -> Self {
+//		return Self(core: core ?? self.core, length: length, incompleteChildren: incompleteChildren ?? self.incompleteChildren, children: children ?? self.children, targets: targets ?? self.targets, masks: masks ?? self.masks, isMasked: isMasked ?? self.isMasked)
+//	}
+//
+//	func capture(digest: Digest, content: [Bool], at route: Path, prefix: Path) -> (Self, Mapping<Digest, [Path]>)? {
+//		guard let firstLeg = route.first else {
+//			return capture(digest: digest, content: content, prefix: prefix)
+//		}
+//		guard let childIndex = Index(stringValue: firstLeg) else { return nil }
+//		guard let childElement = children[childIndex] else { return nil }
+//		if childElement.complete { return nil }
+//		guard let childResult = childElement.capture(digest: digest, content: content, at: Array(route.dropFirst()), prefix: prefix + [firstLeg]) else { return nil }
+//		let newChild = childResult.0
+//		let modifiedChildren = children.setting(key: childIndex, value: newChild)
+//		if newChild.complete { return (changing(children: modifiedChildren).complete(keys: [childIndex]), childResult.1) }
+//		return (changing(children: modifiedChildren), childResult.1)
+//	}
+//	
+//	func capture(digest: Digest, content: [Bool], prefix: Path) -> (Self, Mapping<Digest, [Path]>)? {
+//		guard let modifiedCore = core.capture(content: content, digest: digest) else { return nil }
+//		let newChildren = modifiedCore.2.reduce((Mapping<Index, Element>(), Mapping<Digest, [Path]>())) { (result, entry) -> (Mapping<Index, Element>, Mapping<Digest, [Path]>) in
+//			let childEdge = entry.0.toString()
+//			let childPrefix = prefix + [childEdge]
+//			let childAfterTargeting = Element(digest: entry.1).targeting(targets.including(keys: [childEdge]).subtree(keys: [childEdge]), prefix: childPrefix)
+//			let childAfterMasking = childAfterTargeting.0.masking(masks.including(keys: [childEdge]).subtree(keys: [childEdge]), prefix: childPrefix)
+//			let childMasked = isMasked ? childAfterMasking.0.mask(prefix: childPrefix) : (childAfterMasking.0, Mapping<Digest, [Path]>())
+//			return (result.0.setting(key: entry.0, value: childMasked.0), result.1 + childAfterTargeting.1 + childAfterMasking.1 + childMasked.1)
+//		}
+//		let foundIndicies = modifiedCore.2.map { $0.0.toString() }
+//		let leftoverTargets = foundIndicies.reduce(targets ?? TrieSet<String>()) { (result, entry) -> TrieSet<String> in
+//			return result.excluding(keys: [entry.toString()])
+//		}
+//		let leftoverMasks = foundIndicies.reduce(masks ?? TrieSet<String>()) { (result, entry) -> TrieSet<String> in
+//			return result.excluding(keys: [entry.toString()])
+//		}
+//		let newPaths = modifiedCore.1.reduce(newChildren.1) { (result, entry) -> Mapping<Digest, [Path]> in
+//			return result.setting(key: entry, value: (result[entry] ?? []) + [prefix])
+//		}
+//		let newIncompleteChildren = newChildren.0.elements().filter { !$0.1.complete }.map { $0.0 }
+//		return (changing(core: modifiedCore.0, incompleteChildren: incompleteChildren.union(newIncompleteChildren), children: children.overwrite(with: newChildren.0), targets: leftoverTargets, masks: leftoverMasks), newPaths)
+//	}
+//	
+//	func complete(keys: [Index]) -> Self {
+//		return changing(incompleteChildren: incompleteChildren.subtracting(keys))
+//	}
+//	
+//	func discover(incomplete: [Index]) -> Self {
+//		return changing(incompleteChildren: incompleteChildren.union(incomplete))
+//	}
+//	
+//	func missing(prefix: Path) -> Mapping<Digest, [Path]> {
+//		let missingCore = core.missingDigests().reduce(Mapping<Digest, [Path]>()) { (result, entry) -> Mapping<Digest, [Path]> in
+//			return result.setting(key: entry, value: [prefix])
+//		}
+//		return children.elements().map { $0.1.missing(prefix: prefix + [$0.0.toString()]) }.reduce(missingCore, +)
+//	}
+//	
+//	func contents() -> Mapping<Digest, [Bool]>? {
+//		guard let coreContents = core.contents() else { return nil }
+//		return children.values().reduce(coreContents, { (result, entry) -> Mapping<Digest, [Bool]>? in
+//			guard let result = result else { return nil }
+//			guard let childContent = entry.contents() else { return nil }
+//			return result.overwrite(with: childContent)
+//		})
+//	}
+//	
+//	func appending(_ element: Element) -> Self? {
+//		if !isComplete() || !element.complete { return nil }
+//		guard let modifiedCore = core.setting(key: length, to: element.digest) else { return nil }
+//		let newLength = length.advanced(by: 1)
+//		return Self(core: modifiedCore, length: newLength, incompleteChildren: Set<Index>(), children: children.setting(key: newLength, value: element))
+//	}
+//	
+//	func targeting(_ targets: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<Digest, [Path]>) {
+//		targets.children.keys()
+//	}
+//	
+//	func targeting(_ targets: TrieSet<Edge>, prefix: [Edge], key: String) -> (Self, Mapping<Digest, [Path]>) {
+//		guard let index = Index(stringValue: key) else { return (self, Mapping<Digest, [Path]>()) }
+//		if targets.isEmpty() { return (self, Mapping<Digest, [Path]>()) }
+//		if let child = children[index] {
+//			let childResult = child.targeting(targets, prefix: prefix + [key])
+//			return (changing(children: children.setting(key: index, value: childResult.0)), childResult.1)
+//		}
+//		chil
+//	}
+//}
+
+//import Foundation
+//import Bedrock
+//import AwesomeDictionary
 //
 //public protocol RGArray: RGArtifact {
 //    associatedtype Index: FixedWidthInteger, Stringable

@@ -98,8 +98,9 @@ public extension CID {
         if digest != self.digest { return nil }
 		let targetedNode = decodedNode.targeting(targets, prefix: prefix)
 		let maskedNode = targetedNode.0.masking(masks, prefix: prefix)
-		let finalNode = !isMasked ? (maskedNode.0, Mapping<Digest, [Path]>()) : maskedNode.0.mask(prefix: prefix)
-		return (changing(artifact: finalNode.0, complete: finalNode.0.isComplete(), targets: TrieSet<Edge>(), masks: TrieSet<Edge>()), finalNode.0.missing(prefix: prefix))
+		let shouldMask = maskedNode.0.shouldMask(masks, prefix: prefix)
+		let finalNode = (isMasked || shouldMask) ? maskedNode.0.mask(prefix: prefix) : (maskedNode.0, Mapping<Digest, [Path]>())
+		return (changing(artifact: finalNode.0, complete: finalNode.0.isComplete(), targets: TrieSet<Edge>(), masks: TrieSet<Edge>(), isMasked: (isMasked || shouldMask)), finalNode.0.missing(prefix: prefix))
     }
     
 	func capture(digest: Digest, content: [Bool], at route: Path, prefix: Path) -> (Self, Mapping<Digest, [Path]>)? {

@@ -204,4 +204,8 @@ public extension Radix {
 		}
 		return (changing(children: childrenResult.0), childrenResult.1)
 	}
+	
+	func shouldMask(_ masks: TrieSet<Edge>, prefix: [Edge]) -> Bool {
+		return masks.contains(self.prefix)
+	}
 }
