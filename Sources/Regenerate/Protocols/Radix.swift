@@ -180,7 +180,7 @@ public extension Radix {
     }
 	
 	func targeting(_ targets: TrieSet<Edge>, prefix: Path) -> (Self, Mapping<Digest, [Path]>) {
-		let reducedTargets = targets.including(keys: self.prefix).subtree(keys: self.prefix)
+		let reducedTargets = targets.subtree(keys: self.prefix)
 		let childrenResult = children.elements().reduce((Mapping<Edge, Child>(), Mapping<Digest, [Path]>())) { (result, entry) -> (Mapping<Edge, Child>, Mapping<Digest, [Path]>) in
 			let childResult = entry.1.targeting(reducedTargets.including(keys: [entry.0]), prefix: prefix + [entry.0])
 			return (result.0.setting(key: entry.0, value: childResult.0), result.1 + childResult.1)
@@ -189,7 +189,7 @@ public extension Radix {
 	}
 	
 	func masking(_ masks: TrieSet<Edge>, prefix: Path) -> (Self, Mapping<Digest, [Path]>) {
-		let reducedMasks = masks.including(keys: self.prefix).subtree(keys: self.prefix)
+		let reducedMasks = masks.subtree(keys: self.prefix)
 		let childrenResult = children.elements().reduce((Mapping<Edge, Child>(), Mapping<Digest, [Path]>())) { (result, entry) -> (Mapping<Edge, Child>, Mapping<Digest, [Path]>) in
 			let childResult = entry.1.masking(reducedMasks.including(keys: [entry.0]), prefix: prefix + [entry.0])
 			return (result.0.setting(key: entry.0, value: childResult.0), result.1 + childResult.1)

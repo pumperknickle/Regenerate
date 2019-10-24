@@ -3,7 +3,6 @@ import Bedrock
 import AwesomeDictionary
 import AwesomeTrie
 
-// regenerative radix tree
 public protocol RGRT: RGObject where Root: Stem {
     associatedtype Key: BinaryEncodable
     associatedtype Value: BinaryEncodable

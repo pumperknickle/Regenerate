@@ -8,7 +8,7 @@
 //	associatedtype Element: CID where Element.Digest == Digest
 //	associatedtype CoreType: RGRT where CoreType.Key == Index, CoreType.Value == Element.Digest, CoreType.Digest == Digest
 //	typealias CoreRoot = CoreType.Root
-//	
+//
 //	var core: CoreType! { get }
 //	var length: Index! { get }
 //	var incompleteChildren: Set<Index>! { get }
@@ -16,7 +16,7 @@
 //	var targets: TrieSet<Edge>! { get }
 //	var masks: TrieSet<Edge>! { get }
 //	var isMasked: Bool! { get }
-//	
+//
 //	init(core: CoreType, length: Index, incompleteChildren: Set<Index>, children: Mapping<Index, Element>, targets: TrieSet<Edge>, masks: TrieSet<Edge>, isMasked: Bool)
 //}
 //
@@ -31,27 +31,27 @@
 //		guard let core = CoreType(raw: coreTuples) else { return nil }
 //		self.init(core: core, length: indexedResult.1, incompleteChildren: Set<Index>([]), children: indexedResult.0, targets: TrieSet<String>(), masks: TrieSet<String>(), isMasked: false)
 //	}
-//	
+//
 //	init(core: CoreType, length: Index, incompleteChildren: Set<Index>, children: Mapping<Index, Element>) {
 //		self.init(core: core, length: length, incompleteChildren: incompleteChildren, children: children, targets: TrieSet<Edge>(), masks: TrieSet<Edge>(), isMasked: false)
 //	}
-//	
+//
 //	init(core: CoreType, length: Index) {
 //		self.init(core: core, length: length, incompleteChildren: Set<Index>([]), children: Mapping<Index, Element>(), targets: TrieSet<String>(), masks: TrieSet<String>(), isMasked: false)
 //	}
-//	
+//
 //	init(root: CoreRoot, length: Index) {
 //		self.init(core: CoreType(root: root), length: length)
 //	}
-//	
+//
 //	func isComplete() -> Bool {
 //		return core.complete() && !children.values().contains(where: { !$0.complete })
 //	}
-//	
+//
 //	func pruning() -> Self {
 //		return Self(core: CoreType(root: core.root.empty()), length: length)
 //	}
-//	
+//
 //	func changing(core: CoreType? = nil, incompleteChildren: Set<Index>? = nil, children: Mapping<Index, Element>? = nil, targets: TrieSet<String>? = nil, masks: TrieSet<String>? = nil, isMasked: Bool? = nil) -> Self {
 //		return Self(core: core ?? self.core, length: length, incompleteChildren: incompleteChildren ?? self.incompleteChildren, children: children ?? self.children, targets: targets ?? self.targets, masks: masks ?? self.masks, isMasked: isMasked ?? self.isMasked)
 //	}
@@ -69,14 +69,14 @@
 //		if newChild.complete { return (changing(children: modifiedChildren).complete(keys: [childIndex]), childResult.1) }
 //		return (changing(children: modifiedChildren), childResult.1)
 //	}
-//	
+//
 //	func capture(digest: Digest, content: [Bool], prefix: Path) -> (Self, Mapping<Digest, [Path]>)? {
 //		guard let modifiedCore = core.capture(content: content, digest: digest) else { return nil }
 //		let newChildren = modifiedCore.2.reduce((Mapping<Index, Element>(), Mapping<Digest, [Path]>())) { (result, entry) -> (Mapping<Index, Element>, Mapping<Digest, [Path]>) in
 //			let childEdge = entry.0.toString()
 //			let childPrefix = prefix + [childEdge]
-//			let childAfterTargeting = Element(digest: entry.1).targeting(targets.including(keys: [childEdge]).subtree(keys: [childEdge]), prefix: childPrefix)
-//			let childAfterMasking = childAfterTargeting.0.masking(masks.including(keys: [childEdge]).subtree(keys: [childEdge]), prefix: childPrefix)
+//			let childAfterTargeting = Element(digest: entry.1).targeting(targets.subtree(keys: [childEdge]), prefix: childPrefix)
+//			let childAfterMasking = childAfterTargeting.0.masking(masks.subtree(keys: [childEdge]), prefix: childPrefix)
 //			let childMasked = isMasked ? childAfterMasking.0.mask(prefix: childPrefix) : (childAfterMasking.0, Mapping<Digest, [Path]>())
 //			return (result.0.setting(key: entry.0, value: childMasked.0), result.1 + childAfterTargeting.1 + childAfterMasking.1 + childMasked.1)
 //		}
@@ -93,22 +93,22 @@
 //		let newIncompleteChildren = newChildren.0.elements().filter { !$0.1.complete }.map { $0.0 }
 //		return (changing(core: modifiedCore.0, incompleteChildren: incompleteChildren.union(newIncompleteChildren), children: children.overwrite(with: newChildren.0), targets: leftoverTargets, masks: leftoverMasks), newPaths)
 //	}
-//	
+//
 //	func complete(keys: [Index]) -> Self {
 //		return changing(incompleteChildren: incompleteChildren.subtracting(keys))
 //	}
-//	
+//
 //	func discover(incomplete: [Index]) -> Self {
 //		return changing(incompleteChildren: incompleteChildren.union(incomplete))
 //	}
-//	
+//
 //	func missing(prefix: Path) -> Mapping<Digest, [Path]> {
 //		let missingCore = core.missingDigests().reduce(Mapping<Digest, [Path]>()) { (result, entry) -> Mapping<Digest, [Path]> in
 //			return result.setting(key: entry, value: [prefix])
 //		}
 //		return children.elements().map { $0.1.missing(prefix: prefix + [$0.0.toString()]) }.reduce(missingCore, +)
 //	}
-//	
+//
 //	func contents() -> Mapping<Digest, [Bool]>? {
 //		guard let coreContents = core.contents() else { return nil }
 //		return children.values().reduce(coreContents, { (result, entry) -> Mapping<Digest, [Bool]>? in
@@ -117,26 +117,71 @@
 //			return result.overwrite(with: childContent)
 //		})
 //	}
-//	
+//
 //	func appending(_ element: Element) -> Self? {
 //		if !isComplete() || !element.complete { return nil }
 //		guard let modifiedCore = core.setting(key: length, to: element.digest) else { return nil }
 //		let newLength = length.advanced(by: 1)
 //		return Self(core: modifiedCore, length: newLength, incompleteChildren: Set<Index>(), children: children.setting(key: newLength, value: element))
 //	}
-//	
+//
 //	func targeting(_ targets: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<Digest, [Path]>) {
-//		targets.children.keys()
+//		return targets.children.keys().reduce((self, Mapping<Digest, [Path]>()), { (result, entry) -> (Self, Mapping<Digest, [Path]>) in
+//			let targeted = result.0.targeting(targets, prefix: prefix, key: entry)
+//			return (targeted.0, result.1 + targeted.1)
+//		})
+//	}
+//
+//	func targeting(_ targets: TrieSet<Edge>, prefix: [Edge], key: String) -> (Self, Mapping<Digest, [Path]>) {
+//		if isMasked { return (self, Mapping<Digest, [Path]>()) }
+//		guard let index = Index(stringValue: key) else { return (self, Mapping<Digest, [Path]>()) }
+//		let targetsForKey = targets.including(keys: [key])
+//		if targetsForKey.isEmpty() { return (self, Mapping<Digest, [Path]>()) }
+//		if let child = children[index] { return targeting(child: child, targets: targetsForKey, prefix: prefix, key: key, index: index) }
+//		let newTargets = self.targets.overwrite(with: targetsForKey)
+//		if !self.targets.subtree(keys: [key]).isEmpty() || !self.masks.subtree(keys: [key]).isEmpty() {
+//			return (changing(targets: newTargets), Mapping<Digest, [Path]>())
+//		}
+//		let coreResult = core.targeting(keys: [index])
+//		let corePaths = coreResult.1.reduce(Mapping<Digest, [Path]>()) { (result, entry) -> Mapping<Digest, [Path]> in
+//			return result.setting(key: entry, value: [prefix])
+//		}
+//		return (changing(core: coreResult.0, targets: newTargets), corePaths)
 //	}
 //	
-//	func targeting(_ targets: TrieSet<Edge>, prefix: [Edge], key: String) -> (Self, Mapping<Digest, [Path]>) {
+//	func targeting(child: Element, targets: TrieSet<Edge>, prefix: [Edge], key: String, index: Index) -> (Self, Mapping<Digest, [Path]>) {
+//		let keyTargets = targets.subtree(keys: [key])
+//		let childResult = child.targeting(keyTargets, prefix: prefix + [key])
+//		let newIncompleteChildren = (child.complete && !childResult.0.complete) ? incompleteChildren.union([index]) : incompleteChildren
+//		return (changing(incompleteChildren: newIncompleteChildren, children: children.setting(key: index, value: childResult.0)), childResult.1)
+//	}
+//
+//	func masking(_ masks: TrieSet<Edge>, prefix: [Edge], key: String) -> (Self, Mapping<Digest, [Path]>) {
 //		guard let index = Index(stringValue: key) else { return (self, Mapping<Digest, [Path]>()) }
-//		if targets.isEmpty() { return (self, Mapping<Digest, [Path]>()) }
-//		if let child = children[index] {
-//			let childResult = child.targeting(targets, prefix: prefix + [key])
-//			return (changing(children: children.setting(key: index, value: childResult.0)), childResult.1)
+//		let masksForKey = masks.including(keys: [key])
+//		if masksForKey.isEmpty() { return (self, Mapping<Digest, [Path]>()) }
+//		if let child = children[index] { return masking(child: child, masks: masksForKey, prefix: prefix, key: key, index: index) }
+//		let newMasks = self.masks.overwrite(with: masksForKey)
+//		if !self.targets.subtree(keys: [key]).isEmpty() || !self.masks.subtree(keys: [key]).isEmpty() {
+//			return (changing(masks: newMasks), Mapping<Digest, [Path]>())
 //		}
-//		chil
+//		let coreResult = core.masking(keys: [index])
+//		let corePaths = coreResult.1.reduce(Mapping<Digest, [Path]>()) { (result, entry) -> Mapping<Digest, [Path]> in
+//			return result.setting(key: entry, value: [prefix])
+//		}
+//		return (changing(core: coreResult.0, masks: newMasks), corePaths)
+//	}
+//	
+//	func masking(child: Element, masks: TrieSet<Edge>, prefix: [Edge], key: String, index: Index) -> (Self, Mapping<Digest, [Path]>) {
+//		if masks.contains([key]) {
+//			let maskedChild = child.mask(prefix: prefix + [key])
+//			let newIncompleteChildren = (child.complete && !maskedChild.0.complete) ? incompleteChildren.union([index]) : incompleteChildren
+//			return (changing(incompleteChildren: newIncompleteChildren, children: children.setting(key: index, value: maskedChild.0)), maskedChild.1)
+//		}
+//		let keyMasks = masks.subtree(keys: [key])
+//		let childResult = child.masking(keyMasks, prefix: prefix + [key])
+//		let newIncompleteChildren = (child.complete && !childResult.0.complete) ? incompleteChildren.union([index]) : incompleteChildren
+//		return (changing(incompleteChildren: newIncompleteChildren, children: children.setting(key: index, value: childResult.0)), childResult.1)
 //	}
 //}
 

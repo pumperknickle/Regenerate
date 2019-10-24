@@ -137,7 +137,7 @@ public extension CID {
 	func mask(prefix: Path) -> (Self, Mapping<Digest, [Path]>) {
 		if let childResult = artifact?.mask(prefix: prefix) { return (changing(artifact: childResult.0, isMasked: true), childResult.1) }
 		if focused() { return (changing(isMasked: true), Mapping<Digest, [Path]>()) }
-		return (changing(complete: false, isMasked: true), Mapping<Digest, [Path]>().setting(key: digest, value: [prefix]))
+		return (changing(complete: false, targets: TrieSet<Edge>(), masks: TrieSet<Edge>(), isMasked: true), Mapping<Digest, [Path]>().setting(key: digest, value: [prefix]))
 	}
 	
 	func target(prefix: Path) -> (Self, Mapping<Digest, [Path]>) {

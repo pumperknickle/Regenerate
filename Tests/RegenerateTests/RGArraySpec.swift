@@ -1,18 +1,3 @@
-import Foundation
-import Nimble
-import Quick
-import CryptoStarterPack
-import Bedrock
-@testable import Regenerate
-
-final class RGArraySpec: QuickSpec {
-	override func spec() {
-		describe("Array Merkle Structure") {
-			
-		}
-	}
-}
-
 //import Foundation
 //import Nimble
 //import Quick

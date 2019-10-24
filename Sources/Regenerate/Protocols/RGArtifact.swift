@@ -32,7 +32,6 @@ public extension RGArtifact {
     }
 	
 	func shouldMask(_ masks: TrieSet<Edge>, prefix: [Edge]) -> Bool {
-		guard let lastPrefix = prefix.last else { return false }
-		return masks.contains([lastPrefix])
+		return false
 	}
 }
