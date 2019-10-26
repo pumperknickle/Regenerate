@@ -5,13 +5,13 @@ import AwesomeTrie
 
 public struct RGDictionary256<Key: Stringable, Value: CID>: Codable where Value.Digest == UInt256 {
 	private let rawCore: CoreType!
-	private let rawIncompleteChildren: Set<Key>?
-	private let rawChildren: Mapping<Key, Value>?
+	private let rawIncompleteChildren: Set<String>?
+	private let rawChildren: Mapping<String, Value>?
 	private let rawTargets: TrieSet<Edge>?
 	private let rawMasks: TrieSet<Edge>?
 	private let rawIsMasked: Singleton?
 	
-	public init(core: RGRT256<Key, Value>, incompleteChildren: Set<Key>, children: Mapping<Key, Value>, targets: TrieSet<String>, masks: TrieSet<String>, isMasked: Bool) {
+	public init(core: CoreType, incompleteChildren: Set<String>, children: Mapping<String, Value>, targets: TrieSet<String>, masks: TrieSet<String>, isMasked: Bool) {
 		rawCore = core
 		rawIncompleteChildren = incompleteChildren.isEmpty ? nil : incompleteChildren
 		rawChildren = children.isEmpty() ? nil : children
@@ -21,16 +21,12 @@ public struct RGDictionary256<Key: Stringable, Value: CID>: Codable where Value.
 	}
 }
 
-extension RGDictionary256: RGArtifact {	
-	public typealias Digest = UInt256
-}
-
 extension RGDictionary256: RGDictionary {
 	public typealias CoreType = RGRT256<Key, Value>
 
 	public var core: CoreType! { return rawCore }
-	public var incompleteChildren: Set<Key>! { return rawIncompleteChildren ?? Set<Key>([]) }
-	public var children: Mapping<Key, Value>! { return rawChildren ?? Mapping<Key, Value>() }
+	public var incompleteChildren: Set<String>! { return rawIncompleteChildren ?? Set<String>([]) }
+	public var children: Mapping<String, Value>! { return rawChildren ?? Mapping<String, Value>() }
 	public var targets: TrieSet<Edge>! { return rawTargets ?? TrieSet<Edge>() }
 	public var masks: TrieSet<Edge>! { return rawMasks ?? TrieSet<Edge>() }
 	public var isMasked: Bool! { return rawIsMasked != nil ? true : false }

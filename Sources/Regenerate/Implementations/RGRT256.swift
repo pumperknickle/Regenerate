@@ -4,16 +4,16 @@ import AwesomeDictionary
 
 public struct RGRT256<Key: BinaryEncodable, Value: BinaryEncodable>: Codable {
     private let rawRoot: Root!
-    private let rawPaths: Mapping<Digest, [Path]>!
+    private let rawPaths: Mapping<String, [Path]>!
 }
 
 extension RGRT256: RGObject {
     public typealias Root = Stem256
     
     public var root: Root { return rawRoot }
-    public var keyPaths: Mapping<Digest, [Path]> { return rawPaths }
+    public var keyPaths: Mapping<String, [Path]> { return rawPaths }
     
-    public init(root: Root, paths: Mapping<Digest, [Path]>) {
+    public init(root: Root, paths: Mapping<String, [Path]>) {
         self.rawRoot = root
         self.rawPaths = paths
     }

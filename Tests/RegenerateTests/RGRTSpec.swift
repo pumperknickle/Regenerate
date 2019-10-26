@@ -20,7 +20,7 @@ final class RGRTSpec: QuickSpec {
 				let thirdValue = UInt256.max - UInt256(10000000)
 				
 				let modifiedRRM = tree.setting(key: oneKey, to: oneValue)!.setting(key: anotherKey, to: anotherValue)!.setting(key: thirdKey, to: thirdValue)!
-				let contents = modifiedRRM.contents()!
+				let contents = modifiedRRM.contents()
 				let cutRRM = modifiedRRM.cuttingAllNodes()
 				let emptyTargeted = cutRRM.targeting(keys: [oneKey])
 				let result = emptyTargeted.0.capture(info: Dictionary(uniqueKeysWithValues: contents.elements()))
@@ -43,7 +43,7 @@ final class RGRTSpec: QuickSpec {
 				let thirdValue = UInt256.max - UInt256(10000000)
 				
 				let modifiedRRM = tree.setting(key: firstKey, to: oneValue)!.setting(key: secondKey, to: anotherValue)!.setting(key: thirdKey, to: thirdValue)!
-				let contents = modifiedRRM.contents()!
+				let contents = modifiedRRM.contents()
 				let cutRRM = modifiedRRM.cuttingAllNodes()
 				let emptyTargeted = cutRRM.masking(keys: [firstKey])
 				let result = emptyTargeted.0.capture(info: Dictionary(uniqueKeysWithValues: contents.elements()))
@@ -147,7 +147,7 @@ final class RGRTSpec: QuickSpec {
                     let rrmContents = someRRM.contents()
                     it("can extract node contents from complete") {
                         expect(rrmContents).toNot(beNil())
-                        expect(rrmContents!.elements()).toNot(beEmpty())
+                        expect(rrmContents.elements()).toNot(beEmpty())
                     }
                     describe("rrm with just root") {
                         // Start with only the cryptographic link
@@ -156,11 +156,11 @@ final class RGRTSpec: QuickSpec {
 							expect(cutRRM.digest).to(equal(someRRM.digest))
                         }
                         it("should have no contents") {
-                            expect(cutRRM.contents()!.elements()).to(beEmpty())
+                            expect(cutRRM.contents().elements()).to(beEmpty())
                         }
                         describe("inserting back contents") {
-                            let resultAfterInserting = cutRRM.capture(info: Dictionary(uniqueKeysWithValues: rrmContents!.elements()))
-                            let otherResult = cutRRM.capture(info: rrmContents!.elements().map { $0.1 })
+                            let resultAfterInserting = cutRRM.capture(info: Dictionary(uniqueKeysWithValues: rrmContents.elements()))
+                            let otherResult = cutRRM.capture(info: rrmContents.elements().map { $0.1 })
                             it("should be complete") {
                                 expect(resultAfterInserting).toNot(beNil())
                                 expect(resultAfterInserting!.0.complete()).to(beTrue())
@@ -193,7 +193,7 @@ final class RGRTSpec: QuickSpec {
                             expect(Radix256.Digest(raw: childNodeHash!)).toNot(beNil())
                             expect(Radix256.Digest(raw: childNodeHash!)).toNot(equal(rootDigest!))
                         }
-                        let insertedResult = cutRRM.capture(content: childNodeContent, digest: rootDigest!)
+						let insertedResult = cutRRM.capture(content: childNodeContent, digestString: rootDigest!.toString())
                         it("should accept insertion") {
                             expect(insertedResult).toNot(beNil())
                         }

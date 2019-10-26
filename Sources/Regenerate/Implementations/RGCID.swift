@@ -4,7 +4,7 @@ import CryptoStarterPack
 import AwesomeTrie
 
 public struct RGCID<Artifact: RGArtifact>: Codable {
-    private let rawDigest: Artifact.Digest!
+    private let rawDigest: Digest!
     private let rawArtifact: Artifact?
     private let rawIncomplete: Singleton?
 	private let rawTargets: TrieSet<Edge>?
@@ -13,10 +13,11 @@ public struct RGCID<Artifact: RGArtifact>: Codable {
 	private let rawIsTargeted: Singleton?
 }
 
-extension RGCID: CID {
+extension RGCID: CID {	
 	public typealias CryptoDelegateType = BaseCrypto
+	public typealias Digest = UInt256
 
-    public var digest: Artifact.Digest! { return rawDigest }
+    public var digest: Digest! { return rawDigest }
     public var artifact: Artifact? { return rawArtifact }
 	public var complete: Bool! { return rawIncomplete != nil ? false : true }
 	public var targets: TrieSet<Edge>! { return rawTargets ?? TrieSet<Edge>() }
@@ -24,7 +25,7 @@ extension RGCID: CID {
 	public var isMasked: Bool! { return rawIsMasked != nil ? true : false }
 	public var isTargeted: Bool! { return rawIsTargeted != nil ? true : false }
 	
-	public init(digest: Artifact.Digest, artifact: Artifact?, complete: Bool, targets: TrieSet<Self.Edge>, masks: TrieSet<Self.Edge>, isMasked: Bool, isTargeted: Bool) {
+	public init(digest: Digest, artifact: Artifact?, complete: Bool, targets: TrieSet<Self.Edge>, masks: TrieSet<Self.Edge>, isMasked: Bool, isTargeted: Bool) {
 		rawDigest = digest
 		rawArtifact = artifact
 		rawIncomplete = complete ? nil : .void

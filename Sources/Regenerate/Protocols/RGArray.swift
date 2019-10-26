@@ -9,15 +9,15 @@ public protocol RGArray: RGDictionary where Key: FixedWidthInteger {
 	
 	var length: Index! { get }
 	
-	init(core: CoreType, incompleteChildren: Set<Index>, children: Mapping<Index, Element>, targets: TrieSet<Edge>, masks: TrieSet<Edge>, isMasked: Bool, length: Index)
+	init(core: CoreType, incompleteChildren: Set<String>, children: Mapping<String, Element>, targets: TrieSet<Edge>, masks: TrieSet<Edge>, isMasked: Bool, length: Index)
 }
 
 public extension RGArray {
-	func changing(core: CoreType? = nil, incompleteChildren: Set<Key>? = nil, children: Mapping<Key, Value>? = nil, targets: TrieSet<String>? = nil, masks: TrieSet<String>? = nil, isMasked: Bool? = nil) -> Self {
+	func changing(core: CoreType? = nil, incompleteChildren: Set<String>? = nil, children: Mapping<String, Value>? = nil, targets: TrieSet<String>? = nil, masks: TrieSet<String>? = nil, isMasked: Bool? = nil) -> Self {
 		return Self(core: core ?? self.core, incompleteChildren: incompleteChildren ?? self.incompleteChildren, children: children ?? self.children, targets: targets ?? self.targets, masks: masks ?? self.masks, isMasked: isMasked ?? self.isMasked, length: length)
 	}
 	
-	init(core: CoreType, incompleteChildren: Set<Key>, children: Mapping<Key, Value>, targets: TrieSet<String>, masks: TrieSet<String>, isMasked: Bool) {
+	init(core: CoreType, incompleteChildren: Set<String>, children: Mapping<String, Value>, targets: TrieSet<String>, masks: TrieSet<String>, isMasked: Bool) {
 		self.init(core: core, incompleteChildren: incompleteChildren, children: children, targets: targets, masks: masks, isMasked: isMasked, length: Index(children.keys().count))
 	}
 	
@@ -29,6 +29,9 @@ public extension RGArray {
 		}
 		guard let mappingResult = rawMapping else { return nil }
 		guard let core = CoreType(raw: mappingResult.0.elements()) else { return nil }
-		self.init(core: core, incompleteChildren: Set<Index>([]), children: mappingResult.0, targets: TrieSet<String>(), masks: TrieSet<String>(), isMasked: false, length: mappingResult.1)
+		let newChildren = mappingResult.0.elements().reduce(Mapping<String, Element>()) { (result, entry) -> Mapping<String, Element> in
+			return result.setting(key: entry.0.toString(), value: entry.1)
+		}
+		self.init(core: core, incompleteChildren: Set<String>([]), children: newChildren, targets: TrieSet<String>(), masks: TrieSet<String>(), isMasked: false, length: mappingResult.1)
 	}
 }
