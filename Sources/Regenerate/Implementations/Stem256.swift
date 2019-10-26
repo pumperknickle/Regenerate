@@ -13,7 +13,7 @@ public struct Stem256: Codable {
 	private let rawIsTargeted: Singleton?
 }
 
-extension Stem256: CID {
+extension Stem256: Addressable {
 	public var digest: UInt256! { return rawDigest }
     public var artifact: Radix256? { return rawArtifact }
 	public var complete: Bool! { return rawIncomplete != nil ? false : true }

@@ -3,7 +3,7 @@ import Bedrock
 import CryptoStarterPack
 import AwesomeTrie
 
-public struct RGCID<Artifact: RGArtifact>: Codable {
+public struct Address<Artifact: RGArtifact>: Codable {
     private let rawDigest: Digest!
     private let rawArtifact: Artifact?
     private let rawIncomplete: Singleton?
@@ -13,7 +13,7 @@ public struct RGCID<Artifact: RGArtifact>: Codable {
 	private let rawIsTargeted: Singleton?
 }
 
-extension RGCID: CID {	
+extension Address: Addressable {	
 	public typealias CryptoDelegateType = BaseCrypto
 	public typealias Digest = UInt256
 

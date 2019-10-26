@@ -2,7 +2,7 @@ import Foundation
 import AwesomeDictionary
 import AwesomeTrie
 
-public protocol Regenerative {
+public protocol CryptoBindable {
 	func contents() -> Mapping<String, [Bool]>
 	func missing(prefix: [String]) -> Mapping<String, [[String]]>
 	func capture(digestString: String, content: [Bool], at route: [String], prefix: [String]) -> (Self, Mapping<String, [[String]]>)?

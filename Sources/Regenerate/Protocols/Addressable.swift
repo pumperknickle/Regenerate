@@ -4,7 +4,7 @@ import CryptoStarterPack
 import AwesomeDictionary
 import AwesomeTrie
 
-public protocol CID: Regenerative, Codable, BinaryEncodable {
+public protocol Addressable: CryptoBindable, Codable, BinaryEncodable {
 	associatedtype Digest: FixedWidthInteger, Stringable
     associatedtype Artifact: RGArtifact
     associatedtype CryptoDelegateType: CryptoDelegate
@@ -29,7 +29,7 @@ public protocol CID: Regenerative, Codable, BinaryEncodable {
     func computedCompleteness() -> Bool
 }
 
-public extension CID {
+public extension Addressable {
 	func isComplete() -> Bool {
 		return complete
 	}

@@ -5,7 +5,7 @@ import AwesomeTrie
 
 public protocol RGDictionary: RGArtifact {
 	associatedtype Key: Stringable
-	associatedtype Value: CID
+	associatedtype Value: Addressable
 	associatedtype CoreType: RGRT where CoreType.Key == Key, CoreType.Value == Value
 	typealias CoreRoot = CoreType.Root
 
@@ -30,11 +30,11 @@ public extension RGDictionary {
 		self.init(core: core, incompleteChildren: Set([]), children: children, targets: TrieSet<Edge>(), masks: TrieSet<Edge>(), isMasked: false)
 	}
 	
-	func set(property: String, to child: Regenerative) -> Self? {
+	func set(property: String, to child: CryptoBindable) -> Self? {
 		return nil
 	}
 	
-	func get(property: String) -> Regenerative? {
+	func get(property: String) -> CryptoBindable? {
 		return nil
 	}
 	

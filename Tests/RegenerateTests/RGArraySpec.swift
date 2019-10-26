@@ -11,11 +11,11 @@ final class RGArraySpec: QuickSpec {
 	override func spec() {
 		describe("Array") {
 			typealias ChildNodeType = RGScalar256<UInt256>
-			typealias ChildStemType = RGCID<ChildNodeType>
-			typealias ArrayNodeType = RGArray256<ChildStemType>
-			typealias ArrayStemType = RGCID<ArrayNodeType>
-			typealias NestedArrayNodeType = RGArray256<ArrayStemType>
-			typealias NestedArrayStemType = RGCID<NestedArrayNodeType>
+			typealias ChildStemType = Address<ChildNodeType>
+			typealias ArrayNodeType = Array256<ChildStemType>
+			typealias ArrayStemType = Address<ArrayNodeType>
+			typealias NestedArrayNodeType = Array256<ArrayStemType>
+			typealias NestedArrayStemType = Address<NestedArrayNodeType>
 			typealias RegenerativeNestedArrayType = RGObject256<NestedArrayStemType>
 			
 			// array 0-0

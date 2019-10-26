@@ -21,7 +21,7 @@ final class RGGenericSpec: QuickSpec {
 					self.array2 = array2
 				}
 				
-				func set(property: String, to child: Regenerative) -> Foo? {
+				func set(property: String, to child: CryptoBindable) -> Foo? {
 					guard let stemChild = child as? ArrayStemType else { return nil }
 					switch property {
 					case metafield1:
@@ -33,7 +33,7 @@ final class RGGenericSpec: QuickSpec {
 					}
 				}
 				
-				func get(property: String) -> Regenerative? {
+				func get(property: String) -> CryptoBindable? {
 					switch property {
 					case metafield1:
 						return array1
@@ -49,10 +49,10 @@ final class RGGenericSpec: QuickSpec {
 				}
 			}
 			typealias ChildNodeType = RGScalar256<UInt256>
-			typealias ChildStemType = RGCID<ChildNodeType>
-			typealias ArrayNodeType = RGArray256<ChildStemType>
-			typealias ArrayStemType = RGCID<ArrayNodeType>
-			typealias FooStemType = RGCID<Foo>
+			typealias ChildStemType = Address<ChildNodeType>
+			typealias ArrayNodeType = Array256<ChildStemType>
+			typealias ArrayStemType = Address<ArrayNodeType>
+			typealias FooStemType = Address<Foo>
 			typealias RegenerativeFooType = RGObject256<FooStemType>
 			
 			// array 0-0

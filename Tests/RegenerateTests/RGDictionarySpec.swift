@@ -11,11 +11,11 @@ final class RGDictionarySpec: QuickSpec {
 	override func spec() {
 		describe("Dictionary") {
 			typealias ChildNodeType = RGScalar256<UInt256>
-			typealias ChildStemType = RGCID<ChildNodeType>
-			typealias DictionaryNodeType = RGDictionary256<UInt256, ChildStemType>
-			typealias DictionaryStemType = RGCID<DictionaryNodeType>
-			typealias NestedDictionaryNodeType = RGDictionary256<UInt256, DictionaryStemType>
-			typealias NestedDictionaryStemType = RGCID<NestedDictionaryNodeType>
+			typealias ChildStemType = Address<ChildNodeType>
+			typealias DictionaryNodeType = Dictionary256<UInt256, ChildStemType>
+			typealias DictionaryStemType = Address<DictionaryNodeType>
+			typealias NestedDictionaryNodeType = Dictionary256<UInt256, DictionaryStemType>
+			typealias NestedDictionaryStemType = Address<NestedDictionaryNodeType>
 			typealias RegenerativeNestedDictionaryType = RGObject256<NestedDictionaryStemType>
 
 			// dictionary 0-0

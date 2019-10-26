@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol Stem: CID where Artifact: Radix, Artifact.Child == Self { }
+public protocol Stem: Addressable where Artifact: Radix, Artifact.Child == Self { }
 
 public enum TransitionProofType: Int {
     case creation = 1, mutation, deletion

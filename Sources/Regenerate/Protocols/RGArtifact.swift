@@ -18,8 +18,8 @@ public protocol RGArtifact: Codable, BinaryEncodable {
 	func mask(prefix: [Edge]) -> (Self, Mapping<String, [Path]>)
 	func shouldMask(_ masks: TrieSet<Edge>, prefix: [Edge]) -> Bool
 	
-	func set(property: String, to child: Regenerative) -> Self?
-	func get(property: String) -> Regenerative?
+	func set(property: String, to child: CryptoBindable) -> Self?
+	func get(property: String) -> CryptoBindable?
 	func properties() -> [String]
 }
 

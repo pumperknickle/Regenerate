@@ -16,11 +16,11 @@ public protocol Radix: RGArtifact where Child.Artifact == Self {
 public extension Radix {
     init() { self.init(prefix: [], value: [], children: Mapping<Edge, Child>()) }
 	
-	func set(property: String, to child: Regenerative) -> Self? {
+	func set(property: String, to child: CryptoBindable) -> Self? {
 		return nil
 	}
 	
-	func get(property: String) -> Regenerative? {
+	func get(property: String) -> CryptoBindable? {
 		return nil
 	}
 	

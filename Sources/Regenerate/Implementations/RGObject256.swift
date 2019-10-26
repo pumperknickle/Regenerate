@@ -2,7 +2,7 @@ import Foundation
 import Bedrock
 import AwesomeDictionary
 
-public struct RGObject256<RootType: CID>: Codable where RootType.Digest == UInt256 {
+public struct RGObject256<RootType: Addressable>: Codable where RootType.Digest == UInt256 {
     private let rawRoot: RootType!
     private let rawPaths: Mapping<String, [Path]>!
 }

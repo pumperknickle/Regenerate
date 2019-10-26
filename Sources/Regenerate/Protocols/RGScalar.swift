@@ -19,8 +19,8 @@ public extension RGScalar {
 	func targeting(_ targets: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<String, [Path]>) { return (self, Mapping<String, [Path]>()) }
 	func masking(_ masks: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<String, [Path]>) { return (self, Mapping<String, [Path]>()) }
 	func mask(prefix: [Edge]) -> (Self, Mapping<String, [Path]>) { (self, Mapping<String, [Path]>()) }
-	func set(property: String, to child: Regenerative) -> Self? { return nil }
-	func get(property: String) -> Regenerative? { return nil }
+	func set(property: String, to child: CryptoBindable) -> Self? { return nil }
+	func get(property: String) -> CryptoBindable? { return nil }
 	func properties() -> [String] { return [] }
 	func pruning() -> Self { return self }
 }

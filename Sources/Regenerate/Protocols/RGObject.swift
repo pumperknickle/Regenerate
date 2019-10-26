@@ -4,7 +4,7 @@ import AwesomeDictionary
 import AwesomeTrie
 
 public protocol RGObject: Codable {
-    associatedtype Root: CID
+    associatedtype Root: Addressable
     typealias CryptoDelegateType = Root.CryptoDelegateType
     typealias Digest = Root.Digest
     typealias Edge = Root.Edge
