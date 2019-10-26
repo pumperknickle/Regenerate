@@ -137,11 +137,6 @@ final class RGRTSpec: QuickSpec {
                         }
                     }
                 }
-//				describe("DSQL") {
-//                    let someRRM = rgrmt.setting(key: oneKey, to: oneValue)!.setting(key: anotherKey, to: anotherValue)!
-//					let cutRRM = someRRM.cuttingAllNodes()
-//
-//				}
                 describe("Regeneration") {
                     // Create full data structure
                     let someRRM = rgrmt.setting(key: oneKey, to: oneValue)!.setting(key: anotherKey, to: anotherValue)!

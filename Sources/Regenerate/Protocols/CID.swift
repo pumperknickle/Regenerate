@@ -24,10 +24,9 @@ public protocol CID: Codable, BinaryEncodable {
     init(digest: Digest)
     init(digest: Digest, artifact: Artifact?, complete: Bool)
 	init(digest: Digest, artifact: Artifact?, complete: Bool, targets: TrieSet<Edge>, masks: TrieSet<Edge>, isMasked: Bool, isTargeted: Bool)
-	func changing(digest: Digest?, artifact: Artifact?, complete: Bool?, targets: TrieSet<Edge>?, masks: TrieSet<Edge>?, isMasked: Bool?, isTargeted: Bool?) -> Self
 	
+	func changing(digest: Digest?, artifact: Artifact?, complete: Bool?, targets: TrieSet<Edge>?, masks: TrieSet<Edge>?, isMasked: Bool?, isTargeted: Bool?) -> Self
     func contents() -> Mapping<Digest, [Bool]>?
-    
     func missing(prefix: Path) -> Mapping<Digest, [Path]>
 	func capture(digest: Digest, content: [Bool], at route: Path, prefix: Path) -> (Self, Mapping<Digest, [Path]>)?
     func computedCompleteness() -> Bool
@@ -117,8 +116,8 @@ public extension CID {
 	func targeting(_ targets: TrieSet<Edge>, prefix: Path) -> (Self, Mapping<Digest, [Path]>) {
 		if targets.isEmpty() { return (self, Mapping<Digest, [Path]>()) }
 		guard let artifact = artifact else {
-			if focused() { return (changing(targets: targets), Mapping<Digest, [Path]>()) }
-			return (changing(complete: false, targets: targets), Mapping<Digest, [Path]>().setting(key: digest, value: [prefix]))
+			if focused() { return (changing(targets: self.targets.overwrite(with: targets)), Mapping<Digest, [Path]>()) }
+			return (changing(complete: false, targets: self.targets.overwrite(with: targets)), Mapping<Digest, [Path]>().setting(key: digest, value: [prefix]))
 		}
 		let childResult = artifact.targeting(targets, prefix: prefix)
 		return (changing(artifact: childResult.0), childResult.1)
