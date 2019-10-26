@@ -6,8 +6,17 @@
         "repositoryURL": "https://github.com/pumperknickle/AwesomeDictionary.git",
         "state": {
           "branch": null,
-          "revision": "4521fd032e866239e6da8a07a02831f8326d8404",
-          "version": "0.0.1"
+          "revision": "34f9959e43cfedf27049f0316379b293e290f58e",
+          "version": "0.0.3"
+        }
+      },
+      {
+        "package": "AwesomeTrie",
+        "repositoryURL": "https://github.com/pumperknickle/AwesomeTrie.git",
+        "state": {
+          "branch": null,
+          "revision": "78d1ee85655b25d35d25fa1693811045050251eb",
+          "version": "0.0.4"
         }
       },
       {

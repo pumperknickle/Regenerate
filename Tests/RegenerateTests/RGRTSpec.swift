@@ -8,6 +8,52 @@ import Bedrock
 final class RGRTSpec: QuickSpec {
     override func spec() {
         describe("Regenerative Radix Merkle Trie") {
+			describe("targeting") {
+				let tree = RGRT256<UInt256, UInt256>()
+				
+				// Values to populate
+                let oneKey = UInt256.min
+                let anotherKey = UInt256.max
+                let oneValue = UInt256.max
+                let anotherValue = UInt256.min
+				let thirdKey = UInt256.max - UInt256(100000)
+				let thirdValue = UInt256.max - UInt256(10000000)
+				
+				let modifiedRRM = tree.setting(key: oneKey, to: oneValue)!.setting(key: anotherKey, to: anotherValue)!.setting(key: thirdKey, to: thirdValue)!
+				let contents = modifiedRRM.contents()!
+				let cutRRM = modifiedRRM.cuttingAllNodes()
+				let emptyTargeted = cutRRM.targeting(keys: [oneKey])
+				let result = emptyTargeted.0.capture(info: Dictionary(uniqueKeysWithValues: contents.elements()))
+				it("result should just have one key") {
+					expect(result!.0.get(key: oneKey)).toNot(beNil())
+					expect(result!.0.keys()).toNot(beNil())
+					expect(result!.0.keys()!.count).to(equal(1))
+				}
+			}
+			describe("masking") {
+				let tree = RGRT256<String, UInt256>()
+				
+				// Values to populate
+				let firstKey = "hello world"
+				let secondKey = "hello world1"
+				let thirdKey = "other thing"
+				
+				let oneValue = UInt256.max
+				let anotherValue = UInt256.min
+				let thirdValue = UInt256.max - UInt256(10000000)
+				
+				let modifiedRRM = tree.setting(key: firstKey, to: oneValue)!.setting(key: secondKey, to: anotherValue)!.setting(key: thirdKey, to: thirdValue)!
+				let contents = modifiedRRM.contents()!
+				let cutRRM = modifiedRRM.cuttingAllNodes()
+				let emptyTargeted = cutRRM.masking(keys: [firstKey])
+				let result = emptyTargeted.0.capture(info: Dictionary(uniqueKeysWithValues: contents.elements()))
+				it("result should have two keys") {
+					expect(result!.0.get(key: firstKey)).toNot(beNil())
+					expect(result!.0.get(key: secondKey)).toNot(beNil())
+					expect(result!.0.keys()).toNot(beNil())
+					expect(result!.0.keys()!.count).to(equal(2))
+				}
+			}
             describe("Initialization") {
                 
                 // User defined data structure
@@ -105,9 +151,9 @@ final class RGRTSpec: QuickSpec {
                     }
                     describe("rrm with just root") {
                         // Start with only the cryptographic link
-                        let cutRRM = someRRM.cuttingAllNodes()
+						let cutRRM = someRRM.cuttingAllNodes().mask().0
                         it("should have same digest as original") {
-                            expect(cutRRM.digest).to(equal(someRRM.digest))
+							expect(cutRRM.digest).to(equal(someRRM.digest))
                         }
                         it("should have no contents") {
                             expect(cutRRM.contents()!.elements()).to(beEmpty())
@@ -135,7 +181,7 @@ final class RGRTSpec: QuickSpec {
                         }
                     }
                     describe("malicious insertion") {
-                        let cutRRM = someRRM.cuttingAllNodes()
+						let cutRRM = someRRM.cuttingAllNodes().mask().0
                         let childNode = someRRM.root.artifact!.children.elements().first!.1.artifact!
                         let childNodeContent = childNode.toBoolArray()
                         let rootDigest = someRRM.root.digest
