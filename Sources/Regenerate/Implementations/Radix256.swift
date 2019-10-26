@@ -9,10 +9,6 @@ public struct Radix256: Codable {
     private let rawChildren: [Mapping<Edge, Child>]!
 }
 
-extension Radix256: RGArtifact {
-    public typealias CryptoDelegateType = BaseCrypto
-}
-
 extension Radix256: Radix {
     public typealias Child = Stem256
     public typealias Edge = String

@@ -37,9 +37,9 @@ final class RGArraySpec: QuickSpec {
 			let nestedArrayNode = NestedArrayNodeType([arrayStem1!, arrayStem2!])!
 			let nestedArrayStem = NestedArrayStemType(artifact: nestedArrayNode, complete: true)
 			let regenerativeArray = RegenerativeNestedArrayType(root: nestedArrayStem!)
-			let targets = TrieSet<String>().adding([NestedArrayNodeType.Digest(0).toString(), ArrayNodeType.Digest(0).toString()]).adding([NestedArrayNodeType.Digest(0).toString(), ArrayNodeType.Digest(1).toString()])
+			let targets = TrieSet<String>().adding([NestedArrayStemType.Digest(0).toString(), ArrayStemType.Digest(0).toString()]).adding([NestedArrayStemType.Digest(0).toString(), ArrayStemType.Digest(1).toString()])
 			let cutRegenerativeArray = regenerativeArray.cuttingAllNodes().targeting(targets)
-			let regeneratedArray = cutRegenerativeArray.0.capture(info: Dictionary(uniqueKeysWithValues: regenerativeArray.contents()!.elements()))
+			let regeneratedArray = cutRegenerativeArray.0.capture(info: Dictionary(uniqueKeysWithValues: regenerativeArray.contents().elements()))
 			it("partial regeneration") {
 				expect(regeneratedArray).toNot(beNil())
 				expect(regeneratedArray!.root.artifact!.children.elements().count).to(equal(1))

@@ -26,7 +26,7 @@ public extension RGRT {
     }
     
     // Empty Tree
-    init() { self.init(root: Root(), paths: Mapping<Digest, [Path]>()) }
+    init() { self.init(root: Root(), paths: Mapping<String, [Path]>()) }
     
     var digest: Digest! { return root.digest }
     
@@ -88,23 +88,23 @@ public extension RGRT {
     }
     
     func capture(info: [[Bool]]) -> (Self, [(Key, Value)])? {
-        let optionalDigests = info.reduce([:]) { (result, entry) -> [Digest: [Bool]]? in
+        let optionalDigests = info.reduce([:]) { (result, entry) -> [String: [Bool]]? in
             guard let result = result else { return nil }
             guard let digestBits = CryptoDelegateType.hash(entry) else { return nil }
             guard let digest = Digest(raw: digestBits) else { return nil }
-            return result.setting(digest, withValue: entry)
+			return result.setting(digest.toString(), withValue: entry)
         }
         guard let digests = optionalDigests else { return nil }
         return capture(info: digests)
     }
     
-    func capture(info: [Digest: [Bool]]) -> (Self, [(Key, Value)])? {
+    func capture(info: [String: [Bool]]) -> (Self, [(Key, Value)])? {
         let insertions = keyPaths.keys().map { (digest: $0, content: info[$0]) }
         if insertions.isEmpty || !insertions.contains(where: { $0.content != nil }) { return (self, []) }
         let nextStep = insertions.reduce((self, [])) { (result, entry) -> (Self, [(Key, Value)])? in
             guard let result = result else { return nil }
             guard let content = entry.content else { return result }
-            guard let rrmInsertingContent = result.0.capture(content: content, digest: entry.digest) else { return nil }
+			guard let rrmInsertingContent = result.0.capture(content: content, digestString: entry.digest.toString()) else { return nil }
             return (rrmInsertingContent.0, rrmInsertingContent.2 + result.1)
         }
         guard let rrmAfterStep = nextStep else { return nil }
@@ -112,25 +112,25 @@ public extension RGRT {
         return (recursiveChildResult.0, recursiveChildResult.1 + rrmAfterStep.1)
     }
     
-    func capture(content: [Bool]) -> (Self, Set<Digest>, [(Key, Value)])? {
+    func capture(content: [Bool]) -> (Self, Set<String>, [(Key, Value)])? {
         guard let digestBits = CryptoDelegateType.hash(content) else { return nil }
         guard let digest = Digest(raw: digestBits) else { return nil }
-        return capture(content: content, digest: digest)
+		return capture(content: content, digestString: digest.toString())
     }
     
-    func capture(content: [Bool], digest: Digest) -> (Self, Set<Digest>, [(Key, Value)])? {
-        guard let routes = keyPaths[digest] else { return nil }
+    func capture(content: [Bool], digestString: String) -> (Self, Set<String>, [(Key, Value)])? {
+        guard let routes = keyPaths[digestString] else { return nil }
         if routes.isEmpty { return nil }
-        let resultAfterExploringRoutes = routes.reduce((self, Set<Digest>([]), [])) { (result, entry) -> (Self, Set<Digest>, [Key])? in
+        let resultAfterExploringRoutes = routes.reduce((self, Set<String>([]), [])) { (result, entry) -> (Self, Set<String>, [Key])? in
             guard let result = result else { return nil }
-            guard let rrmAfterExploringRoute = result.0.capture(digest: digest, content: content, at: entry) else { return nil }
+            guard let rrmAfterExploringRoute = result.0.capture(digestString: digestString, content: content, at: entry) else { return nil }
             let newDigests = result.1.union(rrmAfterExploringRoute.1)
             guard let keyForResult = rrmAfterExploringRoute.2 else { return (rrmAfterExploringRoute.0, newDigests, result.2) }
             return (rrmAfterExploringRoute.0, newDigests, result.2 + [keyForResult])
         }
         guard let finalResult = resultAfterExploringRoutes else { return nil }
-        if finalResult.1.contains(digest) { return nil }
-        let finalRRM = Self(root: finalResult.0.root, paths: finalResult.0.keyPaths.deleting(key: digest))
+        if finalResult.1.contains(digestString) { return nil }
+        let finalRRM = Self(root: finalResult.0.root, paths: finalResult.0.keyPaths.deleting(key: digestString))
         guard let insertedNode = Root.Artifact(raw: content) else { return nil }
         if insertedNode.value.isEmpty { return (finalRRM, finalResult.1, []) }
         guard let binaryDecodedValue = decodeValue(insertedNode.value) else { return nil }
@@ -138,8 +138,8 @@ public extension RGRT {
         return (finalRRM, finalResult.1, finalResult.2.map { ($0, value) })
     }
     
-    func capture(digest: Digest, content: [Bool], at route: Path) -> (Self, Set<Digest>, Key?)? {
-		guard let modifiedRootResult = root.capture(digest: digest, content: content, at: route, prefix: []) else { return nil }
+    func capture(digestString: String, content: [Bool], at route: Path) -> (Self, Set<String>, Key?)? {
+		guard let modifiedRootResult = root.capture(digestString: digestString, content: content, at: route, prefix: []) else { return nil }
         guard let nodeInfo = modifiedRootResult.0.nodeInfoAlong(path: route) else { return nil }
         let nodes = nodeInfo.map { Root.Artifact(raw: $0) }
         if nodes.contains(where: { $0 == nil }) { return nil }
@@ -150,7 +150,7 @@ public extension RGRT {
         return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys()), key)
     }
 	
-	func targeting(keys: [Key]) -> (Self, Set<Digest>) {
+	func targeting(keys: [Key]) -> (Self, Set<String>) {
 		let targets = keys.reduce(TrieSet<Edge>()) { (result, entry) -> TrieSet<Edge> in
 			guard let symbolEncodedKey = encodeKey(entry.toBoolArray()) else { return result }
 			return result.adding(symbolEncodedKey)
@@ -158,7 +158,7 @@ public extension RGRT {
 		return targeting(targets)
 	}
 	
-	func masking(keys: [Key]) -> (Self, Set<Digest>) {
+	func masking(keys: [Key]) -> (Self, Set<String>) {
 		let masks = keys.reduce(TrieSet<Edge>()) { (result, entry) -> TrieSet<Edge> in
 			guard let symbolEncodedKey = encodeKey(entry.toBoolArray()) else { return result }
 			return result.adding(symbolEncodedKey)

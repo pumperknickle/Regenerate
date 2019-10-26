@@ -46,12 +46,12 @@ final class RGDictionarySpec: QuickSpec {
 			let regenerativeDictionary = RegenerativeNestedDictionaryType(root: nestedDictionaryStem!)
 			let targets = TrieSet<String>().adding([firstKey.toString(), firstKey.toString()]).adding([secondKey.toString(), fourthKey.toString()])
 			let cutRegenerativeDictionary = regenerativeDictionary.cuttingAllNodes().targeting(targets)
-			let regeneratedDictionary = cutRegenerativeDictionary.0.capture(info: Dictionary(uniqueKeysWithValues: regenerativeDictionary.contents()!.elements()))
+			let regeneratedDictionary = cutRegenerativeDictionary.0.capture(info: Dictionary(uniqueKeysWithValues: regenerativeDictionary.contents().elements()))
 			it("partial regeneration") {
 				expect(regeneratedDictionary).toNot(beNil())
 				expect(regeneratedDictionary!.root.artifact!.children.elements().count).to(equal(2))
-				expect(regeneratedDictionary!.root.artifact!.children.keys()).to(contain(firstKey))
-				expect(regeneratedDictionary!.root.artifact!.children.keys()).to(contain(secondKey))
+				expect(regeneratedDictionary!.root.artifact!.children.keys()).to(contain(firstKey.toString()))
+				expect(regeneratedDictionary!.root.artifact!.children.keys()).to(contain(secondKey.toString()))
 				expect(regeneratedDictionary!.root.artifact!.children.values().map { $0.artifact!.children.values().contains(where: { !$0.complete }) }).toNot(contain(true))
 			}
 		}

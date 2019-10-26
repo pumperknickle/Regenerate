@@ -12,11 +12,15 @@ public protocol RGScalar: RGArtifact {
 
 public extension RGScalar {
     func isComplete() -> Bool { return true }
-	func capture(digest: Digest, content: [Bool], at route: Path, prefix: Path) -> (Self, Mapping<Digest, [Path]>)? { return nil }
-	func missing(prefix: Path) -> Mapping<Digest, [Path]> { return Mapping<Digest, [Path]>() }
-    func contents() -> Mapping<Digest, [Bool]>? { return Mapping<Digest, [Bool]>() }
+	func capture(digestString: String, content: [Bool], at route: Path, prefix: Path) -> (Self, Mapping<String, [Path]>)? { return nil }
+	func missing(prefix: Path) -> Mapping<String, [Path]> { return Mapping<String, [Path]>() }
+    func contents() -> Mapping<String, [Bool]> { return Mapping<String, [Bool]>() }
     func isValid() -> Bool { return true }
-	func targeting(_ targets: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<Digest, [Path]>) { return (self, Mapping<Digest, [Path]>()) }
-	func masking(_ masks: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<Digest, [Path]>) { return (self, Mapping<Digest, [Path]>()) }
-	func mask(prefix: [Edge]) -> (Self, Mapping<Digest, [Path]>) { (self, Mapping<Digest, [Path]>()) }
+	func targeting(_ targets: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<String, [Path]>) { return (self, Mapping<String, [Path]>()) }
+	func masking(_ masks: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<String, [Path]>) { return (self, Mapping<String, [Path]>()) }
+	func mask(prefix: [Edge]) -> (Self, Mapping<String, [Path]>) { (self, Mapping<String, [Path]>()) }
+	func set(property: String, to child: Regenerative) -> Self? { return nil }
+	func get(property: String) -> Regenerative? { return nil }
+	func properties() -> [String] { return [] }
+	func pruning() -> Self { return self }
 }
