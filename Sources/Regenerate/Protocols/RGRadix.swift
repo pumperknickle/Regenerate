@@ -3,8 +3,8 @@ import Bedrock
 import AwesomeDictionary
 import AwesomeTrie
 
-public protocol Radix: RGArtifact where Child.Artifact == Self {
-    associatedtype Child: Stem
+public protocol RGRadix: RGArtifact where Child.Artifact == Self {
+    associatedtype Child: RGRadixAddress
 
     var prefix: [Edge] { get }
     var value: [Edge] { get }
@@ -13,7 +13,7 @@ public protocol Radix: RGArtifact where Child.Artifact == Self {
     init(prefix: [Edge], value: [Edge], children: Mapping<Edge, Child>)
 }
 
-public extension Radix {
+public extension RGRadix {
     init() { self.init(prefix: [], value: [], children: Mapping<Edge, Child>()) }
 	
 	func set(property: String, to child: CryptoBindable) -> Self? {

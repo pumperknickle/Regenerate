@@ -2,12 +2,12 @@ import Foundation
 import Bedrock
 import AwesomeDictionary
 
-public struct RGObject256<RootType: Addressable>: Codable where RootType.Digest == UInt256 {
+public struct RGObject<RootType: Addressable>: Codable where RootType.Digest == UInt256 {
     private let rawRoot: RootType!
     private let rawPaths: Mapping<String, [Path]>!
 }
 
-extension RGObject256: RGObject {
+extension RGObject: Regenerative {
     public var root: RootType { return rawRoot }
     public var keyPaths: Mapping<String, [Path]> { return rawPaths }
     

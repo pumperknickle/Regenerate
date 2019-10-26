@@ -22,7 +22,7 @@ public struct Dictionary256<Key: Stringable, Value: Addressable>: Codable where 
 }
 
 extension Dictionary256: RGDictionary {
-	public typealias CoreType = RGRT256<Key, Value>
+	public typealias CoreType = RT256<Key, Value>
 
 	public var core: CoreType! { return rawCore }
 	public var incompleteChildren: Set<String>! { return rawIncompleteChildren ?? Set<String>([]) }

@@ -3,7 +3,7 @@ import Bedrock
 import AwesomeDictionary
 import AwesomeTrie
 
-public protocol RGObject: Codable {
+public protocol Regenerative: Codable {
     associatedtype Root: Addressable
     typealias CryptoDelegateType = Root.CryptoDelegateType
     typealias Digest = Root.Digest
@@ -19,7 +19,7 @@ public protocol RGObject: Codable {
 	func mask() -> (Self, Set<String>)
 }
 
-public extension RGObject {
+public extension Regenerative {
 	init(root: Root) { self.init(root: root, paths: root.missing(prefix: [])) }
     
     func complete() -> Bool { return root.complete }

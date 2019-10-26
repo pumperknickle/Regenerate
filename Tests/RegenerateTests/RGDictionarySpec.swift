@@ -10,13 +10,13 @@ import AwesomeDictionary
 final class RGDictionarySpec: QuickSpec {
 	override func spec() {
 		describe("Dictionary") {
-			typealias ChildNodeType = RGScalar256<UInt256>
+			typealias ChildNodeType = Scalar<UInt256>
 			typealias ChildStemType = Address<ChildNodeType>
 			typealias DictionaryNodeType = Dictionary256<UInt256, ChildStemType>
 			typealias DictionaryStemType = Address<DictionaryNodeType>
 			typealias NestedDictionaryNodeType = Dictionary256<UInt256, DictionaryStemType>
 			typealias NestedDictionaryStemType = Address<NestedDictionaryNodeType>
-			typealias RegenerativeNestedDictionaryType = RGObject256<NestedDictionaryStemType>
+			typealias RegenerativeNestedDictionaryType = RGObject<NestedDictionaryStemType>
 
 			// dictionary 0-0
 			let firstKey = UInt256(0)

@@ -10,13 +10,13 @@ import AwesomeDictionary
 final class RGArraySpec: QuickSpec {
 	override func spec() {
 		describe("Array") {
-			typealias ChildNodeType = RGScalar256<UInt256>
+			typealias ChildNodeType = Scalar<UInt256>
 			typealias ChildStemType = Address<ChildNodeType>
 			typealias ArrayNodeType = Array256<ChildStemType>
 			typealias ArrayStemType = Address<ArrayNodeType>
 			typealias NestedArrayNodeType = Array256<ArrayStemType>
 			typealias NestedArrayStemType = Address<NestedArrayNodeType>
-			typealias RegenerativeNestedArrayType = RGObject256<NestedArrayStemType>
+			typealias RegenerativeNestedArrayType = RGObject<NestedArrayStemType>
 			
 			// array 0-0
 			let firstNode = ChildNodeType(raw: UInt256.min)

@@ -1,12 +1,12 @@
 import Foundation
 
-public protocol Stem: Addressable where Artifact: Radix, Artifact.Child == Self { }
+public protocol RGRadixAddress: Addressable where Artifact: RGRadix, Artifact.Child == Self { }
 
 public enum TransitionProofType: Int {
     case creation = 1, mutation, deletion
 }
 
-public extension Stem {
+public extension RGRadixAddress {
     init() { self.init(artifact: Artifact())! }
     
     func get(key: [Edge]) -> [Edge]? {

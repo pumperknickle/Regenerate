@@ -9,8 +9,8 @@ public struct Radix256: Codable {
     private let rawChildren: [Mapping<Edge, Child>]!
 }
 
-extension Radix256: Radix {
-    public typealias Child = Stem256
+extension Radix256: RGRadix {
+    public typealias Child = RadixAddress256
     public typealias Edge = String
     public typealias Digest = UInt256
     

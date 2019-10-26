@@ -3,7 +3,7 @@ import Bedrock
 import CryptoStarterPack
 import AwesomeTrie
 
-public struct Stem256: Codable {
+public struct RadixAddress256: Codable {
     private let rawDigest: UInt256!
     private let rawArtifact: Radix256?
     private let rawIncomplete: Singleton?
@@ -13,7 +13,7 @@ public struct Stem256: Codable {
 	private let rawIsTargeted: Singleton?
 }
 
-extension Stem256: Addressable {
+extension RadixAddress256: Addressable {
 	public var digest: UInt256! { return rawDigest }
     public var artifact: Radix256? { return rawArtifact }
 	public var complete: Bool! { return rawIncomplete != nil ? false : true }
@@ -35,6 +35,6 @@ extension Stem256: Addressable {
 	}
 }
 
-extension Stem256: Stem {
+extension RadixAddress256: RGRadixAddress {
     public typealias Artifact = Radix256
 }

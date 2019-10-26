@@ -2,13 +2,13 @@ import Foundation
 import Bedrock
 import AwesomeDictionary
 
-public struct RGRT256<Key: BinaryEncodable, Value: BinaryEncodable>: Codable {
+public struct RT256<Key: BinaryEncodable, Value: BinaryEncodable>: Codable {
     private let rawRoot: Root!
     private let rawPaths: Mapping<String, [Path]>!
 }
 
-extension RGRT256: RGObject {
-    public typealias Root = Stem256
+extension RT256: Regenerative {
+    public typealias Root = RadixAddress256
     
     public var root: Root { return rawRoot }
     public var keyPaths: Mapping<String, [Path]> { return rawPaths }
@@ -19,7 +19,7 @@ extension RGRT256: RGObject {
     }
 }
 
-extension RGRT256: RGRT {
+extension RT256: RGRT {
     public func decodeKey(_ symbols: [String]) -> [Bool]? { return symbols.map { $0 == "1" ? true : false } }
     public func encodeKey(_ key: [Bool]) -> [String]? { return key.map { $0 == false ? "0" : "1" } }
     public func decodeValue(_ symbols: [String]) -> [Bool]? { return symbols.map { $0 == "1" ? true : false } }

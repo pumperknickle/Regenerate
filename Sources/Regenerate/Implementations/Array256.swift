@@ -26,7 +26,7 @@ public struct Array256<Element: Addressable>: Codable where Element.Digest == UI
 extension Array256: RGArray {
 	public typealias Key = UInt256
 	public typealias Value = Element
-	public typealias CoreType = RGRT256<Key, Value>
+	public typealias CoreType = RT256<Key, Value>
 
 	public var core: CoreType! { return rawCore }
 	public var incompleteChildren: Set<String>! { return rawIncompleteChildren ?? Set<String>([]) }

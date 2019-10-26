@@ -9,7 +9,7 @@ final class RGRTSpec: QuickSpec {
     override func spec() {
         describe("Regenerative Radix Merkle Trie") {
 			describe("targeting") {
-				let tree = RGRT256<UInt256, UInt256>()
+				let tree = RT256<UInt256, UInt256>()
 				
 				// Values to populate
                 let oneKey = UInt256.min
@@ -31,7 +31,7 @@ final class RGRTSpec: QuickSpec {
 				}
 			}
 			describe("masking") {
-				let tree = RGRT256<String, UInt256>()
+				let tree = RT256<String, UInt256>()
 				
 				// Values to populate
 				let firstKey = "hello world"
@@ -57,7 +57,7 @@ final class RGRTSpec: QuickSpec {
             describe("Initialization") {
                 
                 // User defined data structure
-                let rgrmt = RGRT256<UInt256, UInt256>()
+                let rgrmt = RT256<UInt256, UInt256>()
                 
                 // Values to populate
                 let oneKey = UInt256.min
