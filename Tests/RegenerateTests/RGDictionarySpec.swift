@@ -43,7 +43,7 @@ final class RGDictionarySpec: QuickSpec {
 			let parentMapping = Mapping<UInt256, DictionaryStemType>().setting(key: firstKey, value: dictionaryStem1!).setting(key: secondKey, value: dictionaryStem2!)
 			let nestedDictionaryNode = NestedDictionaryNodeType(parentMapping)!
 			let nestedDictionaryStem = NestedDictionaryStemType(artifact: nestedDictionaryNode, complete: true)
-			let regenerativeDictionary = RegenerativeNestedDictionaryType(root: nestedDictionaryStem!)
+			let regenerativeDictionary = RegenerativeNestedDictionaryType(root: nestedDictionaryStem!).set(key: UInt256.random().toBoolArray())!
 			let targets = TrieSet<String>().adding([firstKey.toString(), firstKey.toString()]).adding([secondKey.toString(), fourthKey.toString()])
 			let cutRegenerativeDictionary = regenerativeDictionary.cuttingAllNodes().targeting(targets)
 			let regeneratedDictionary = cutRegenerativeDictionary.0.capture(info: Dictionary(uniqueKeysWithValues: regenerativeDictionary.contents().elements()))
