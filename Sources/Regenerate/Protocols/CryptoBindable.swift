@@ -12,4 +12,5 @@ public protocol CryptoBindable {
 	func target(prefix: [String]) -> (Self, Mapping<String, [[String]]>)
 	func isComplete() -> Bool
 	func empty() -> Self
+	func set(key: [Bool], iv: [Bool]) -> Self?
 }

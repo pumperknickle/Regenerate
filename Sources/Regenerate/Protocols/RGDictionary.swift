@@ -30,6 +30,17 @@ public extension RGDictionary {
 		self.init(core: core, incompleteChildren: Set([]), children: children, targets: TrieSet<Edge>(), masks: TrieSet<Edge>(), isMasked: false)
 	}
 	
+	func set(key: [Bool]) -> Self? {
+		guard let newCore = core.set(key: key) else { return nil }
+		let childrenResult = children.elements().reduce(Mapping<String, Value>(), { (result, entry) -> Mapping<String, Value>? in
+			guard let result = result else { return nil }
+			guard let childResult = entry.1.set(key: key, iv: entry.0.toBoolArray()) else { return nil }
+			return result.setting(key: entry.0, value: childResult)
+		})
+		guard let newChildren = childrenResult else { return nil }
+		return changing(core: newCore, children: newChildren)
+	}
+	
 	func set(property: String, to child: CryptoBindable) -> Self? {
 		return nil
 	}

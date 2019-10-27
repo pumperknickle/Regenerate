@@ -17,6 +17,7 @@ public protocol Regenerative: Codable {
 	func targeting(_ targets: TrieSet<Edge>) -> (Self, Set<String>)
 	func masking(_ masks: TrieSet<Edge>) -> (Self, Set<String>)
 	func mask() -> (Self, Set<String>)
+	func set(key: [Bool]) -> Self?
 }
 
 public extension Regenerative {
@@ -29,6 +30,12 @@ public extension Regenerative {
     func contents() -> Mapping<String, [Bool]> { return root.contents() }
     
     func cuttingAllNodes() -> Self { return Self(root: root.empty()) }
+	
+	func set(key: [Bool]) -> Self? {
+		guard let keyHash = CryptoDelegateType.hash(key) else { return nil }
+		guard let childResult = root.set(key: key, iv: keyHash) else { return nil }
+		return Self(root: childResult)
+	}
     
     func capture(info: [[Bool]]) -> Self? {
         let optionalDigests = info.reduce([:]) { (result, entry) -> [String: [Bool]]? in
