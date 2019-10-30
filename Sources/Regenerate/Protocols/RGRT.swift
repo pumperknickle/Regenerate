@@ -121,7 +121,7 @@ public extension RGRT {
     func capture(content: [Bool], digestString: String) -> (Self, Set<String>, [(Key, Value)])? {
         guard let routes = keyPaths[digestString] else { return nil }
         if routes.isEmpty { return nil }
-        let resultAfterExploringRoutes = routes.reduce((self, Set<String>([]), [])) { (result, entry) -> (Self, Set<String>, [Key])? in
+        let resultAfterExploringRoutes = routes.reduce((self, Set<String>([]), [])) { (result, entry) -> (Self, Set<String>, [(Key, Value)])? in
             guard let result = result else { return nil }
             guard let rrmAfterExploringRoute = result.0.capture(digestString: digestString, content: content, at: entry) else { return nil }
             let newDigests = result.1.union(rrmAfterExploringRoute.1)
@@ -131,23 +131,19 @@ public extension RGRT {
         guard let finalResult = resultAfterExploringRoutes else { return nil }
         if finalResult.1.contains(digestString) { return nil }
         let finalRRM = Self(root: finalResult.0.root, paths: finalResult.0.keyPaths.deleting(key: digestString))
-        guard let insertedNode = Root.Artifact(raw: content) else { return nil }
-        if insertedNode.value.isEmpty { return (finalRRM, finalResult.1, []) }
-        guard let binaryDecodedValue = decodeValue(insertedNode.value) else { return nil }
-        guard let value = Value(raw: binaryDecodedValue) else { return nil }
-        return (finalRRM, finalResult.1, finalResult.2.map { ($0, value) })
+		return (finalRRM, finalResult.1, finalResult.2)
     }
     
-    func capture(digestString: String, content: [Bool], at route: Path) -> (Self, Set<String>, Key?)? {
+    func capture(digestString: String, content: [Bool], at route: Path) -> (Self, Set<String>, (Key, Value)?)? {
 		guard let modifiedRootResult = root.capture(digestString: digestString, content: content, at: route, prefix: []) else { return nil }
-        guard let nodeInfo = modifiedRootResult.0.nodeInfoAlong(path: route) else { return nil }
-        let nodes = nodeInfo.map { Root.Artifact(raw: $0) }
-        if nodes.contains(where: { $0 == nil }) { return nil }
-        let allSymbolsAlongPath = nodes.map { $0!.prefix }.reduce([], +)
-        guard let binaryDecodedKey = decodeKey(allSymbolsAlongPath) else { return nil }
-        if binaryDecodedKey.isEmpty { return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys()), nil)  }
-        guard let key = Key(raw: binaryDecodedKey) else { return nil }
-        return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys()), key)
+		guard let valueEdges = modifiedRootResult.0.value(for: route) else { return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys()), nil) }
+		if valueEdges.isEmpty { return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys()), nil) }
+		guard let binaryDecodedValue = decodeValue(valueEdges) else { return nil }
+		guard let value = Value(raw: binaryDecodedValue) else { return nil }
+		guard let keyEdges = modifiedRootResult.0.key(for: route, prefix: []) else { return nil }
+		guard let binaryDecodedKey = decodeKey(keyEdges) else { return nil }
+		guard let key = Key(raw: binaryDecodedKey) else { return nil }
+		return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys()), (key, value))
     }
 	
 	func targeting(keys: [Key]) -> (Self, Set<String>) {

@@ -7,12 +7,22 @@ public enum TransitionProofType: Int {
 }
 
 public extension RGRadixAddress {
-    init() { self.init(artifact: Artifact())! }
+	init() { self.init(artifact: Artifact(), symmetricKey: nil)! }
     
     func get(key: [Edge]) -> [Edge]? {
         guard let node = artifact else { return nil }
         return node.get(key: key)
     }
+	
+	func value(for route: Path) -> [Edge]? {
+		guard let artifact = artifact else { return nil }
+		return artifact.value(for: route)
+	}
+	
+	func key(for route: Path, prefix: [Edge]) -> [Edge]? {
+		guard let artifact = artifact else { return nil }
+		return artifact.key(for: route, prefix: prefix)
+	}
     
     func values() -> [[Edge]] {
         guard let node = artifact else { return [] }
@@ -35,8 +45,8 @@ public extension RGRadixAddress {
     // warning, calling this creates a NEW rrm with a new digest
     func setting(key: [Edge], to value: [Edge]) -> Self? {
         guard let node = artifact else { return nil }
-        guard let modifiedNode = value.isEmpty ? node.deleting(key: key) : node.setting(key: key, to: value) else { return nil }
-        return Self(artifact: modifiedNode)
+		guard let modifiedNode = value.isEmpty ? node.deleting(key: key) : node.setting(key: key, to: value, symmetricKey: symmetricKey?.toBoolArray()) else { return nil }
+        return Self(artifact: modifiedNode, symmetricKey: symmetricKey)
     }
     
     func setting(all: [(key: [Edge], value: [Edge])]) -> Self? {
@@ -48,21 +58,14 @@ public extension RGRadixAddress {
     func transitionProof(proofType: TransitionProofType, key: [Edge]) -> Self? {
         guard let node = artifact else { return nil }
         guard let transitionProof = node.transitionProof(proofType: proofType, key: key) else { return nil }
-        return Self(artifact: transitionProof)
+        return Self(artifact: transitionProof, symmetricKey: symmetricKey)
     }
     
     func merging(right: Self) -> Self {
         if artifact == nil && right.artifact == nil { return self }
         guard let leftNode = artifact else { return right }
         guard let rightNode = right.artifact else { return self }
-        guard let mergedStem = Self(artifact: leftNode.merging(right: rightNode)) else { return self }
+        guard let mergedStem = Self(artifact: leftNode.merging(right: rightNode), symmetricKey: nil) else { return self }
         return mergedStem
-    }
-    
-    func nodeInfoAlong(path: Path) -> [[Bool]]? {
-        guard let node = artifact else { return nil }
-        guard let firstLeg = path.first else { return [node.toBoolArray()] }
-        guard let childResult = node.nodeInfoAlong(firstLeg: firstLeg, path: Array(path.dropFirst())) else { return nil }
-        return [node.toBoolArray()] + childResult
     }
 }

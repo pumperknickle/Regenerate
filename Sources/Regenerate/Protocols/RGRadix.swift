@@ -5,6 +5,7 @@ import AwesomeTrie
 
 public protocol RGRadix: RGArtifact where Child.Artifact == Self {
     associatedtype Child: RGRadixAddress
+	typealias SymmetricKey = Child.SymmetricKey
 
     var prefix: [Edge] { get }
     var value: [Edge] { get }
@@ -16,12 +17,34 @@ public protocol RGRadix: RGArtifact where Child.Artifact == Self {
 public extension RGRadix {
     init() { self.init(prefix: [], value: [], children: Mapping<Edge, Child>()) }
 	
+	func set(key: [Bool]) -> Self? {
+		let childrenResult = children.elements().reduce(Mapping<Edge, Child>()) { (result, entry) -> Mapping<Edge, Child>? in
+			guard let result = result else { return nil }
+			guard let childResult = entry.1.set(key: key, iv: entry.0.toBoolArray()) else { return nil }
+			return result.setting(key: entry.0, value: childResult)
+		}
+		guard let newChildren = childrenResult else { return nil }
+		return changing(children: newChildren)
+	}
+	
 	func set(property: String, to child: CryptoBindable) -> Self? {
 		return nil
 	}
 	
 	func get(property: String) -> CryptoBindable? {
 		return nil
+	}
+	
+	func value(for route: Path) -> [Edge]? {
+		guard let firstLeg = route.first else { return value }
+		guard let child = children[firstLeg] else { return nil }
+		return child.value(for: Array(route.dropFirst()))
+	}
+	
+	func key(for route: Path, prefix: [Edge]) -> [Edge]? {
+		guard let firstLeg = route.first else { return prefix + self.prefix }
+		guard let child = children[firstLeg] else { return nil }
+		return child.key(for: Array(route.dropFirst()), prefix: prefix + self.prefix)
 	}
 	
 	func properties() -> [String] {
@@ -62,7 +85,7 @@ public extension RGRadix {
         return children.elements().reduce(Mapping<Edge, Child>(), { (result, entry) -> Mapping<Edge, Child>? in
             guard let result = result else { return nil }
             guard let node = entry.1.artifact else { return nil }
-            guard let newChild = Child(artifact: node.pruning()) else { return nil }
+			guard let newChild = Child(artifact: node.pruning(), symmetricKey: entry.1.symmetricKey) else { return nil }
             return result.setting(key: entry.0, value: newChild)
         })
     }
@@ -80,12 +103,12 @@ public extension RGRadix {
         return childStem.get(key: suffix)
     }
     
-    func setting(key: [Edge], to value: [Edge]) -> Self? {
+	func setting(key: [Edge], to value: [Edge], symmetricKey: [Bool]?) -> Self? {
         if !key.starts(with: prefix) {
             if prefix.starts(with: key) {
                 let childSuffix = prefix - key
                 guard let firstChild = childSuffix.first else { return nil }
-                guard let newChild = Child(artifact: changing(prefix: childSuffix)) else { return nil }
+                guard let newChild = Child(artifact: changing(prefix: childSuffix), symmetricKey: nil) else { return nil }
                 return Self(prefix: key, value: value, children: Mapping<Edge, Child>().setting(key: firstChild, value: newChild))
             }
             let sharedPrefix = prefix ~> key
@@ -93,15 +116,15 @@ public extension RGRadix {
             let nodeSuffix = prefix - sharedPrefix
             guard let firstKeySuffix = keySuffix.first else { return nil }
             guard let firstNodeSuffix = nodeSuffix.first else { return nil }
-            guard let keyChild = Child(artifact: Self(prefix: keySuffix, value: value, children: Mapping<Edge, Child>())) else { return nil }
-            guard let nodeChild = Child(artifact: changing(prefix: nodeSuffix)) else { return nil }
+			guard let keyChild = Child(artifact: Self(prefix: keySuffix, value: value, children: Mapping<Edge, Child>()), symmetricKey: nil) else { return nil }
+            guard let nodeChild = Child(artifact: changing(prefix: nodeSuffix), symmetricKey: nil) else { return nil }
             let newChildren = Mapping<Edge, Child>().setting(key: firstKeySuffix, value: keyChild).setting(key: firstNodeSuffix, value: nodeChild)
             return Self(prefix: sharedPrefix, value: [], children: newChildren)
         }
         let suffix = key - prefix
         guard let firstSymbol = suffix.first else { return changing(value: value) }
         guard let firstStem = children[firstSymbol] else {
-            guard let newStem = Child(artifact: Self(prefix: suffix, value: value, children: Mapping<Edge, Child>())) else { return nil }
+            guard let newStem = Child(artifact: Self(prefix: suffix, value: value, children: Mapping<Edge, Child>()), symmetricKey: nil) else { return nil }
             return changing(children: children.setting(key: firstSymbol, value: newStem))
         }
         guard let newStem = firstStem.setting(key: suffix, to: value) else { return nil }
@@ -163,11 +186,6 @@ public extension RGRadix {
             return result.setting(key: entry, value: mergedChildStem)
         }
         return changing(children: newChildren)
-    }
-    
-    func nodeInfoAlong(firstLeg: Edge, path route: Path) -> [[Bool]]? {
-        guard let child = children[firstLeg] else { return nil }
-        return child.nodeInfoAlong(path: route)
     }
     
 	func capture(digestString: String, content: [Bool], at route: Path, prefix: Path) -> (Self, Mapping<String, [Path]>)? {
