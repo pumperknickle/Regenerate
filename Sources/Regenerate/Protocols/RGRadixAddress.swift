@@ -68,11 +68,4 @@ public extension RGRadixAddress {
         guard let mergedStem = Self(artifact: leftNode.merging(right: rightNode), symmetricKey: nil) else { return self }
         return mergedStem
     }
-    
-    func nodeInfoAlong(path: Path) -> [[Bool]]? {
-        guard let node = artifact else { return nil }
-        guard let firstLeg = path.first else { return [node.toBoolArray()] }
-        guard let childResult = node.nodeInfoAlong(firstLeg: firstLeg, path: Array(path.dropFirst())) else { return nil }
-        return [node.toBoolArray()] + childResult
-    }
 }

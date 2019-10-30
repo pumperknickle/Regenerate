@@ -188,11 +188,6 @@ public extension RGRadix {
         return changing(children: newChildren)
     }
     
-    func nodeInfoAlong(firstLeg: Edge, path route: Path) -> [[Bool]]? {
-        guard let child = children[firstLeg] else { return nil }
-        return child.nodeInfoAlong(path: route)
-    }
-    
 	func capture(digestString: String, content: [Bool], at route: Path, prefix: Path) -> (Self, Mapping<String, [Path]>)? {
         guard let firstLeg = route.first else { return nil }
         guard let childStem = children[firstLeg] else { return nil }
