@@ -35,6 +35,18 @@ public extension RGRadix {
 		return nil
 	}
 	
+	func value(for route: Path) -> [Edge]? {
+		guard let firstLeg = route.first else { return value }
+		guard let child = children[firstLeg] else { return nil }
+		return child.value(for: Array(route.dropFirst()))
+	}
+	
+	func key(for route: Path, prefix: [Edge]) -> [Edge]? {
+		guard let firstLeg = route.first else { return prefix + self.prefix }
+		guard let child = children[firstLeg] else { return nil }
+		return child.key(for: Array(route.dropFirst()), prefix: prefix + self.prefix)
+	}
+	
 	func properties() -> [String] {
 		return []
 	}

@@ -13,6 +13,16 @@ public extension RGRadixAddress {
         guard let node = artifact else { return nil }
         return node.get(key: key)
     }
+	
+	func value(for route: Path) -> [Edge]? {
+		guard let artifact = artifact else { return nil }
+		return artifact.value(for: route)
+	}
+	
+	func key(for route: Path, prefix: [Edge]) -> [Edge]? {
+		guard let artifact = artifact else { return nil }
+		return artifact.key(for: route, prefix: prefix)
+	}
     
     func values() -> [[Edge]] {
         guard let node = artifact else { return [] }

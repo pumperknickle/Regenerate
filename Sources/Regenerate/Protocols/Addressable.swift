@@ -40,10 +40,11 @@ public extension Addressable {
 	func set(key: [Bool], iv: [Bool]) -> Self? {
 		let concat = key + iv
 		guard let keyIVHash = CryptoDelegateType.hash(concat) else { return nil }
-		let newKeyBinary = key ||| keyIVHash
-		guard let decodedKey = SymmetricKey(raw: newKeyBinary) else { return nil }
-		guard let childResult = artifact?.set(key: newKeyBinary) else { return nil }
-		return Self(artifact: childResult, symmetricKey: decodedKey)
+		guard let childResult = artifact?.set(key: key ||| keyIVHash) else { return nil }
+		guard let childResultHash = CryptoDelegateType.hash(childResult.toBoolArray()) else { return nil }
+		let finalKey = key ||| childResultHash
+		guard let decodedFinalKey = SymmetricKey(raw: key ||| finalKey) else { return nil }
+		return Self(artifact: childResult, symmetricKey: decodedFinalKey)
 	}
 	
 	func focused() -> Bool { return !(targets.isEmpty() && masks.isEmpty() && !isMasked && !isTargeted) }
@@ -94,8 +95,9 @@ public extension Addressable {
     
     func contents() -> Mapping<String, [Bool]> {
         guard let node = artifact else { return Mapping<String, [Bool]>() }
+		guard let encryptedBoolArray = symmetricKey != nil ? SymmetricDelegateType.encrypt(plainText: node.toBoolArray(), key: symmetricKey!) : node.toBoolArray() else { return Mapping<String, [Bool]>() }
 		return node.contents().setting(key: digest.toString(), value:
-			node.pruning().toBoolArray())
+			encryptedBoolArray)
     }
     
 	func missing(prefix: Path) -> Mapping<String, [Path]> {
@@ -105,7 +107,8 @@ public extension Addressable {
     
 	func capture(digestString: String, content: [Bool], prefix: Path) -> (Self, Mapping<String, [Path]>)? {
 		guard let digest = Digest(stringValue: digestString) else { return nil }
-        guard let decodedNode = Artifact(raw: content) else { return nil }
+		guard let decryptedContent = symmetricKey != nil ? SymmetricDelegateType.decrypt(cipherText: content, key: symmetricKey!) : content else { return nil }
+        guard let decodedNode = Artifact(raw: decryptedContent) else { return nil }
         if digest != self.digest { return nil }
 		let targetedNode = decodedNode.targeting(targets, prefix: prefix)
 		let maskedNode = targetedNode.0.masking(masks, prefix: prefix)
