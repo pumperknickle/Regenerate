@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/pumperknickle/AwesomeTrie.git",
         "state": {
           "branch": null,
-          "revision": "78d1ee85655b25d35d25fa1693811045050251eb",
-          "version": "0.0.4"
+          "revision": "efb64e9a640800aa9299e8d1a58543ec75b4067c",
+          "version": "0.0.5"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/pumperknickle/Bedrock.git",
         "state": {
           "branch": null,
-          "revision": "c6bbcae4e0e314d85fe72dc0180386b2e0a8820c",
-          "version": "0.0.5"
+          "revision": "36238261d2e02d44daff418317d494d6cf80c648",
+          "version": "0.0.8"
         }
       },
       {

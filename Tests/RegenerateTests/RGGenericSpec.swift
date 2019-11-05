@@ -73,7 +73,7 @@ final class RGGenericSpec: QuickSpec {
 			
 			let fooNode = Foo(array1: arrayStem1!, array2: arrayStem2!)
 			let fooStem = FooStemType(artifact: fooNode, complete: true)
-			let regenerativeFoo = RegenerativeFooType(root: fooStem!).set(key: UInt256.random().toBoolArray())!
+			let regenerativeFoo = RegenerativeFooType(root: fooStem!)
 			
 			let targets = TrieSet<String>().adding([fooNode.metafield1, ArrayStemType.Digest(0).toString()]).adding([fooNode.metafield1, ArrayStemType.Digest(1).toString()])
 

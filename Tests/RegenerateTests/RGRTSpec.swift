@@ -19,7 +19,7 @@ final class RGRTSpec: QuickSpec {
 				let thirdKey = UInt256.max - UInt256(100000)
 				let thirdValue = UInt256.max - UInt256(10000000)
 				
-				let modifiedRRM = tree.setting(key: oneKey, to: oneValue)!.setting(key: anotherKey, to: anotherValue)!.setting(key: thirdKey, to: thirdValue)!.set(key: UInt256.random().toBoolArray())!
+				let modifiedRRM = tree.setting(key: oneKey, to: oneValue)!.setting(key: anotherKey, to: anotherValue)!.setting(key: thirdKey, to: thirdValue)!
 				let contents = modifiedRRM.contents()
 				let cutRRM = modifiedRRM.cuttingAllNodes()
 				let emptyTargeted = cutRRM.targeting(keys: [oneKey])

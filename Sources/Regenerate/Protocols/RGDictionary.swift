@@ -29,24 +29,7 @@ public extension RGDictionary {
 		guard let core = CoreType(raw: coreTuples) else { return nil }
 		self.init(core: core, incompleteChildren: Set([]), children: children, targets: TrieSet<Edge>(), masks: TrieSet<Edge>(), isMasked: false)
 	}
-	
-	func set(key: [Bool]) -> Self? {
-		let childrenResult = children.elements().reduce(Mapping<String, Value>(), { (result, entry) -> Mapping<String, Value>? in
-			guard let result = result else { return nil }
-			guard let childResult = entry.1.set(key: key, iv: entry.0.toBoolArray()) else { return nil }
-			return result.setting(key: entry.0, value: childResult)
-		})
-		guard let newChildren = childrenResult else { return nil }
-		guard let childMappings = newChildren.elements().reduce(Mapping<Key, Value>(), { (result, entry) -> Mapping<Key, Value>? in
-			guard let result = result else { return nil }
-			guard let key = Key(stringValue: entry.0) else { return nil }
-			return result.setting(key: key, value: entry.1)
-		}) else { return nil }
-		guard let core = CoreType(raw: childMappings.elements()) else { return nil }
-		guard let encryptedCore = core.set(key: key) else { return nil }
-		return changing(core: encryptedCore, children: newChildren)
-	}
-	
+
 	func set(property: String, to child: CryptoBindable) -> Self? {
 		return nil
 	}
@@ -115,10 +98,10 @@ public extension RGDictionary {
 		return children.elements().map { $0.1.missing(prefix: prefix + [$0.0.toString()]) }.reduce(missingCore, +)
 	}
 	
-	func contents() -> Mapping<String, [Bool]> {
-		return children.values().reduce(core.contents(), { (result, entry) -> Mapping<String, [Bool]> in
-			return result.overwrite(with: entry.contents())
-		})
+	func contents(prefix: Path) -> Mapping<String, [Bool]> {
+		return children.elements().reduce(core.contents()) { (result, entry) -> Mapping<String, [Bool]> in
+			return result.overwrite(with: entry.1.contents(prefix: prefix + [entry.0]))
+		}
 	}
 	
 	func targeting(_ targets: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<String, [Path]>) {

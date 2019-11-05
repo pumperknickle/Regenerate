@@ -3,7 +3,7 @@ import Bedrock
 import AwesomeDictionary
 import AwesomeTrie
 
-public protocol RGArtifact: Codable, BinaryEncodable {
+public protocol RGArtifact: BinaryEncodable {
     typealias Edge = String
     typealias Path = [Edge]
 	
@@ -12,12 +12,11 @@ public protocol RGArtifact: Codable, BinaryEncodable {
     func isComplete() -> Bool
 	func capture(digestString: String, content: [Bool], at route: Path, prefix: Path) -> (Self, Mapping<String, [Path]>)?
     func missing(prefix: Path) -> Mapping<String, [Path]>
-    func contents() -> Mapping<String, [Bool]>
+	func contents(prefix: Path) -> Mapping<String, [Bool]>
 	func targeting(_ targets: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<String, [Path]>)
 	func masking(_ masks: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<String, [Path]>)
 	func mask(prefix: [Edge]) -> (Self, Mapping<String, [Path]>)
 	func shouldMask(_ masks: TrieSet<Edge>, prefix: [Edge]) -> Bool
-	func set(key: [Bool]) -> Self?
 	
 	func set(property: String, to child: CryptoBindable) -> Self?
 	func get(property: String) -> CryptoBindable?
@@ -32,15 +31,7 @@ public extension RGArtifact {
 		guard let finalSelf = set(property: firstLeg, to: result.0) else { return nil }
 		return (finalSelf, result.1)
 	}
-	
-	func set(key: [Bool]) -> Self? {
-		return properties().reduce(self) { (result, entry) -> Self? in
-			guard let result = result else { return nil }
-			guard let child = result.get(property: entry) else { return nil }
-			guard let childResult = child.set(key: key, iv: entry.toBoolArray()) else { return nil }
-			return result.set(property: entry, to: childResult)
-		}
-	}
+
 	
 	func mask(prefix: [Edge]) -> (Self, Mapping<String, [Path]>) {
 		return properties().reduce((self, Mapping<String, [Path]>())) { (result, entry) -> (Self, Mapping<String, [Path]>) in
@@ -71,10 +62,10 @@ public extension RGArtifact {
 		}
 	}
 	
-	func contents() -> Mapping<String, [Bool]> {
+	func contents(prefix: Path) -> Mapping<String, [Bool]> {
 		return properties().reduce(Mapping<String, [Bool]>()) { (result, entry) -> Mapping<String, [Bool]> in
 			guard let value = get(property: entry) else { return result }
-			return result.overwrite(with: value.contents())
+			return result.overwrite(with: value.contents(prefix: prefix + [entry]))
 		}
 	}
 	

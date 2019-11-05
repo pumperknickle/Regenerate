@@ -36,7 +36,7 @@ final class RGArraySpec: QuickSpec {
 
 			let nestedArrayNode = NestedArrayNodeType([arrayStem1!, arrayStem2!])!
 			let nestedArrayStem = NestedArrayStemType(artifact: nestedArrayNode, complete: true)
-			let regenerativeArray = RegenerativeNestedArrayType(root: nestedArrayStem!).set(key: UInt256.random().toBoolArray())!
+			let regenerativeArray = RegenerativeNestedArrayType(root: nestedArrayStem!)
 			let targets = TrieSet<String>().adding([NestedArrayStemType.Digest(0).toString(), ArrayStemType.Digest(0).toString()]).adding([NestedArrayStemType.Digest(0).toString(), ArrayStemType.Digest(1).toString()])
 			let cutRegenerativeArray = regenerativeArray.cuttingAllNodes().targeting(targets)
 			let regeneratedArray = cutRegenerativeArray.0.capture(info: Dictionary(uniqueKeysWithValues: regenerativeArray.contents().elements()))
