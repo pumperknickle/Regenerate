@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/pumperknickle/Bedrock.git",
         "state": {
           "branch": null,
-          "revision": "36238261d2e02d44daff418317d494d6cf80c648",
-          "version": "0.0.8"
+          "revision": "ded6dbcebadb1157064e05404143f1a1e42d299e",
+          "version": "0.1.1"
         }
       },
       {
@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/pumperknickle/CryptoStarterPack.git",
         "state": {
           "branch": null,
-          "revision": "14240881889c12c1b94a539b6f7489fb205ce442",
-          "version": "1.0.9"
+          "revision": "f84953f2c05769e14f712d4b6773060b3aa43584",
+          "version": "1.1.3"
         }
       },
       {

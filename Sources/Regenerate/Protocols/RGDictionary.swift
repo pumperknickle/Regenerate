@@ -21,6 +21,25 @@ public protocol RGDictionary: RGArtifact {
 }
 
 public extension RGDictionary {
+	func encrypt(allKeys: CoveredTrie<String, [Bool]>, commonIv: [Bool]) -> Self? {
+		let encryptedChildren = children.elements().reduce(Mapping<String, Value>()) { (result, entry) -> Mapping<String, Value>? in
+			guard let result = result else { return nil }
+			guard let childResult = entry.1.encrypt(allKeys: allKeys.subtreeWithCover(keys: [entry.0]), commonIv: commonIv + entry.0.toBoolArray()) else { return nil }
+			return result.setting(key: entry.0, value: childResult)
+		}
+		guard let unwrappedChildren = encryptedChildren else { return nil }
+		let convertedChildren = unwrappedChildren.elements().reduce(Mapping<Key, Value>()) { (result, entry) -> Mapping<Key, Value>? in
+			guard let result = result else { return nil }
+			guard let key = Key(stringValue: entry.0) else { return nil }
+			return result.setting(key: key, value: entry.1)
+		}
+		guard let finalConvertedChildren = convertedChildren else { return nil }
+		guard let newCore = CoreType(raw: finalConvertedChildren.elements()) else { return nil }
+		guard let cover = allKeys.cover else { return changing(core: newCore, children: unwrappedChildren) }
+		guard let encryptedCore = newCore.encrypt(allKeys: CoveredTrie<String, [Bool]>(trie: TrieMapping<String, [Bool]>(), cover: cover), commonIv: commonIv + commonIv) else { return nil }
+		return changing(core: encryptedCore, children: unwrappedChildren)
+	}
+	
 	init?(_ mapping: Mapping<Key, Value>) {
 		let coreTuples = mapping.elements()
 		let children = coreTuples.reduce(Mapping<String, Value>()) { (result, entry) -> Mapping<String, Value> in

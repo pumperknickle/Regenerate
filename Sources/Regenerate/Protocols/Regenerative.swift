@@ -29,6 +29,12 @@ public extension Regenerative {
     func contents() -> Mapping<String, [Bool]> { return root.contents(prefix: []) }
     
     func cuttingAllNodes() -> Self { return Self(root: root.empty()) }
+	
+	func encrypt(allKeys: CoveredTrie<String, [Bool]>, commonIv: [Bool]) -> Self? {
+		if !missingDigests().isEmpty { return nil }
+		guard let encryptedRoot = root.encrypt(allKeys: allKeys, commonIv: commonIv) else { return nil }
+		return Self(root: encryptedRoot, paths: Mapping<String, [Path]>())
+	}
     
     func capture(info: [[Bool]]) -> Self? {
         let optionalDigests = info.reduce([:]) { (result, entry) -> [String: [Bool]]? in

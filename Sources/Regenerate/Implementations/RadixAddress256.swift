@@ -11,7 +11,8 @@ public struct RadixAddress256: Codable {
 	private let rawMasks: TrieSet<Edge>?
 	private let rawIsMasked: Singleton?
 	private let rawIsTargeted: Singleton?
-	private let rawKeyHash: Digest?
+	private let rawSymmetricKey: SymmetricKey?
+	private let rawSymmetricIV: SymmetricIV?
 	private let rawAllKeyHashes: CoveredTrie<Edge, Digest>?
 }
 
@@ -26,12 +27,13 @@ extension RadixAddress256: Addressable {
 	public var masks: TrieSet<Edge>! { return rawMasks ?? TrieSet<Edge>() }
 	public var isMasked: Bool! { return rawIsMasked != nil ? true : false }
 	public var isTargeted: Bool! { return rawIsTargeted != nil ? true : false }
-	public var keyHash: Digest? { return rawKeyHash }
+	public var symmetricKey: SymmetricKey? { return rawSymmetricKey }
+	public var symmetricIV: SymmetricIV? { return rawSymmetricIV }
 	public var allKeyHashes: CoveredTrie<Edge, Digest>? { return rawAllKeyHashes }
 	
     public typealias CryptoDelegateType = BaseCrypto
 	
-	public init(digest: Artifact.Digest, artifact: Artifact?, complete: Bool, targets: TrieSet<Self.Edge>, masks: TrieSet<Self.Edge>, isMasked: Bool, isTargeted: Bool, keyHash: Digest?, allKeyHashes: CoveredTrie<Edge, Digest>?) {
+	public init(digest: UInt256, artifact: Artifact?, complete: Bool, targets: TrieSet<Self.Edge>, masks: TrieSet<Self.Edge>, isMasked: Bool, isTargeted: Bool, symmetricKey: UInt256?, symmetricIV: UInt128?, allKeyHashes: CoveredTrie<String, UInt256>?) {
 		rawDigest = digest
 		rawArtifact = artifact
 		rawIncomplete = complete ? nil : .void
@@ -39,7 +41,8 @@ extension RadixAddress256: Addressable {
 		rawMasks = masks.isEmpty() ? nil : masks
 		rawIsMasked = isMasked ? .void : nil
 		rawIsTargeted = isTargeted ? .void : nil
-		rawKeyHash = keyHash
+		rawSymmetricKey = symmetricKey
+		rawSymmetricIV = symmetricIV
 		rawAllKeyHashes = allKeyHashes
 	}
 }

@@ -17,6 +17,7 @@ public protocol RGArtifact: BinaryEncodable {
 	func masking(_ masks: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<String, [Path]>)
 	func mask(prefix: [Edge]) -> (Self, Mapping<String, [Path]>)
 	func shouldMask(_ masks: TrieSet<Edge>, prefix: [Edge]) -> Bool
+	func encrypt(allKeys: CoveredTrie<String, [Bool]>, commonIv: [Bool]) -> Self?
 	
 	func set(property: String, to child: CryptoBindable) -> Self?
 	func get(property: String) -> CryptoBindable?
@@ -24,6 +25,15 @@ public protocol RGArtifact: BinaryEncodable {
 }
 
 public extension RGArtifact {
+	func encrypt(allKeys: CoveredTrie<String, [Bool]>, commonIv: [Bool]) -> Self? {
+		return properties().reduce(self) { (result, entry) -> Self? in
+			guard let result = result else { return nil }
+			guard let child = get(property: entry) else { return nil }
+			guard let encryptedChild = child.encrypt(allKeys: allKeys.subtreeWithCover(keys: [entry]), commonIv: commonIv + entry.toBoolArray()) else { return nil }
+			return result.set(property: entry, to: encryptedChild)
+		}
+	}
+	
 	func capture(digestString: String, content: [Bool], at route: Path, prefix: Path) -> (Self, Mapping<String, [Path]>)? {
 		guard let firstLeg = route.first else { return nil }
 		guard let child = get(property: firstLeg) else { return nil }
@@ -31,7 +41,6 @@ public extension RGArtifact {
 		guard let finalSelf = set(property: firstLeg, to: result.0) else { return nil }
 		return (finalSelf, result.1)
 	}
-
 	
 	func mask(prefix: [Edge]) -> (Self, Mapping<String, [Path]>) {
 		return properties().reduce((self, Mapping<String, [Path]>())) { (result, entry) -> (Self, Mapping<String, [Path]>) in

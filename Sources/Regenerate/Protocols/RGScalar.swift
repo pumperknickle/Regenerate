@@ -23,4 +23,5 @@ public extension RGScalar {
 	func get(property: String) -> CryptoBindable? { return nil }
 	func properties() -> [String] { return [] }
 	func pruning() -> Self { return self }
+	func encrypt(allKeys: CoveredTrie<String, [Bool]>, commonIv: [Bool]) -> Self? { return self }
 }

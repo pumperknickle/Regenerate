@@ -13,6 +13,7 @@ public protocol Addressable: CryptoBindable, BinaryEncodable {
     typealias Edge = String
     typealias Path = Artifact.Path
 	typealias SymmetricKey = SymmetricDelegateType.Key
+	typealias SymmetricIV = SymmetricDelegateType.IV
     
     var digest: Digest! { get }
     var artifact: Artifact? { get }
@@ -22,18 +23,34 @@ public protocol Addressable: CryptoBindable, BinaryEncodable {
 	var masks: TrieSet<Edge>! { get }
 	var isMasked: Bool! { get }
 	var isTargeted: Bool! { get }
-	var keyHash: Digest? { get }
+	var symmetricKey: SymmetricKey? { get }
+	var symmetricIV: SymmetricIV? { get }
 	var allKeyHashes: CoveredTrie<Edge, Digest>? { get }
 	
 	init(digest: Digest)
 	init(digest: Digest, artifact: Artifact?, complete: Bool)
-	init(digest: Digest, artifact: Artifact?, complete: Bool, targets: TrieSet<Edge>, masks: TrieSet<Edge>, isMasked: Bool, isTargeted: Bool, keyHash: Digest?, allKeyHashes: CoveredTrie<Edge, Digest>?)
+	init(digest: Digest, artifact: Artifact?, complete: Bool, targets: TrieSet<Edge>, masks: TrieSet<Edge>, isMasked: Bool, isTargeted: Bool, symmetricKey: SymmetricKey?, symmetricIV: SymmetricIV?, allKeyHashes: CoveredTrie<Edge, Digest>?)
 	
 	func changing(digest: Digest?, artifact: Artifact?, complete: Bool?, targets: TrieSet<Edge>?, masks: TrieSet<Edge>?, isMasked: Bool?, isTargeted: Bool?) -> Self
     func computedCompleteness() -> Bool
 }
 
 public extension Addressable {
+	func encrypt(allKeys: CoveredTrie<String, [Bool]>, commonIv: [Bool]) -> Self? {
+		guard let artifact = artifact else { return nil }
+		guard let encryptedArtifact = artifact.encrypt(allKeys: allKeys, commonIv: commonIv) else { return nil }
+		guard let symmetricKeyBinary = allKeys.cover else { return changing(artifact: encryptedArtifact) }
+		guard let symmetricKey = SymmetricKey(raw: symmetricKeyBinary) else { return nil }
+		guard let binaryIV = CryptoDelegateType.hash(commonIv) else { return nil }
+		guard let IV = SymmetricIV(raw: binaryIV) else { return nil }
+		let plaintext = encryptedArtifact.toBoolArray()
+		guard let ciphertext = SymmetricDelegateType.encrypt(plainText: plaintext, key: symmetricKey, iv: IV) else { return nil }
+		let completeCiphertext = IV.toBoolArray() + ciphertext
+		guard let ciphertextHashOutput = CryptoDelegateType.hash(completeCiphertext) else { return nil }
+		guard let ciphertextDigest = Digest(raw: ciphertextHashOutput) else { return nil }
+		return Self(digest: ciphertextDigest, artifact: encryptedArtifact, complete: complete, targets: targets, masks: masks, isMasked: isMasked, isTargeted: isTargeted, symmetricKey: symmetricKey, symmetricIV: IV, allKeyHashes: allKeyHashes)
+	}
+	
 	func isComplete() -> Bool {
 		return complete
 	}
@@ -41,11 +58,11 @@ public extension Addressable {
 	func focused() -> Bool { return !(targets.isEmpty() && masks.isEmpty() && !isMasked && !isTargeted) }
 	
 	func changing(digest: Digest? = nil, artifact: Artifact? = nil, complete: Bool? = nil, targets: TrieSet<Edge>? = nil, masks: TrieSet<Edge>? = nil, isMasked: Bool? = nil, isTargeted: Bool? = nil) -> Self {
-		return Self(digest: digest ?? self.digest, artifact: artifact ?? self.artifact, complete: complete ?? self.complete, targets: targets ?? self.targets, masks: masks ?? self.masks, isMasked: isMasked ?? self.isMasked, isTargeted: isTargeted ?? self.isTargeted, keyHash: keyHash, allKeyHashes: allKeyHashes)
+		return Self(digest: digest ?? self.digest, artifact: artifact ?? self.artifact, complete: complete ?? self.complete, targets: targets ?? self.targets, masks: masks ?? self.masks, isMasked: isMasked ?? self.isMasked, isTargeted: isTargeted ?? self.isTargeted, symmetricKey: symmetricKey, symmetricIV: symmetricIV, allKeyHashes: allKeyHashes)
 	}
     
     init?(artifact: Artifact, complete: Bool) {
-		guard let artifactHashOutput = CryptoDelegateType.hash(artifact.toBoolArray()) else { return nil }
+		guard let artifactHashOutput = CryptoDelegateType.hash(artifact.pruning().toBoolArray()) else { return nil }
         guard let digest = Digest(raw: artifactHashOutput) else { return nil }
 		self.init(digest: digest, artifact: artifact, complete: complete)
     }
@@ -59,7 +76,7 @@ public extension Addressable {
     }
 	
 	init(digest: Digest, artifact: Artifact?, complete: Bool) {
-		self.init(digest: digest, artifact: artifact, complete: complete, targets: TrieSet<Edge>(), masks: TrieSet<Edge>(), isMasked: false, isTargeted: false, keyHash: nil, allKeyHashes: nil)
+		self.init(digest: digest, artifact: artifact, complete: complete, targets: TrieSet<Edge>(), masks: TrieSet<Edge>(), isMasked: false, isTargeted: false, symmetricKey: nil, symmetricIV: nil, allKeyHashes: nil)
 	}
 
     init?(artifact: Artifact) {

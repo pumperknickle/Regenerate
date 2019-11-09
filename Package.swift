@@ -12,8 +12,8 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/pumperknickle/AwesomeTrie.git", from: "0.0.5"),
         .package(url: "https://github.com/pumperknickle/AwesomeDictionary.git", from: "0.0.3"),
-        .package(url: "https://github.com/pumperknickle/CryptoStarterPack.git", from: "1.0.9"),
-        .package(url: "https://github.com/pumperknickle/Bedrock.git", from: "0.0.8"),
+        .package(url: "https://github.com/pumperknickle/CryptoStarterPack.git", from: "1.1.3"),
+        .package(url: "https://github.com/pumperknickle/Bedrock.git", from: "0.1.1"),
         .package(url: "https://github.com/Quick/Quick.git", from: "2.1.0"),
         .package(url: "https://github.com/Quick/Nimble.git", from: "8.0.2"),
     ],

@@ -14,6 +14,16 @@ public protocol RGRadix: RGArtifact where Child.Artifact == Self {
 }
 
 public extension RGRadix {
+	func encrypt(allKeys: CoveredTrie<String, [Bool]>, commonIv: [Bool]) -> Self? {
+		let newChildren = children.elements().reduce(children) { (result, entry) -> Mapping<Edge, Child>? in
+			guard let result = result else { return nil }
+			guard let newChild = entry.1.encrypt(allKeys: allKeys.subtreeWithCover(keys: [entry.0]), commonIv: commonIv + entry.0.toBoolArray()) else { return nil }
+			return result.setting(key: entry.0, value: newChild)
+		}
+		guard let finalChildren = newChildren else { return nil }
+		return changing(children: finalChildren)
+	}
+	
     init() { self.init(prefix: [], value: [], children: Mapping<Edge, Child>()) }
 	
 	func set(property: String, to child: CryptoBindable) -> Self? {
