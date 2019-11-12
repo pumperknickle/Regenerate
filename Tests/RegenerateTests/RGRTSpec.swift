@@ -3,6 +3,7 @@ import Nimble
 import Quick
 import CryptoStarterPack
 import Bedrock
+import AwesomeTrie
 @testable import Regenerate
 
 final class RGRTSpec: QuickSpec {
@@ -20,10 +21,10 @@ final class RGRTSpec: QuickSpec {
 				let thirdValue = UInt256.max - UInt256(10000000)
 				
 				let modifiedRRM = tree.setting(key: oneKey, to: oneValue)!.setting(key: anotherKey, to: anotherValue)!.setting(key: thirdKey, to: thirdValue)!
-				let contents = modifiedRRM.contents()
+				let contents = modifiedRRM.contents(previousKey: nil, keys: TrieMapping<Bool, [Bool]>())
 				let cutRRM = modifiedRRM.cuttingAllNodes()
 				let emptyTargeted = cutRRM.targeting(keys: [oneKey])
-				let result = emptyTargeted.0.capture(info: Dictionary(uniqueKeysWithValues: contents.elements()))
+				let result = emptyTargeted.0.capture(info: Dictionary(uniqueKeysWithValues: contents.elements()), previousKey: nil, keys: TrieMapping<Bool, [Bool]>())
 				it("result should just have one key") {
 					expect(result!.0.get(key: oneKey)).toNot(beNil())
 					expect(result!.0.keys()).toNot(beNil())
@@ -43,10 +44,10 @@ final class RGRTSpec: QuickSpec {
 				let thirdValue = UInt256.max - UInt256(10000000)
 				
 				let modifiedRRM = tree.setting(key: firstKey, to: oneValue)!.setting(key: secondKey, to: anotherValue)!.setting(key: thirdKey, to: thirdValue)!
-				let contents = modifiedRRM.contents()
+				let contents = modifiedRRM.contents(previousKey: nil, keys: TrieMapping<Bool, [Bool]>())
 				let cutRRM = modifiedRRM.cuttingAllNodes()
 				let emptyTargeted = cutRRM.masking(keys: [firstKey])
-				let result = emptyTargeted.0.capture(info: Dictionary(uniqueKeysWithValues: contents.elements()))
+				let result = emptyTargeted.0.capture(info: Dictionary(uniqueKeysWithValues: contents.elements()), previousKey: nil, keys: TrieMapping<Bool, [Bool]>())
 				it("result should have two keys") {
 					expect(result!.0.get(key: firstKey)).toNot(beNil())
 					expect(result!.0.get(key: secondKey)).toNot(beNil())
@@ -144,7 +145,7 @@ final class RGRTSpec: QuickSpec {
                         expect(someRRM.complete()).to(beTrue())
                     }
                     // blocks can be extracted
-                    let rrmContents = someRRM.contents()
+                    let rrmContents = someRRM.contents(previousKey: nil, keys: TrieMapping<Bool, [Bool]>())
                     it("can extract node contents from complete") {
                         expect(rrmContents).toNot(beNil())
                         expect(rrmContents.elements()).toNot(beEmpty())
@@ -156,11 +157,11 @@ final class RGRTSpec: QuickSpec {
 							expect(cutRRM.digest).to(equal(someRRM.digest))
                         }
                         it("should have no contents") {
-                            expect(cutRRM.contents().elements()).to(beEmpty())
+                            expect(cutRRM.contents(previousKey: nil, keys: TrieMapping<Bool, [Bool]>()).elements()).to(beEmpty())
                         }
                         describe("inserting back contents") {
-                            let resultAfterInserting = cutRRM.capture(info: Dictionary(uniqueKeysWithValues: rrmContents.elements()))
-                            let otherResult = cutRRM.capture(info: rrmContents.elements().map { $0.1 })
+                            let resultAfterInserting = cutRRM.capture(info: Dictionary(uniqueKeysWithValues: rrmContents.elements()), previousKey: nil, keys: TrieMapping<Bool, [Bool]>())
+                            let otherResult = cutRRM.capture(info: rrmContents.elements().map { $0.1 }, previousKey: nil, keys: TrieMapping<Bool, [Bool]>())
                             it("should be complete") {
                                 expect(resultAfterInserting).toNot(beNil())
                                 expect(resultAfterInserting!.0.complete()).to(beTrue())
@@ -193,11 +194,11 @@ final class RGRTSpec: QuickSpec {
                             expect(Radix256.Digest(raw: childNodeHash!)).toNot(beNil())
                             expect(Radix256.Digest(raw: childNodeHash!)).toNot(equal(rootDigest!))
                         }
-						let insertedResult = cutRRM.capture(content: childNodeContent, digestString: rootDigest!.toString())
+						let insertedResult = cutRRM.capture(content: childNodeContent, digestString: rootDigest!.toString(), previousKey: nil, keys: TrieMapping<Bool, [Bool]>())
                         it("should accept insertion") {
                             expect(insertedResult).toNot(beNil())
                         }
-                        let otherResult = cutRRM.capture(content: childNodeContent)
+                        let otherResult = cutRRM.capture(content: childNodeContent, previousKey: nil, keys: TrieMapping<Bool, [Bool]>())
                         it("should reject insertion") {
                             expect(otherResult).to(beNil())
                         }
