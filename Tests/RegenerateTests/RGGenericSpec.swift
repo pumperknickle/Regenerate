@@ -70,19 +70,29 @@ final class RGGenericSpec: QuickSpec {
 			let fourthStem = ChildStemType(artifact: fourthNode, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
 			let arrayNode2 = ArrayNodeType([thirdStem!, fourthStem!])!
 			let arrayStem2 = ArrayStemType(artifact: arrayNode2, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
+            
+            let rootKey = RegenerativeFooType.Root.SymmetricKey.random()
+            let rootKeyBinary = rootKey.toBoolArray()
+            let rootKeyHash = RegenerativeFooType.Root.CryptoDelegateType.hash(rootKeyBinary)!
+            
+            let firstKey = RegenerativeFooType.Root.SymmetricKey.random()
+            let firstKeyBinary = firstKey.toBoolArray()
+            let firstKeyHash = RegenerativeFooType.Root.CryptoDelegateType.hash(firstKeyBinary)!
+
+            let secondKey = RegenerativeFooType.Root.SymmetricKey.random()
+            let secondKeyBinary = secondKey.toBoolArray()
+            let secondKeyHash = RegenerativeFooType.Root.CryptoDelegateType.hash(secondKeyBinary)!
+            
 			
 			let fooNode = Foo(array1: arrayStem1!, array2: arrayStem2!)
             let fooStem = FooStemType(artifact: fooNode, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
-            let rootKey = RegenerativeFooType.Root.SymmetricKey.random()
-            let rootKeyBinary = rootKey.toBoolArray()
-            let rootIV = RegenerativeFooType.Root.SymmetricIV.random()
-            let keyHash = RegenerativeFooType.Root.CryptoDelegateType.hash(rootKeyBinary)!
-            let keys = CoveredTrie<String, [Bool]>(trie: TrieMapping<String, [Bool]>(), cover: rootKeyBinary)
-            let regenerativeFoo = RegenerativeFooType(root: fooStem!).encrypt(allKeys: keys, commonIv: rootIV.toBoolArray())!
-
-            let allKeys = TrieMapping<Bool, [Bool]>().setting(keys: keyHash, value: rootKeyBinary)
             
-			
+            let keys = CoveredTrie<String, [Bool]>(trie: TrieMapping<String, [Bool]>().setting(keys: [fooNode.metafield1, ArrayStemType.Digest(0).toString()], value: firstKeyBinary).setting(keys: [fooNode.metafield1, ArrayStemType.Digest(1).toString()], value: secondKeyBinary), cover: rootKeyBinary)
+            
+            let rootIV = RegenerativeFooType.Root.SymmetricIV.random()
+            let regenerativeFoo = RegenerativeFooType(root: fooStem!).encrypt(allKeys: keys, commonIv: rootIV.toBoolArray())!
+            let allKeys = TrieMapping<Bool, [Bool]>().setting(keys: rootKeyHash, value: rootKeyBinary).setting(keys: firstKeyHash, value: firstKeyBinary).setting(keys: secondKeyHash, value: secondKeyBinary)
+            
 			let targets = TrieSet<String>().adding([fooNode.metafield1, ArrayStemType.Digest(0).toString()]).adding([fooNode.metafield1, ArrayStemType.Digest(1).toString()])
 
 			let cutFoo = regenerativeFoo.cuttingAllNodes().targeting(targets)
