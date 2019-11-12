@@ -73,16 +73,23 @@ final class RGGenericSpec: QuickSpec {
 			
 			let fooNode = Foo(array1: arrayStem1!, array2: arrayStem2!)
             let fooStem = FooStemType(artifact: fooNode, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
-			let regenerativeFoo = RegenerativeFooType(root: fooStem!)
+            let rootKey = RegenerativeFooType.Root.SymmetricKey.random()
+            let rootKeyBinary = rootKey.toBoolArray()
+            let rootIV = RegenerativeFooType.Root.SymmetricIV.random()
+            let keyHash = RegenerativeFooType.Root.CryptoDelegateType.hash(rootKeyBinary)!
+            let keys = CoveredTrie<String, [Bool]>(trie: TrieMapping<String, [Bool]>(), cover: rootKeyBinary)
+            let regenerativeFoo = RegenerativeFooType(root: fooStem!).encrypt(allKeys: keys, commonIv: rootIV.toBoolArray())!
+
+            let allKeys = TrieMapping<Bool, [Bool]>().setting(keys: keyHash, value: rootKeyBinary)
+            
 			
 			let targets = TrieSet<String>().adding([fooNode.metafield1, ArrayStemType.Digest(0).toString()]).adding([fooNode.metafield1, ArrayStemType.Digest(1).toString()])
 
 			let cutFoo = regenerativeFoo.cuttingAllNodes().targeting(targets)
-			let regeneratedFoo = cutFoo.0.capture(info: Dictionary(uniqueKeysWithValues: regenerativeFoo.contents(previousKey: nil, keys: TrieMapping<Bool, [Bool]>()).elements()), previousKey: nil, keys: TrieMapping<Bool, [Bool]>())
+			let regeneratedFoo = cutFoo.0.capture(info: Dictionary(uniqueKeysWithValues: regenerativeFoo.contents(previousKey: nil, keys: allKeys).elements()), previousKey: nil, keys: allKeys)
 			it("should regenerate partially") {
 				expect(regeneratedFoo!.root.artifact!.array1.artifact).toNot(beNil())
 				expect(regeneratedFoo!.root.artifact!.array2.artifact).to(beNil())
-
 			}
 		}
 	}
