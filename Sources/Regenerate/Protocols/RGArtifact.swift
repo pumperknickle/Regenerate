@@ -3,21 +3,21 @@ import Bedrock
 import AwesomeDictionary
 import AwesomeTrie
 
-public protocol RGArtifact: Codable, BinaryEncodable {
+public protocol RGArtifact: BinaryEncodable {
     typealias Edge = String
     typealias Path = [Edge]
 	
 	func pruning() -> Self
 	
     func isComplete() -> Bool
-	func capture(digestString: String, content: [Bool], at route: Path, prefix: Path) -> (Self, Mapping<String, [Path]>)?
+	func capture(digestString: String, content: [Bool], at route: Path, prefix: Path, previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> (Self, Mapping<String, [Path]>)?
     func missing(prefix: Path) -> Mapping<String, [Path]>
-    func contents() -> Mapping<String, [Bool]>
+	func contents(previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> Mapping<String, [Bool]>
 	func targeting(_ targets: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<String, [Path]>)
 	func masking(_ masks: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<String, [Path]>)
 	func mask(prefix: [Edge]) -> (Self, Mapping<String, [Path]>)
 	func shouldMask(_ masks: TrieSet<Edge>, prefix: [Edge]) -> Bool
-	func set(key: [Bool]) -> Self?
+	func encrypt(allKeys: CoveredTrie<String, [Bool]>, commonIv: [Bool]) -> Self?
 	
 	func set(property: String, to child: CryptoBindable) -> Self?
 	func get(property: String) -> CryptoBindable?
@@ -25,21 +25,21 @@ public protocol RGArtifact: Codable, BinaryEncodable {
 }
 
 public extension RGArtifact {
-	func capture(digestString: String, content: [Bool], at route: Path, prefix: Path) -> (Self, Mapping<String, [Path]>)? {
-		guard let firstLeg = route.first else { return nil }
-		guard let child = get(property: firstLeg) else { return nil }
-		guard let result = child.capture(digestString: digestString, content: content, at: Array(route.dropFirst()), prefix: prefix + [firstLeg]) else { return nil }
-		guard let finalSelf = set(property: firstLeg, to: result.0) else { return nil }
-		return (finalSelf, result.1)
-	}
-	
-	func set(key: [Bool]) -> Self? {
+	func encrypt(allKeys: CoveredTrie<String, [Bool]>, commonIv: [Bool]) -> Self? {
 		return properties().reduce(self) { (result, entry) -> Self? in
 			guard let result = result else { return nil }
-			guard let child = result.get(property: entry) else { return nil }
-			guard let childResult = child.set(key: key, iv: entry.toBoolArray()) else { return nil }
-			return result.set(property: entry, to: childResult)
+			guard let child = get(property: entry) else { return nil }
+            guard let encryptedChild = child.encrypt(allKeys: allKeys.subtreeWithCover(keys: [entry]), commonIv: commonIv + entry.toBoolArray(), keyRoot: allKeys.contains(key: entry)) else { return nil }
+			return result.set(property: entry, to: encryptedChild)
 		}
+	}
+	
+	func capture(digestString: String, content: [Bool], at route: Path, prefix: Path, previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> (Self, Mapping<String, [Path]>)? {
+		guard let firstLeg = route.first else { return nil }
+		guard let child = get(property: firstLeg) else { return nil }
+        guard let result = child.capture(digestString: digestString, content: content, at: Array(route.dropFirst()), prefix: prefix + [firstLeg], previousKey: previousKey, keys: keys) else { return nil }
+		guard let finalSelf = set(property: firstLeg, to: result.0) else { return nil }
+		return (finalSelf, result.1)
 	}
 	
 	func mask(prefix: [Edge]) -> (Self, Mapping<String, [Path]>) {
@@ -71,10 +71,10 @@ public extension RGArtifact {
 		}
 	}
 	
-	func contents() -> Mapping<String, [Bool]> {
+	func contents(previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> Mapping<String, [Bool]> {
 		return properties().reduce(Mapping<String, [Bool]>()) { (result, entry) -> Mapping<String, [Bool]> in
 			guard let value = get(property: entry) else { return result }
-			return result.overwrite(with: value.contents())
+			return result.overwrite(with: value.contents(previousKey: previousKey, keys: keys))
 		}
 	}
 	
