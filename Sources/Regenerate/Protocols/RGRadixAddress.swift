@@ -7,7 +7,7 @@ public enum TransitionProofType: Int {
 }
 
 public extension RGRadixAddress {
-    init() { self.init(artifact: Artifact(), symmetricKeyHash: nil)! }
+    init() { self.init(artifact: Artifact(), symmetricKeyHash: nil, symmetricIV: nil)! }
     
     func get(key: [Edge]) -> [Edge]? {
         guard let node = artifact else { return nil }
@@ -46,7 +46,7 @@ public extension RGRadixAddress {
     func setting(key: [Edge], to value: [Edge]) -> Self? {
         guard let node = artifact else { return nil }
 		guard let modifiedNode = value.isEmpty ? node.deleting(key: key) : node.setting(key: key, to: value) else { return nil }
-        return Self(artifact: modifiedNode, symmetricKeyHash: nil)
+        return Self(artifact: modifiedNode, symmetricKeyHash: nil, symmetricIV: symmetricIV)
     }
     
     func setting(all: [(key: [Edge], value: [Edge])]) -> Self? {
@@ -58,14 +58,14 @@ public extension RGRadixAddress {
     func transitionProof(proofType: TransitionProofType, key: [Edge]) -> Self? {
         guard let node = artifact else { return nil }
         guard let transitionProof = node.transitionProof(proofType: proofType, key: key) else { return nil }
-        return Self(artifact: transitionProof, symmetricKeyHash: symmetricKeyHash)
+        return Self(artifact: transitionProof, symmetricKeyHash: symmetricKeyHash, symmetricIV: symmetricIV)
     }
     
     func merging(right: Self) -> Self {
         if artifact == nil && right.artifact == nil { return self }
         guard let leftNode = artifact else { return right }
         guard let rightNode = right.artifact else { return self }
-        guard let mergedStem = Self(artifact: leftNode.merging(right: rightNode), symmetricKeyHash: symmetricKeyHash) else { return self }
+        guard let mergedStem = Self(artifact: leftNode.merging(right: rightNode), symmetricKeyHash: symmetricKeyHash, symmetricIV: symmetricIV) else { return self }
         return mergedStem
     }
 }

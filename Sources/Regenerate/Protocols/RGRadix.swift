@@ -84,7 +84,7 @@ public extension RGRadix {
         return children.elements().reduce(Mapping<Edge, Child>(), { (result, entry) -> Mapping<Edge, Child>? in
             guard let result = result else { return nil }
             guard let node = entry.1.artifact else { return nil }
-            guard let newChild = Child(artifact: node.pruning(), symmetricKeyHash: entry.1.symmetricKeyHash) else { return nil }
+            guard let newChild = Child(artifact: node.pruning(), symmetricKeyHash: entry.1.symmetricKeyHash, symmetricIV: entry.1.symmetricIV) else { return nil }
             return result.setting(key: entry.0, value: newChild)
         })
     }
@@ -107,7 +107,7 @@ public extension RGRadix {
             if prefix.starts(with: key) {
                 let childSuffix = prefix - key
                 guard let firstChild = childSuffix.first else { return nil }
-                guard let newChild = Child(artifact: changing(prefix: childSuffix), symmetricKeyHash: nil) else { return nil }
+                guard let newChild = Child(artifact: changing(prefix: childSuffix), symmetricKeyHash: nil, symmetricIV: nil) else { return nil }
                 return Self(prefix: key, value: value, children: Mapping<Edge, Child>().setting(key: firstChild, value: newChild))
             }
             let sharedPrefix = prefix ~> key
@@ -115,15 +115,15 @@ public extension RGRadix {
             let nodeSuffix = prefix - sharedPrefix
             guard let firstKeySuffix = keySuffix.first else { return nil }
             guard let firstNodeSuffix = nodeSuffix.first else { return nil }
-			guard let keyChild = Child(artifact: Self(prefix: keySuffix, value: value, children: Mapping<Edge, Child>()), symmetricKeyHash: nil) else { return nil }
-            guard let nodeChild = Child(artifact: changing(prefix: nodeSuffix), symmetricKeyHash: nil) else { return nil }
+			guard let keyChild = Child(artifact: Self(prefix: keySuffix, value: value, children: Mapping<Edge, Child>()), symmetricKeyHash: nil, symmetricIV: nil) else { return nil }
+            guard let nodeChild = Child(artifact: changing(prefix: nodeSuffix), symmetricKeyHash: nil, symmetricIV: nil) else { return nil }
             let newChildren = Mapping<Edge, Child>().setting(key: firstKeySuffix, value: keyChild).setting(key: firstNodeSuffix, value: nodeChild)
             return Self(prefix: sharedPrefix, value: [], children: newChildren)
         }
         let suffix = key - prefix
         guard let firstSymbol = suffix.first else { return changing(value: value) }
         guard let firstStem = children[firstSymbol] else {
-            guard let newStem = Child(artifact: Self(prefix: suffix, value: value, children: Mapping<Edge, Child>()), symmetricKeyHash: nil) else { return nil }
+            guard let newStem = Child(artifact: Self(prefix: suffix, value: value, children: Mapping<Edge, Child>()), symmetricKeyHash: nil, symmetricIV: nil) else { return nil }
             return changing(children: children.setting(key: firstSymbol, value: newStem))
         }
         guard let newStem = firstStem.setting(key: suffix, to: value) else { return nil }
