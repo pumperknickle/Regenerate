@@ -7,7 +7,7 @@ import AwesomeTrie
 public protocol RGScalar: RGArtifact {
     associatedtype T: Codable
     var scalar: T! { get }
-    init(raw: T)
+    init(scalar: T)
 }
 
 public extension RGScalar {

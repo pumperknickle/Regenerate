@@ -8,5 +8,5 @@ public struct Scalar<T: Codable>: Codable {
 
 extension Scalar: RGScalar {
     public var scalar: T! { return rawScalar }
-    public init(raw: T) { self.rawScalar = raw }
+    public init(scalar: T) { self.rawScalar = scalar }
 }

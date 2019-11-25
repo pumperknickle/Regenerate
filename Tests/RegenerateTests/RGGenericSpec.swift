@@ -56,16 +56,16 @@ final class RGGenericSpec: QuickSpec {
 			typealias RegenerativeFooType = RGObject<FooStemType>
 			
 			// array 0-0
-			let firstNode = ChildNodeType(raw: UInt256.min)
-			let secondNode = ChildNodeType(raw: UInt256.max)
+			let firstNode = ChildNodeType(scalar: UInt256.min)
+			let secondNode = ChildNodeType(scalar: UInt256.max)
 			let firstStem = ChildStemType(artifact: firstNode, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
 			let secondStem = ChildStemType(artifact: secondNode, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
 			let arrayNode1 = ArrayNodeType([firstStem!, secondStem!])!
 			let arrayStem1 = ArrayStemType(artifact: arrayNode1, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
 
 			// array 0-1
-			let thirdNode = ChildNodeType(raw: UInt256(109303931))
-			let fourthNode = ChildNodeType(raw: UInt256(10922))
+			let thirdNode = ChildNodeType(scalar: UInt256(109303931))
+			let fourthNode = ChildNodeType(scalar: UInt256(10922))
 			let thirdStem = ChildStemType(artifact: thirdNode, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
 			let fourthStem = ChildStemType(artifact: fourthNode, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
 			let arrayNode2 = ArrayNodeType([thirdStem!, fourthStem!])!

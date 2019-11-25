@@ -21,8 +21,8 @@ final class RGDictionarySpec: QuickSpec {
 			// dictionary 0-0
 			let firstKey = UInt256(0)
 			let secondKey = UInt256(1)
-			let firstNode = ChildNodeType(raw: UInt256.min)
-			let secondNode = ChildNodeType(raw: UInt256.max)
+			let firstNode = ChildNodeType(scalar: UInt256.min)
+			let secondNode = ChildNodeType(scalar: UInt256.max)
 			let firstStem = ChildStemType(artifact: firstNode, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
 			let secondStem = ChildStemType(artifact: secondNode, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
 			let mapping = Mapping<UInt256, ChildStemType>().setting(key: firstKey, value: firstStem!).setting(key: secondKey, value: secondStem!)
@@ -32,8 +32,8 @@ final class RGDictionarySpec: QuickSpec {
 			// dictionary 0-1
 			let thirdKey = UInt256(3)
 			let fourthKey = UInt256(4)
-			let thirdNode = ChildNodeType(raw: UInt256.min)
-			let fourthNode = ChildNodeType(raw: UInt256.min)
+			let thirdNode = ChildNodeType(scalar: UInt256.min)
+			let fourthNode = ChildNodeType(scalar: UInt256.min)
 			let thirdStem = ChildStemType(artifact: thirdNode, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
 			let fourthStem = ChildStemType(artifact: fourthNode, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
 			let secondMapping = Mapping<UInt256, ChildStemType>().setting(key: thirdKey, value: thirdStem!).setting(key: fourthKey, value: fourthStem!)
