@@ -43,7 +43,6 @@ final class RGArraySpec: QuickSpec {
 			it("partial regeneration") {
 				expect(regeneratedArray).toNot(beNil())
 				expect(regeneratedArray!.root.artifact!.children.elements().count).to(equal(1))
-			
 			}
 		}
 	}

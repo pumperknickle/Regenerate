@@ -82,7 +82,6 @@ final class RGGenericSpec: QuickSpec {
             let secondKey = RegenerativeFooType.Root.SymmetricKey.random()
             let secondKeyBinary = secondKey.toBoolArray()
             let secondKeyHash = RegenerativeFooType.Root.CryptoDelegateType.hash(secondKeyBinary)!
-            
 			
 			let fooNode = Foo(array1: arrayStem1!, array2: arrayStem2!)
             let fooStem = FooStemType(artifact: fooNode, symmetricKeyHash: nil, symmetricIV: nil, complete: true)

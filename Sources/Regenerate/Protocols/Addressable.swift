@@ -62,13 +62,13 @@ public extension Addressable {
 		return Self(digest: digest ?? self.digest, artifact: artifact ?? self.artifact, symmetricKeyHash: symmetricKeyHash, complete: complete ?? self.complete, targets: targets ?? self.targets, masks: masks ?? self.masks, isMasked: isMasked ?? self.isMasked, isTargeted: isTargeted ?? self.isTargeted, symmetricIV: symmetricIV)
 	}
     
-    init?(artifact: Artifact, symmetricKeyHash: Digest?, symmetricIV: SymmetricIV?, complete: Bool) {
+    init?(artifact: Artifact, symmetricKeyHash: Digest? = nil, symmetricIV: SymmetricIV? = nil, complete: Bool) {
 		guard let artifactHashOutput = CryptoDelegateType.hash(artifact.pruning().toBoolArray()) else { return nil }
         guard let digest = Digest(raw: artifactHashOutput) else { return nil }
         self.init(digest: digest, artifact: artifact, symmetricKeyHash: symmetricKeyHash, symmetricIV: symmetricIV, complete: complete)
     }
     
-    init(digest: Digest, symmetricKeyHash: Digest?, symmetricIV: SymmetricIV?) {
+    init(digest: Digest, symmetricKeyHash: Digest? = nil, symmetricIV: SymmetricIV? = nil) {
         self.init(digest: digest, artifact: nil, symmetricKeyHash: symmetricKeyHash, symmetricIV: symmetricIV, complete: true)
     }
     
@@ -100,7 +100,7 @@ public extension Addressable {
         return node.isComplete()
     }
     
-    func contents(previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> Mapping<String, [Bool]> {
+    func contents(previousKey: [Bool]? = nil, keys: TrieMapping<Bool, [Bool]> = TrieMapping<Bool, [Bool]>()) -> Mapping<String, [Bool]> {
         guard let node = artifact else { return Mapping<String, [Bool]>() }
         let plaintext = node.toBoolArray()
         guard let symmetricKeyHash = symmetricKeyHash else {
