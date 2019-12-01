@@ -1,5 +1,7 @@
 # Regenerate
 
+![](https://github.com/pumperknickle/Regenerate/workflows/test/badge.svg?branch=master)
+
 ## Conceptual Overview
 
 Regenerate is a framework for creating, encrypting, and regenerating cryptographic data structures or CDS for short. A CDS has integrity guarantees. Each CDS has a root digest, which can be a considered a reference or address to the data structure as a whole.
