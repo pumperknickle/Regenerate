@@ -6,6 +6,7 @@ apt-get update && \
 apt-get install -y libmysqlclient20 libmysqlclient-dev cstack ctls openssl libssl-dev
 
 WORKDIR /app
+COPY entrypoint.sh /entrypoint.sh
 COPY . ./
 RUN swift package resolve
 RUN swift package clean
