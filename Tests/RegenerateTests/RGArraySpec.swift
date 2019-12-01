@@ -17,7 +17,7 @@ final class RGArraySpec: QuickSpec {
 			typealias NestedArrayNodeType = Array256<ArrayStemType>
 			typealias NestedArrayStemType = Address<NestedArrayNodeType>
 			typealias RegenerativeNestedArrayType = RGObject<NestedArrayStemType>
-			
+
 			// array 0-0
 			let firstNode = ChildNodeType(scalar: UInt256.min)
 			let secondNode = ChildNodeType(scalar: UInt256.max)

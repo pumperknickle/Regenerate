@@ -11,7 +11,7 @@ final class RGRTSpec: QuickSpec {
         describe("Regenerative Radix Merkle Trie") {
 			describe("targeting") {
 				let tree = RT256<UInt256, UInt256>()
-				
+
 				// Values to populate
                 let oneKey = UInt256.min
                 let anotherKey = UInt256.max
@@ -19,7 +19,7 @@ final class RGRTSpec: QuickSpec {
                 let anotherValue = UInt256.min
 				let thirdKey = UInt256.max - UInt256(100000)
 				let thirdValue = UInt256.max - UInt256(10000000)
-				
+
 				let modifiedRRM = tree.setting(key: oneKey, to: oneValue)!.setting(key: anotherKey, to: anotherValue)!.setting(key: thirdKey, to: thirdValue)!
 				let contents = modifiedRRM.contents(previousKey: nil, keys: TrieMapping<Bool, [Bool]>())
 				let cutRRM = modifiedRRM.cuttingAllNodes()
@@ -33,16 +33,16 @@ final class RGRTSpec: QuickSpec {
 			}
 			describe("masking") {
 				let tree = RT256<String, UInt256>()
-				
+
 				// Values to populate
 				let firstKey = "hello world"
 				let secondKey = "hello world1"
 				let thirdKey = "other thing"
-				
+
 				let oneValue = UInt256.max
 				let anotherValue = UInt256.min
 				let thirdValue = UInt256.max - UInt256(10000000)
-				
+
 				let modifiedRRM = tree.setting(key: firstKey, to: oneValue)!.setting(key: secondKey, to: anotherValue)!.setting(key: thirdKey, to: thirdValue)!
 				let contents = modifiedRRM.contents(previousKey: nil, keys: TrieMapping<Bool, [Bool]>())
 				let cutRRM = modifiedRRM.cuttingAllNodes()
@@ -56,16 +56,16 @@ final class RGRTSpec: QuickSpec {
 				}
 			}
             describe("Initialization") {
-                
+
                 // User defined data structure
                 let rgrmt = RT256<UInt256, UInt256>()
-                
+
                 // Values to populate
                 let oneKey = UInt256.min
                 let anotherKey = UInt256.max
                 let oneValue = UInt256.max
                 let anotherValue = UInt256.min
-                
+
                 it("should initialize empty rrm") {
                     expect(rgrmt).toNot(beNil())
                 }
@@ -173,7 +173,7 @@ final class RGRTSpec: QuickSpec {
                             it("should output correct keys") {
                                 expect(Set(resultAfterInserting!.1.map { $0.0 })).to(equal(Set([oneKey, anotherKey])))
                                 expect(Set(otherResult!.1.map { $0.0 })).to(equal(Set([oneKey, anotherKey])))
-                                
+
                             }
                             it("should output correct values") {
                                 expect(Set(resultAfterInserting!.1.map { $0.1 })).to(equal(Set([oneValue, anotherValue])))

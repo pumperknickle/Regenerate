@@ -6,7 +6,7 @@ extension RGArraySpec {
     //   `swift test --generate-linuxmain`
     // to regenerate.
     static let __allTests__RGArraySpec = [
-        ("Array__partial_regeneration", Array__partial_regeneration),
+        ("Array__partial_regeneration", Array__partial_regeneration)
     ]
 }
 
@@ -15,7 +15,7 @@ extension RGDictionarySpec {
     //   `swift test --generate-linuxmain`
     // to regenerate.
     static let __allTests__RGDictionarySpec = [
-        ("Dictionary__partial_regeneration", Dictionary__partial_regeneration),
+        ("Dictionary__partial_regeneration", Dictionary__partial_regeneration)
     ]
 }
 
@@ -24,7 +24,7 @@ extension RGGenericSpec {
     //   `swift test --generate-linuxmain`
     // to regenerate.
     static let __allTests__RGGenericSpec = [
-        ("Generic_Data_Structure__should_regenerate_partially", Generic_Data_Structure__should_regenerate_partially),
+        ("Generic_Data_Structure__should_regenerate_partially", Generic_Data_Structure__should_regenerate_partially)
     ]
 }
 
@@ -59,7 +59,7 @@ extension RGRTSpec {
         ("Regenerative_Radix_Merkle_Trie__Initialization__Regeneration__rrm_with_just_root__inserting_back_contents__should_output_correct_values", Regenerative_Radix_Merkle_Trie__Initialization__Regeneration__rrm_with_just_root__inserting_back_contents__should_output_correct_values),
         ("Regenerative_Radix_Merkle_Trie__Initialization__Regeneration__malicious_insertion__should_be_the_wrong_digest", Regenerative_Radix_Merkle_Trie__Initialization__Regeneration__malicious_insertion__should_be_the_wrong_digest),
         ("Regenerative_Radix_Merkle_Trie__Initialization__Regeneration__malicious_insertion__should_accept_insertion", Regenerative_Radix_Merkle_Trie__Initialization__Regeneration__malicious_insertion__should_accept_insertion),
-        ("Regenerative_Radix_Merkle_Trie__Initialization__Regeneration__malicious_insertion__should_reject_insertion", Regenerative_Radix_Merkle_Trie__Initialization__Regeneration__malicious_insertion__should_reject_insertion),
+        ("Regenerative_Radix_Merkle_Trie__Initialization__Regeneration__malicious_insertion__should_reject_insertion", Regenerative_Radix_Merkle_Trie__Initialization__Regeneration__malicious_insertion__should_reject_insertion)
     ]
 }
 
@@ -68,7 +68,7 @@ public func __allTests() -> [XCTestCaseEntry] {
         testCase(RGArraySpec.__allTests__RGArraySpec),
         testCase(RGDictionarySpec.__allTests__RGDictionarySpec),
         testCase(RGGenericSpec.__allTests__RGGenericSpec),
-        testCase(RGRTSpec.__allTests__RGRTSpec),
+        testCase(RGRTSpec.__allTests__RGRTSpec)
     ]
 }
 #endif

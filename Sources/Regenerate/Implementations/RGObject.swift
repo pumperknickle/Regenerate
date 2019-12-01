@@ -10,7 +10,7 @@ public struct RGObject<RootType: Addressable>: Codable where RootType.Digest == 
 extension RGObject: Regenerative {
     public var root: RootType { return rawRoot }
     public var keyPaths: Mapping<String, [Path]> { return rawPaths }
-    
+
     public init(root: RootType, paths: Mapping<String, [Path]>) {
         self.rawRoot = root
         self.rawPaths = paths

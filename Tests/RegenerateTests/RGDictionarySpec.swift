@@ -28,7 +28,7 @@ final class RGDictionarySpec: QuickSpec {
 			let mapping = Mapping<UInt256, ChildStemType>().setting(key: firstKey, value: firstStem!).setting(key: secondKey, value: secondStem!)
 			let dictionaryNode1 = DictionaryNodeType(mapping)!
 			let dictionaryStem1 = DictionaryStemType(artifact: dictionaryNode1, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
-			
+
 			// dictionary 0-1
 			let thirdKey = UInt256(3)
 			let fourthKey = UInt256(4)

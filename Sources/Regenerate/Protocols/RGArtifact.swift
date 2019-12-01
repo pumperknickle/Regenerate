@@ -6,9 +6,9 @@ import AwesomeTrie
 public protocol RGArtifact: BinaryEncodable {
     typealias Edge = String
     typealias Path = [Edge]
-	
+
 	func pruning() -> Self
-	
+
     func isComplete() -> Bool
 	func capture(digestString: String, content: [Bool], at route: Path, prefix: Path, previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> (Self, Mapping<String, [Path]>)?
     func missing(prefix: Path) -> Mapping<String, [Path]>
@@ -18,7 +18,7 @@ public protocol RGArtifact: BinaryEncodable {
 	func mask(prefix: [Edge]) -> (Self, Mapping<String, [Path]>)
 	func shouldMask(_ masks: TrieSet<Edge>, prefix: [Edge]) -> Bool
 	func encrypt(allKeys: CoveredTrie<String, [Bool]>, commonIv: [Bool]) -> Self?
-	
+
 	func set(property: String, to child: CryptoBindable) -> Self?
 	func get(property: String) -> CryptoBindable?
 	func properties() -> [String]
@@ -33,7 +33,7 @@ public extension RGArtifact {
 			return result.set(property: entry, to: encryptedChild)
 		}
 	}
-	
+
 	func capture(digestString: String, content: [Bool], at route: Path, prefix: Path, previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> (Self, Mapping<String, [Path]>)? {
 		guard let firstLeg = route.first else { return nil }
 		guard let child = get(property: firstLeg) else { return nil }
@@ -41,7 +41,7 @@ public extension RGArtifact {
 		guard let finalSelf = set(property: firstLeg, to: result.0) else { return nil }
 		return (finalSelf, result.1)
 	}
-	
+
 	func mask(prefix: [Edge]) -> (Self, Mapping<String, [Path]>) {
 		return properties().reduce((self, Mapping<String, [Path]>())) { (result, entry) -> (Self, Mapping<String, [Path]>) in
 			guard let value = get(property: entry) else { return result }
@@ -50,7 +50,7 @@ public extension RGArtifact {
 			return (afterMasking, masked.1)
 		}
 	}
-	
+
 	func masking(_ masks: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<String, [Path]>) {
 		return masks.children.keys().reduce((self, Mapping<String, [Path]>())) { (result, entry) -> (Self, Mapping<String, [Path]>) in
 			guard let value = get(property: entry) else { return result }
@@ -70,46 +70,46 @@ public extension RGArtifact {
 			return (afterSetting, targeted.1 + finalTargets.1)
 		}
 	}
-	
+
 	func contents(previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> Mapping<String, [Bool]> {
 		return properties().reduce(Mapping<String, [Bool]>()) { (result, entry) -> Mapping<String, [Bool]> in
 			guard let value = get(property: entry) else { return result }
 			return result.overwrite(with: value.contents(previousKey: previousKey, keys: keys))
 		}
 	}
-	
+
 	func missing(prefix: Path) -> Mapping<String, [Path]> {
 		return properties().reduce(Mapping<String, [Path]>()) { (result, entry) -> Mapping<String, [Path]> in
 			guard let value = get(property: entry) else { return result }
 			return result + value.missing(prefix: prefix + [entry])
 		}
 	}
-	
+
 	func isComplete() -> Bool {
 		return !properties().contains(where: {
 			guard let value = get(property: $0) else { return true }
 			return !value.isComplete()
 		})
 	}
-	
+
 	func pruning() -> Self {
-		return properties().reduce(self) { (result, entry) -> Self in
+		return properties().reduce(self) { (_, entry) -> Self in
 			guard let value = get(property: entry) else { return self }
 			guard let toReturn = set(property: entry, to: value.empty()) else { return self }
 			return toReturn
 		}
 	}
-	
+
     init?(raw: [Bool]) {
         guard let data = Data(raw: raw) else { return nil }
         guard let node = try? JSONDecoder().decode(Self.self, from: data) else { return nil }
         self = node
     }
-    
+
     func toBoolArray() -> [Bool] {
         return try! JSONEncoder().encode(pruning()).toBoolArray()
     }
-	
+
 	func shouldMask(_ masks: TrieSet<Edge>, prefix: [Edge]) -> Bool {
 		return false
 	}

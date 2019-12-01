@@ -11,7 +11,7 @@ public struct Array256<Element: Addressable>: Codable where Element.Digest == UI
 	private let rawMasks: TrieSet<Edge>?
 	private let rawIsMasked: Singleton?
 	private let rawLength: UInt256!
-	
+
 	public init(core: CoreType, incompleteChildren: Set<String>, children: Mapping<String, Value>, targets: TrieSet<Edge>, masks: TrieSet<Edge>, isMasked: Bool, length: UInt256) {
 		rawCore = core
 		rawIncompleteChildren = incompleteChildren.isEmpty ? nil : incompleteChildren

@@ -9,10 +9,10 @@ public struct RT256<Key: BinaryEncodable, Value: BinaryEncodable>: Codable {
 
 extension RT256: Regenerative {
     public typealias Root = RadixAddress256
-    
+
     public var root: Root { return rawRoot }
     public var keyPaths: Mapping<String, [Path]> { return rawPaths }
-    
+
     public init(root: Root, paths: Mapping<String, [Path]>) {
         self.rawRoot = root
         self.rawPaths = paths

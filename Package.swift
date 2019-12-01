@@ -7,7 +7,7 @@ let package = Package(
     products: [
         .library(
             name: "Regenerate",
-            targets: ["Regenerate"]),
+            targets: ["Regenerate"])
     ],
     dependencies: [
         .package(url: "https://github.com/pumperknickle/AwesomeTrie.git", from: "0.0.7"),
@@ -15,7 +15,7 @@ let package = Package(
         .package(url: "https://github.com/pumperknickle/CryptoStarterPack.git", from: "1.1.4"),
         .package(url: "https://github.com/pumperknickle/Bedrock.git", from: "0.1.1"),
         .package(url: "https://github.com/Quick/Quick.git", from: "2.2.0"),
-        .package(url: "https://github.com/Quick/Nimble.git", from: "8.0.4"),
+        .package(url: "https://github.com/Quick/Nimble.git", from: "8.0.4")
     ],
     targets: [
         .target(
@@ -23,6 +23,6 @@ let package = Package(
 			dependencies: ["CryptoStarterPack", "Bedrock", "AwesomeTrie", "AwesomeDictionary"]),
         .testTarget(
             name: "RegenerateTests",
-            dependencies: ["Regenerate", "Quick", "Nimble", "CryptoStarterPack", "Bedrock", "AwesomeDictionary", "AwesomeTrie"]),
+            dependencies: ["Regenerate", "Quick", "Nimble", "CryptoStarterPack", "Bedrock", "AwesomeDictionary", "AwesomeTrie"])
     ]
 )

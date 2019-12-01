@@ -13,11 +13,11 @@ extension Radix256: RGRadix {
     public typealias Child = RadixAddress256
     public typealias Edge = String
     public typealias Digest = UInt256
-    
+
     public var prefix: [Edge] { return rawPrefix }
     public var value: [Edge] { return rawValue }
     public var children: Mapping<Edge, Child> { return rawChildren.first! }
-    
+
     public init(prefix: [Edge], value: [Edge], children: Mapping<Edge, Child>) {
         self.rawPrefix = prefix
         self.rawValue = value

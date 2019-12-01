@@ -18,7 +18,7 @@ public struct RadixAddress256: Codable {
 extension RadixAddress256: Addressable {
 	public typealias Digest = UInt256
 	public typealias SymmetricDelegateType = BaseSymmetric
-	
+
 	public var digest: UInt256! { return rawDigest }
     public var artifact: Radix256? { return rawArtifact }
     public var symmetricKeyHash: Digest? { return rawSymmetricKeyHash }
@@ -28,9 +28,9 @@ extension RadixAddress256: Addressable {
 	public var isMasked: Bool! { return rawIsMasked != nil ? true : false }
 	public var isTargeted: Bool! { return rawIsTargeted != nil ? true : false }
 	public var symmetricIV: SymmetricIV? { return rawSymmetricIV }
-	
+
     public typealias CryptoDelegateType = BaseCrypto
-	
+
     public init(digest: UInt256, artifact: Artifact?, symmetricKeyHash: Digest?, complete: Bool, targets: TrieSet<Self.Edge>, masks: TrieSet<Self.Edge>, isMasked: Bool, isTargeted: Bool, symmetricIV: UInt128?) {
 		rawDigest = digest
 		rawArtifact = artifact

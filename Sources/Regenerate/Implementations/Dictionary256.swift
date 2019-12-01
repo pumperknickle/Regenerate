@@ -10,7 +10,7 @@ public struct Dictionary256<Key: Stringable, Value: Addressable>: Codable where 
 	private let rawTargets: TrieSet<Edge>?
 	private let rawMasks: TrieSet<Edge>?
 	private let rawIsMasked: Singleton?
-	
+
 	public init(core: CoreType, incompleteChildren: Set<String>, children: Mapping<String, Value>, targets: TrieSet<String>, masks: TrieSet<String>, isMasked: Bool) {
 		rawCore = core
 		rawIncompleteChildren = incompleteChildren.isEmpty ? nil : incompleteChildren
