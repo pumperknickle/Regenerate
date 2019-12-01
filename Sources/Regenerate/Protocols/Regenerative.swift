@@ -26,7 +26,7 @@ public extension Regenerative {
     
 	func missingDigests() -> Set<String> { return Set(keyPaths.keys()) }
     
-    func contents(previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> Mapping<String, [Bool]> { return root.contents(previousKey: previousKey, keys: keys) }
+    func contents(previousKey: [Bool]? = nil, keys: TrieMapping<Bool, [Bool]> = TrieMapping<Bool, [Bool]>()) -> Mapping<String, [Bool]> { return root.contents(previousKey: previousKey, keys: keys) }
     
     func cuttingAllNodes() -> Self { return Self(root: root.empty()) }
 	
@@ -36,7 +36,7 @@ public extension Regenerative {
 		return Self(root: encryptedRoot, paths: Mapping<String, [Path]>())
 	}
     
-    func capture(info: [[Bool]], previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> Self? {
+    func capture(info: [[Bool]], previousKey: [Bool]? = nil, keys: TrieMapping<Bool, [Bool]> = TrieMapping<Bool, [Bool]>()) -> Self? {
         let optionalDigests = info.reduce([:]) { (result, entry) -> [String: [Bool]]? in
             guard let result = result else { return nil }
             guard let digestBits = CryptoDelegateType.hash(entry) else { return nil }
@@ -61,7 +61,7 @@ public extension Regenerative {
         return regenerativeAfterStep.capture(info: info, previousKey: previousKey, keys: keys)
     }
     
-    func capture(content: [Bool], previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> (Self, Set<String>)? {
+    func capture(content: [Bool], previousKey: [Bool]? = nil, keys: TrieMapping<Bool, [Bool]> = TrieMapping<Bool, [Bool]>()) -> (Self, Set<String>)? {
         guard let digestBits = CryptoDelegateType.hash(content) else { return nil }
         guard let digest = Digest(raw: digestBits) else { return nil }
 		return capture(content: content, digestString: digest.toString(), previousKey: previousKey, keys: keys)
