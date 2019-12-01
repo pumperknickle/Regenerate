@@ -11,8 +11,6 @@ jobs:
     - uses: actions/checkout@v1
     - name: Get Homebrew
       run: /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-    - name: Get openssl
-      run: brew install openssl
     - name: Build
       run: swift package resolve
     - name: Run tests
