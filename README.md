@@ -1,6 +1,8 @@
 # Regenerate
 
-![](https://github.com/pumperknickle/Regenerate/workflows/test/badge.svg?branch=master)
+<p align="left">
+  <a href="https://github.com/pumperknickle/Regenerate"><img alt="GitHub Actions status" src="https://github.com/pumperknickle/Regenerate/workflows/test/badge.svg"></a>
+</p>
 
 ## Conceptual Overview
 
