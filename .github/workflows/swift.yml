@@ -3,8 +3,8 @@ name: Swift
 on: [push]
 
 jobs:
-  build:
-    name: Build
+  test:
+    name: test
     runs-on: ${{ matrix.operating-system }}
     strategy:
       matrix:
