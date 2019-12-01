@@ -5,7 +5,7 @@ echo "deb https://repo.vapor.codes/apt $(lsb_release -sc) main" | tee /etc/apt/s
 apt-get update && \
 apt-get install -y libmysqlclient20 libmysqlclient-dev cstack ctls openssl libssl-dev
 
-WORKDIR /
+WORKDIR /app
 COPY . ./
 RUN swift package resolve
 RUN swift package clean
