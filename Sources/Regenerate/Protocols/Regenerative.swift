@@ -21,6 +21,8 @@ public protocol Regenerative: Codable {
 
 public extension Regenerative {
 	init(root: Root) { self.init(root: root, paths: root.missing(prefix: [])) }
+    
+    func empty() -> Self { return Self(root: root.empty()) }
 
     func complete() -> Bool { return root.complete }
 
