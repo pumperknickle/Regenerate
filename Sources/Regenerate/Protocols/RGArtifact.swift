@@ -21,12 +21,12 @@ public protocol RGArtifact: BinaryEncodable {
 
 	func set(property: String, to child: CryptoBindable) -> Self?
 	func get(property: String) -> CryptoBindable?
-	func properties() -> [String]
+	static func properties() -> [String]
 }
 
 public extension RGArtifact {
 	func encrypt(allKeys: CoveredTrie<String, [Bool]>, commonIv: [Bool]) -> Self? {
-		return properties().reduce(self) { (result, entry) -> Self? in
+        return Self.properties().reduce(self) { (result, entry) -> Self? in
 			guard let result = result else { return nil }
 			guard let child = get(property: entry) else { return nil }
             guard let encryptedChild = child.encrypt(allKeys: allKeys.subtreeWithCover(keys: [entry]), commonIv: commonIv + entry.toBoolArray(), keyRoot: allKeys.contains(key: entry)) else { return nil }
@@ -43,7 +43,7 @@ public extension RGArtifact {
 	}
 
 	func mask(prefix: [Edge]) -> (Self, Mapping<String, [Path]>) {
-		return properties().reduce((self, Mapping<String, [Path]>())) { (result, entry) -> (Self, Mapping<String, [Path]>) in
+        return Self.properties().reduce((self, Mapping<String, [Path]>())) { (result, entry) -> (Self, Mapping<String, [Path]>) in
 			guard let value = get(property: entry) else { return result }
 			let masked = value.mask(prefix: prefix + [entry])
 			guard let afterMasking = set(property: entry, to: masked.0) else { return result }
@@ -72,28 +72,28 @@ public extension RGArtifact {
 	}
 
 	func contents(previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> Mapping<String, [Bool]> {
-		return properties().reduce(Mapping<String, [Bool]>()) { (result, entry) -> Mapping<String, [Bool]> in
+        return Self.properties().reduce(Mapping<String, [Bool]>()) { (result, entry) -> Mapping<String, [Bool]> in
 			guard let value = get(property: entry) else { return result }
 			return result.overwrite(with: value.contents(previousKey: previousKey, keys: keys))
 		}
 	}
 
 	func missing(prefix: Path) -> Mapping<String, [Path]> {
-		return properties().reduce(Mapping<String, [Path]>()) { (result, entry) -> Mapping<String, [Path]> in
+        return Self.properties().reduce(Mapping<String, [Path]>()) { (result, entry) -> Mapping<String, [Path]> in
 			guard let value = get(property: entry) else { return result }
 			return result + value.missing(prefix: prefix + [entry])
 		}
 	}
 
 	func isComplete() -> Bool {
-		return !properties().contains(where: {
+        return !Self.properties().contains(where: {
 			guard let value = get(property: $0) else { return true }
 			return !value.isComplete()
 		})
 	}
 
 	func pruning() -> Self {
-		return properties().reduce(self) { (_, entry) -> Self in
+        return Self.properties().reduce(self) { (_, entry) -> Self in
 			guard let value = get(property: entry) else { return self }
 			guard let toReturn = set(property: entry, to: value.empty()) else { return self }
 			return toReturn

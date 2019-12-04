@@ -6,6 +6,7 @@ import AwesomeTrie
 public protocol RGArray: RGDictionary where Key: FixedWidthInteger {
 	typealias Index = Key
 	typealias Element = Value
+    typealias Artifact = Element.Artifact
 
 	var length: Index! { get }
 
@@ -33,4 +34,14 @@ public extension RGArray {
 		}
 		self.init(core: core, incompleteChildren: Set<String>([]), children: newChildren, targets: TrieSet<String>(), masks: TrieSet<String>(), isMasked: false, length: mappingResult.1)
 	}
+    
+    init?(artifacts: [Artifact?]) {
+        guard let elements = artifacts.reduce([], { (result, entry) -> [Element]? in
+            guard let result = result else { return nil }
+            guard let entry = entry else { return nil }
+            guard let element = Element(artifact: entry, complete: true) else { return nil }
+            return result + [element]
+        }) else { return nil }
+        self.init(elements)
+    }
 }

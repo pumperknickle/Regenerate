@@ -21,7 +21,7 @@ public extension RGScalar {
 	func mask(prefix: [Edge]) -> (Self, Mapping<String, [Path]>) { (self, Mapping<String, [Path]>()) }
 	func set(property: String, to child: CryptoBindable) -> Self? { return nil }
 	func get(property: String) -> CryptoBindable? { return nil }
-	func properties() -> [String] { return [] }
+	static func properties() -> [String] { return [] }
 	func pruning() -> Self { return self }
 	func encrypt(allKeys: CoveredTrie<String, [Bool]>, commonIv: [Bool]) -> Self? { return self }
 }

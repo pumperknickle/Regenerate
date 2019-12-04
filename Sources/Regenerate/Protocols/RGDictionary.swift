@@ -8,6 +8,7 @@ public protocol RGDictionary: RGArtifact {
 	associatedtype Value: Addressable
 	associatedtype CoreType: RGRT where CoreType.Key == Key, CoreType.Value == Value
 	typealias CoreRoot = CoreType.Root
+    typealias Artifact = Value.Artifact
 
 	var core: CoreType! { get }
 	var incompleteChildren: Set<String>! { get }
@@ -48,6 +49,28 @@ public extension RGDictionary {
 		guard let core = CoreType(raw: coreTuples) else { return nil }
 		self.init(core: core, incompleteChildren: Set([]), children: children, targets: TrieSet<Edge>(), masks: TrieSet<Edge>(), isMasked: false)
 	}
+    
+    init?(artifacts: Mapping<Key, Artifact?>) {
+        let mapping = artifacts.elements().reduce(Mapping<Key, Value>()) { (result, entry) -> Mapping<Key, Value>? in
+            guard let result = result else { return nil }
+            guard let artifact = entry.1 else { return nil }
+            guard let address = Value(artifact: artifact, complete: true) else { return nil }
+            return result.setting(key: entry.0, value: address)
+        }
+        guard let finalMapping = mapping else { return nil }
+        self.init(finalMapping)
+    }
+    
+    init?(da: [Key: Artifact?]) {
+        let mapping = da.reduce(Mapping<Key, Value>()) { (result, entry) -> Mapping<Key, Value>? in
+            guard let result = result else { return nil }
+            guard let artifact = entry.1 else { return nil }
+            guard let address = Value(artifact: artifact, complete: true) else { return nil }
+            return result.setting(key: entry.0, value: address)
+        }
+        guard let finalMapping = mapping else { return nil }
+        self.init(finalMapping)
+    }
 
 	func set(property: String, to child: CryptoBindable) -> Self? {
 		return nil
@@ -57,7 +80,7 @@ public extension RGDictionary {
 		return nil
 	}
 
-	func properties() -> [String] {
+	static func properties() -> [String] {
 		return []
 	}
 

@@ -46,7 +46,7 @@ public extension RGRadix {
 		return child.key(for: Array(route.dropFirst()), prefix: prefix + self.prefix)
 	}
 
-	func properties() -> [String] {
+	static func properties() -> [String] {
 		return []
 	}
 

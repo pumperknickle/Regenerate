@@ -10,36 +10,39 @@ import AwesomeDictionary
 final class RGArraySpec: QuickSpec {
 	override func spec() {
 		describe("Array") {
-			typealias ChildNodeType = Scalar<UInt256>
-			typealias ChildStemType = Address<ChildNodeType>
-			typealias ArrayNodeType = Array256<ChildStemType>
-			typealias ArrayStemType = Address<ArrayNodeType>
-			typealias NestedArrayNodeType = Array256<ArrayStemType>
-			typealias NestedArrayStemType = Address<NestedArrayNodeType>
-			typealias RegenerativeNestedArrayType = RGObject<NestedArrayStemType>
+			typealias LeafNode = Scalar<UInt256>
+			typealias ArrayNode = Array256<Address<LeafNode>>
+			typealias NestedArrayNode = Array256<Address<ArrayNode>>
+			typealias RegenerativeNestedArrayType = RGObject<Address<NestedArrayNode>>
 
-			// array 0-0
-			let firstNode = ChildNodeType(scalar: UInt256.min)
-			let secondNode = ChildNodeType(scalar: UInt256.max)
-            let firstStem = ChildStemType(artifact: firstNode, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
-            let secondStem = ChildStemType(artifact: secondNode, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
-			let arrayNode1 = ArrayNodeType([firstStem!, secondStem!])!
-			let arrayStem1 = ArrayStemType(artifact: arrayNode1, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
+			let firstNode = LeafNode(scalar: UInt256.min)
+			let secondNode = LeafNode(scalar: UInt256.max)
+			let thirdNode = LeafNode(scalar: UInt256(109303931))
+			let fourthNode = LeafNode(scalar: UInt256(10922))
 
-			// array 0-1
-			let thirdNode = ChildNodeType(scalar: UInt256(109303931))
-			let fourthNode = ChildNodeType(scalar: UInt256(10922))
-			let thirdStem = ChildStemType(artifact: thirdNode, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
-			let fourthStem = ChildStemType(artifact: fourthNode, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
-			let arrayNode2 = ArrayNodeType([thirdStem!, fourthStem!])!
-			let arrayStem2 = ArrayStemType(artifact: arrayNode2, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
-
-			let nestedArrayNode = NestedArrayNodeType([arrayStem1!, arrayStem2!])!
-			let nestedArrayStem = NestedArrayStemType(artifact: nestedArrayNode, symmetricKeyHash: nil, symmetricIV: nil, complete: true)
-			let regenerativeArray = RegenerativeNestedArrayType(root: nestedArrayStem!)
-			let targets = TrieSet<String>().adding([NestedArrayStemType.Digest(0).toString(), ArrayStemType.Digest(0).toString()]).adding([NestedArrayStemType.Digest(0).toString(), ArrayStemType.Digest(1).toString()])
-			let cutRegenerativeArray = regenerativeArray.cuttingAllNodes().targeting(targets)
-            let regeneratedArray = cutRegenerativeArray.0.capture(info: Dictionary(uniqueKeysWithValues: regenerativeArray.contents(previousKey: nil, keys: TrieMapping<Bool, [Bool]>()).elements()), previousKey: nil, keys: TrieMapping<Bool, [Bool]>())
+			let nestedArrayNode =
+                NestedArrayNode(artifacts:
+                    [ArrayNode(artifacts: [firstNode,
+                                           secondNode])!,
+                     ArrayNode(artifacts: [thirdNode,
+                                           fourthNode])!])!
+            
+			let regenerativeArray = RegenerativeNestedArrayType(artifact: nestedArrayNode)!
+            
+            let targets = TrieSet<String>()
+                .adding([
+                    RegenerativeNestedArrayType.Root.Digest(0).toString(),
+                    NestedArrayNode.Value.Digest(0).toString()])
+                .adding([
+                    RegenerativeNestedArrayType.Root.Digest(0).toString(),
+                    NestedArrayNode.Value.Digest(1).toString()])
+            
+            let cutRegenerativeArray = regenerativeArray.cuttingAllNodes().targeting(targets).0
+            
+            let rawInformation = Dictionary(uniqueKeysWithValues: regenerativeArray.contents().elements())
+            
+            let regeneratedArray = cutRegenerativeArray.capture(info: rawInformation)
+            
 			it("partial regeneration") {
 				expect(regeneratedArray).toNot(beNil())
 				expect(regeneratedArray!.root.artifact!.children.elements().count).to(equal(1))

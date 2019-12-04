@@ -9,6 +9,7 @@ public protocol Regenerative: Codable {
     typealias Digest = Root.Digest
     typealias Edge = Root.Edge
     typealias Path = Root.Path
+    typealias Artifact = Root.Artifact
 
     var root: Root { get }
     var keyPaths: Mapping<String, [Path]> { get }
@@ -21,6 +22,12 @@ public protocol Regenerative: Codable {
 
 public extension Regenerative {
 	init(root: Root) { self.init(root: root, paths: root.missing(prefix: [])) }
+    
+    init?(artifact: Artifact?) {
+        guard let artifact = artifact else { return nil }
+        guard let address = Root(artifact: artifact, complete: true) else { return nil }
+        self.init(root: address)
+    }
     
     func empty() -> Self { return Self(root: root.empty()) }
 
@@ -50,7 +57,7 @@ public extension Regenerative {
         return captured
     }
 
-    func capture(info: [String: [Bool]], previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> Self? {
+    func capture(info: [String: [Bool]], previousKey: [Bool]? = nil, keys: TrieMapping<Bool, [Bool]> = TrieMapping<Bool, [Bool]>()) -> Self? {
         let insertions = missingDigests().map { (key: $0, value: info[$0]) }
         if insertions.isEmpty || !insertions.contains(where: { $0.value != nil }) { return self } // no relevant info to insert
         let nextStep = insertions.reduce(self) { (result, entry) -> Self? in
