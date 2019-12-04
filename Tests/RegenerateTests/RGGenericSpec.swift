@@ -69,7 +69,7 @@ final class RGGenericSpec: QuickSpec {
             let thirdNode = ChildNodeType(scalar: UInt256(109303931))
             let fourthNode = ChildNodeType(scalar: UInt256(10922))
     
-            let fooNode = Foo(
+            let fooNode: Foo = Foo(
                 artifact1: ArrayNodeType(artifacts: [firstNode, secondNode]),
                 artifact2: ArrayNodeType(artifacts: [thirdNode, fourthNode])
             )!
@@ -100,12 +100,12 @@ final class RGGenericSpec: QuickSpec {
                 .setting(keys: firstKeyHash, value: firstKeyBinary)
                 .setting(keys: secondKeyHash, value: secondKeyBinary)
 
-			let targets = TrieSet<String>()
+            let targets: TrieSet<String> = TrieSet<String>()
                 .adding([Foo.metafield1, ArrayStemType.Digest(0).toString()])
                 .adding([Foo.metafield1, ArrayStemType.Digest(1).toString()])
 
-            let cutFoo = encryptedFoo.cuttingAllNodes().targeting(targets).0
-            let regeneratedFoo = cutFoo.capture(info: Dictionary(uniqueKeysWithValues: encryptedFoo.contents(keys: allKeys).elements()), keys: allKeys)
+            let cutFoo: RegenerativeFooType = encryptedFoo.cuttingAllNodes().targeting(targets).0
+            let regeneratedFoo: RegenerativeFooType? = cutFoo.capture(info: Dictionary(uniqueKeysWithValues: encryptedFoo.contents(keys: allKeys).elements()), keys: allKeys)
 			it("should regenerate partially") {
 				expect(regeneratedFoo!.root.artifact!.array1.artifact).toNot(beNil())
 				expect(regeneratedFoo!.root.artifact!.array2.artifact).to(beNil())

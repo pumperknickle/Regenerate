@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/pumperknickle/Bedrock.git",
         "state": {
           "branch": null,
-          "revision": "6214d09d54ffe31d54b1a329344725f985f9923f",
-          "version": "0.1.2"
+          "revision": "c7ab73980e2765fd8ba43ac2afb23e2a2a6c37a4",
+          "version": "0.1.3"
         }
       },
       {
@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/vapor/core.git",
         "state": {
           "branch": null,
-          "revision": "18f2436bf7a6bc2224372c0885db2e0159af1649",
-          "version": "3.9.2"
+          "revision": "10d33362a47fab03a067e78fb0791341d9c634fa",
+          "version": "3.9.3"
         }
       },
       {
@@ -51,8 +51,17 @@
         "repositoryURL": "https://github.com/pumperknickle/CryptoStarterPack.git",
         "state": {
           "branch": null,
-          "revision": "d02cea659bc87617fda8b938e656eb9619820b6f",
-          "version": "1.1.4"
+          "revision": "7188555c1769faea828910d826e61467ef899060",
+          "version": "1.1.5"
+        }
+      },
+      {
+        "package": "CryptoSwift",
+        "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift.git",
+        "state": {
+          "branch": null,
+          "revision": "79ac632c85df81f2618dd838fc3869633e163370",
+          "version": "1.2.0"
         }
       },
       {
