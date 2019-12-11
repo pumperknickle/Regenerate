@@ -87,7 +87,7 @@ public extension RGRT {
 		return Self(root: mergedRoots, paths: mergedRoots.missing(prefix: []))
     }
 
-    func capture(info: [[Bool]], previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> (Self, [(Key, Value)])? {
+    func capture(info: [[Bool]], previousKey: [Bool]? = nil, keys: TrieMapping<Bool, [Bool]> = TrieMapping<Bool, [Bool]>()) -> (Self, [(Key, Value)])? {
         let optionalDigests = info.reduce([:]) { (result, entry) -> [String: [Bool]]? in
             guard let result = result else { return nil }
             guard let digestBits = CryptoDelegateType.hash(entry) else { return nil }
@@ -98,7 +98,7 @@ public extension RGRT {
         return capture(info: digests, previousKey: previousKey, keys: keys)
     }
 
-    func capture(info: [String: [Bool]], previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> (Self, [(Key, Value)])? {
+    func capture(info: [String: [Bool]], previousKey: [Bool]? = nil, keys: TrieMapping<Bool, [Bool]> = TrieMapping<Bool, [Bool]>()) -> (Self, [(Key, Value)])? {
         let insertions = keyPaths.keys().map { (digest: $0, content: info[$0]) }
         if insertions.isEmpty || !insertions.contains(where: { $0.content != nil }) { return (self, []) }
         let nextStep = insertions.reduce((self, [])) { (result, entry) -> (Self, [(Key, Value)])? in
@@ -112,13 +112,13 @@ public extension RGRT {
         return (recursiveChildResult.0, recursiveChildResult.1 + rrmAfterStep.1)
     }
 
-    func capture(content: [Bool], previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> (Self, Set<String>, [(Key, Value)])? {
+    func capture(content: [Bool], previousKey: [Bool]? = nil, keys: TrieMapping<Bool, [Bool]> = TrieMapping<Bool, [Bool]>()) -> (Self, Set<String>, [(Key, Value)])? {
         guard let digestBits = CryptoDelegateType.hash(content) else { return nil }
         guard let digest = Digest(raw: digestBits) else { return nil }
 		return capture(content: content, digestString: digest.toString(), previousKey: previousKey, keys: keys)
     }
 
-    func capture(content: [Bool], digestString: String, previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> (Self, Set<String>, [(Key, Value)])? {
+    func capture(content: [Bool], digestString: String, previousKey: [Bool]? = nil, keys: TrieMapping<Bool, [Bool]> = TrieMapping<Bool, [Bool]>()) -> (Self, Set<String>, [(Key, Value)])? {
         guard let routes = keyPaths[digestString] else { return nil }
         if routes.isEmpty { return nil }
         let resultAfterExploringRoutes = routes.reduce((self, Set<String>([]), [])) { (result, entry) -> (Self, Set<String>, [(Key, Value)])? in
@@ -134,7 +134,7 @@ public extension RGRT {
 		return (finalRRM, finalResult.1, finalResult.2)
     }
 
-    func capture(digestString: String, content: [Bool], at route: Path, previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> (Self, Set<String>, (Key, Value)?)? {
+    func capture(digestString: String, content: [Bool], at route: Path, previousKey: [Bool]? = nil, keys: TrieMapping<Bool, [Bool]> = TrieMapping<Bool, [Bool]>()) -> (Self, Set<String>, (Key, Value)?)? {
 		guard let modifiedRootResult = root.capture(digestString: digestString, content: content, at: route, prefix: [], previousKey: previousKey, keys: keys) else { return nil }
 		guard let valueEdges = modifiedRootResult.0.value(for: route) else { return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys()), nil) }
 		if valueEdges.isEmpty { return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys()), nil) }

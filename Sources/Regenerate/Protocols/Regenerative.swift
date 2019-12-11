@@ -77,7 +77,7 @@ public extension Regenerative {
     }
 
     // warning - this call assumes that the content's digest == digest. Calling this function directly without checking digest equivalency may introduce malicious information
-    func capture(content: [Bool], digestString: String, previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> (Self, Set<String>)? {
+    func capture(content: [Bool], digestString: String, previousKey: [Bool]? = nil, keys: TrieMapping<Bool, [Bool]> = TrieMapping<Bool, [Bool]>()) -> (Self, Set<String>)? {
         guard let routes = keyPaths[digestString] else { return nil }
         if routes.isEmpty { return (self, Set<String>([])) }
         let resultExploringRoutes = routes.reduce((self, Set<String>([]))) { (result, entry) -> (Self, Set<String>)? in
@@ -91,7 +91,7 @@ public extension Regenerative {
         return (finalResult, routeResult.1)
     }
 
-    func capture(digestString: String, content: [Bool], at route: Path, previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> (Self, Set<String>)? {
+    func capture(digestString: String, content: [Bool], at route: Path, previousKey: [Bool]? = nil, keys: TrieMapping<Bool, [Bool]> = TrieMapping<Bool, [Bool]>) -> (Self, Set<String>)? {
 		guard let modifiedStem = root.capture(digestString: digestString, content: content, at: route, prefix: [], previousKey: previousKey, keys: keys) else { return nil }
         let newMissingDigests = modifiedStem.1.keys().filter { !keyPaths.keys().contains($0) }
         return (Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths), Set(newMissingDigests))
