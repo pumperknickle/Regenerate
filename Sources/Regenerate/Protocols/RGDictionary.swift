@@ -140,7 +140,7 @@ public extension RGDictionary {
 		return children.elements().map { $0.1.missing(prefix: prefix + [$0.0.toString()]) }.reduce(missingCore, +)
 	}
 
-	func contents(previousKey: [Bool]?, keys: TrieMapping<Bool, [Bool]>) -> Mapping<String, [Bool]> {
+	func contents(previousKey: [Bool]? = nil, keys: TrieMapping<Bool, [Bool]> = TrieMapping<Bool, [Bool]>()) -> Mapping<String, [Bool]> {
 		return children.elements().reduce(core.contents(previousKey: previousKey, keys: keys)) { (result, entry) -> Mapping<String, [Bool]> in
 			return result.overwrite(with: entry.1.contents(previousKey: previousKey, keys: keys))
 		}
