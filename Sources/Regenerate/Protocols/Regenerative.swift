@@ -96,6 +96,16 @@ public extension Regenerative {
         let newMissingDigests = modifiedStem.1.keys().filter { !keyPaths.keys().contains($0) }
         return (Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths), Set(newMissingDigests))
     }
+    
+    func query(_ queryString: String) -> Self? {
+        guard let trie = TrieSet<Edge>(queryString: queryString) else { return nil }
+        return targeting(trie).0
+    }
+    
+    func queryAll(_ queryString: String) -> Self? {
+        guard let trie = TrieSet<Edge>(queryString: queryString) else { return nil }
+        return masking(trie).0
+    }
 
 	func targeting(_ targets: TrieSet<Edge>) -> (Self, Set<String>) {
 		let modifiedStem = root.targeting(targets, prefix: [])

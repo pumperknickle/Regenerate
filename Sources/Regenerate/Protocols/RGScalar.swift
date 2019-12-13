@@ -25,3 +25,25 @@ public extension RGScalar {
 	func pruning() -> Self { return self }
 	func encrypt(allKeys: CoveredTrie<String, [Bool]>, commonIv: [Bool]) -> Self? { return self }
 }
+
+public extension RGScalar where T == String {
+    func toBoolArray() -> [Bool] {
+        return scalar.toBoolArray()
+    }
+    
+    init?(raw: [Bool]) {
+        guard let stringValue = String(raw: raw) else { return nil }
+        self = Self(scalar: stringValue)
+    }
+}
+
+public extension RGScalar where T == Data {
+    func toBoolArray() -> [Bool] {
+        return scalar.toBoolArray()
+    }
+    
+    init?(raw: [Bool]) {
+        guard let dataValue = Data(raw: raw) else { return nil }
+        self = Self(scalar: dataValue)
+    }
+}

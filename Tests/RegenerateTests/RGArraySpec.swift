@@ -10,16 +10,23 @@ import AwesomeDictionary
 final class RGArraySpec: QuickSpec {
 	override func spec() {
 		describe("Array") {
-			typealias LeafNode = Scalar<UInt256>
+            // Describe Data Types
+            // 2D Array
+			typealias LeafNode = Scalar<String>
 			typealias ArrayNode = Array256<Address<LeafNode>>
 			typealias NestedArrayNode = Array256<Address<ArrayNode>>
 			typealias RegenerativeNestedArrayType = RGObject<Address<NestedArrayNode>>
+            
+            // Type of Cryptographic Hash
+            typealias Digest = RegenerativeNestedArrayType.Root.Digest
 
-			let firstNode = LeafNode(scalar: UInt256.min)
-			let secondNode = LeafNode(scalar: UInt256.max)
-			let thirdNode = LeafNode(scalar: UInt256(109303931))
-			let fourthNode = LeafNode(scalar: UInt256(10922))
-
+            // Input Data
+            let firstNode = LeafNode(scalar: "1")
+			let secondNode = LeafNode(scalar: "2")
+			let thirdNode = LeafNode(scalar: "3")
+			let fourthNode = LeafNode(scalar: "4")
+            
+            // Initialize Data Structure
 			let nestedArrayNode =
                 NestedArrayNode(artifacts:
                     [ArrayNode(artifacts: [firstNode,
@@ -29,24 +36,19 @@ final class RGArraySpec: QuickSpec {
             
 			let regenerativeArray = RegenerativeNestedArrayType(artifact: nestedArrayNode)!
             
-            let targets = TrieSet<String>()
-                .adding([
-                    RegenerativeNestedArrayType.Root.Digest(0).toString(),
-                    NestedArrayNode.Value.Digest(0).toString()])
-                .adding([
-                    RegenerativeNestedArrayType.Root.Digest(0).toString(),
-                    NestedArrayNode.Value.Digest(1).toString()])
+            // Extract Node Information
+            let serializedNodeInfo = regenerativeArray.contents().values()
             
-            let cutRegenerativeArray = regenerativeArray.cuttingAllNodes().targeting(targets).0
+            // Query given a Hash
+            let emptyObject = regenerativeArray.cuttingAllNodes()
+            let queriedObject = emptyObject.query("{ \(Digest(0).toString()) { \(Digest(0).toString()), \(Digest(1).toString()) } } ")!
+            let regenerated = queriedObject.capture(info: serializedNodeInfo)
             
-            let rawInformation = Dictionary(uniqueKeysWithValues: regenerativeArray.contents().elements())
-            
-            let regeneratedArray = cutRegenerativeArray.capture(info: rawInformation)
-            
-			it("partial regeneration") {
-				expect(regeneratedArray).toNot(beNil())
-				expect(regeneratedArray!.root.artifact!.children.elements().count).to(equal(1))
-			}
+            it("regenerates only the queried values!") {
+                expect(regenerated).toNot(beNil())
+                expect(regenerated!.root.artifact!.children.elements().count).to(equal(1))
+                expect(regenerated!.root.artifact!.children.elements().first!.1.artifact!.children.elements().count).to(equal(2))
+            }
 		}
 	}
 }

@@ -58,20 +58,19 @@ final class RGGenericSpec: QuickSpec {
 				}
 			}
             
+            // Data types
 			typealias ChildNodeType = Scalar<UInt256>
 			typealias ArrayNodeType = Array256<Address<ChildNodeType>>
 			typealias ArrayStemType = Address<ArrayNodeType>
 			typealias FooStemType = Address<Foo>
 			typealias RegenerativeFooType = RGObject<FooStemType>
-
-			let firstNode = ChildNodeType(scalar: UInt256.min)
-			let secondNode = ChildNodeType(scalar: UInt256.max)
-            let thirdNode = ChildNodeType(scalar: UInt256(109303931))
-            let fourthNode = ChildNodeType(scalar: UInt256(10922))
-    
+ 
+            // Initialize Data Structure
             let fooNode: Foo = Foo(
-                artifact1: ArrayNodeType(artifacts: [firstNode, secondNode]),
-                artifact2: ArrayNodeType(artifacts: [thirdNode, fourthNode])
+                artifact1: ArrayNodeType(artifacts: [ChildNodeType(scalar: UInt256.min),
+                                                     ChildNodeType(scalar: UInt256.max)]),
+                artifact2: ArrayNodeType(artifacts: [ChildNodeType(scalar: UInt256(109303931)),
+                                                     ChildNodeType(scalar: UInt256(10922))])
             )!
             
             let regenerativeFoo = RegenerativeFooType(artifact: fooNode)
