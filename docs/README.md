@@ -17,8 +17,8 @@ dependencies: [
 
 ## Conceptual Overview
 
-Regenerate is a framework for creating, encrypting, and regenerating cryptographic data structures or CDS for short. A CDS has integrity guarantees. Each CDS has a root digest, which can be a considered a reference or address to the data structure as a whole.
+Regenerate empowers users to creating custom authenticated data structures in a declarative manner similar to how structs or classes are defined.
 
-Given the digest of a particaular CDS, one is guaranteed to regenerate the same structure bit for bit. A cryptographic data structure can also be pieced into its base nodes - these pieces can be used to regenerate the structure. The CDS digest, the structure data type, and the node pieces are enough to regenerate the full structure.
+The intuition here is that with authenticated data structures, if you and I agree on a hash digest, then we also agree on all the data hashed by that hash digest. Since you can hash a hash digest, this agreement operates recursively.
 
 An example of a cryptographic data structure is a merkle tree (used by bitcoin, github) or patricia merkle trie (used by Ethereum).

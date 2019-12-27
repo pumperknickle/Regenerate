@@ -84,12 +84,6 @@ public extension Addressable {
         self.init(artifact: artifact, symmetricKeyHash: symmetricKeyHash, symmetricIV: symmetricIV, complete: artifact.isComplete())
     }
 
-    init?(raw: [Bool]) {
-        guard let data = Data(raw: raw) else { return nil }
-        guard let object = try? JSONDecoder().decode(Self.self, from: data) else { return nil }
-		self = object
-    }
-
     func toBoolArray() -> [Bool] {
         let data = try! JSONEncoder().encode(empty())
         return data.toBoolArray()
