@@ -37,6 +37,16 @@ public extension RGScalar where T == String {
     }
 }
 
+public extension RGScalar where T == [Bool] {
+    func toBoolArray() -> [Bool] {
+        return scalar
+    }
+    
+    init?(raw: [Bool]) {
+        self = Self(scalar: raw)
+    }
+}
+
 public extension RGScalar where T == Data {
     func toBoolArray() -> [Bool] {
         return scalar.toBoolArray()
