@@ -99,7 +99,7 @@ public extension RGArtifact {
 			return toReturn
 		}
 	}
-
+    
     func toBoolArray() -> [Bool] {
         return try! JSONEncoder().encode(pruning()).toBoolArray()
     }
