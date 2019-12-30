@@ -235,4 +235,18 @@ public extension RGRadix {
 	func shouldMask(_ masks: TrieSet<Edge>, prefix: [Edge]) -> Bool {
 		return masks.contains(self.prefix)
 	}
+    
+    init?(raw: [Bool]) {
+        guard let data = Data(raw: raw) else { return nil }
+        guard let decoded = try? JSONDecoder().decode(Self.self, from: data) else { return nil }
+        let prefix: [Edge] = decoded.prefix.first != nil ? decoded.prefix.first!.map { "\($0)" } : []
+        let value: [Edge] = decoded.value.first != nil ? decoded.value.first!.map { "\($0)" } : []
+        self = decoded.changing(prefix: prefix, value: value)
+    }
+    
+    func toBoolArray() -> [Bool] {
+        let newPrefix: [Edge] = [prefix.reduce("", +)]
+        let newValue: [Edge] = [value.reduce("", +)]
+        return try! JSONEncoder().encode(changing(prefix: newPrefix, value: newValue).pruning()).toBoolArray()
+    }
 }
