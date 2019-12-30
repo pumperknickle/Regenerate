@@ -89,6 +89,12 @@ public extension Addressable {
         let data = try! JSONEncoder().encode(empty())
         return data.toBoolArray()
     }
+    
+    init?(raw: [Bool]) {
+        guard let data = Data(raw: raw) else { return nil }
+        guard let decoded = try? JSONDecoder().decode(Self.self, from: data) else { return nil }
+        self = decoded
+    }
 
     func computedCompleteness() -> Bool {
         guard let node = artifact else { return !focused() }

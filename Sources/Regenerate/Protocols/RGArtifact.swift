@@ -107,4 +107,10 @@ public extension RGArtifact {
 	func shouldMask(_ masks: TrieSet<Edge>, prefix: [Edge]) -> Bool {
 		return false
 	}
+    
+    init?(raw: [Bool]) {
+        guard let data = Data(raw: raw) else { return nil }
+        guard let decoded = try? JSONDecoder().decode(Self.self, from: data) else { return nil }
+        self = decoded
+    }
 }
