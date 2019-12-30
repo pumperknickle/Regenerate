@@ -63,7 +63,8 @@ public extension Addressable {
 	}
 
     init?(artifact: Artifact, symmetricKeyHash: Digest? = nil, symmetricIV: SymmetricIV? = nil, complete: Bool) {
-		guard let artifactHashOutput = CryptoDelegateType.hash(artifact.pruning().toBoolArray()) else { return nil }
+        let bools: [Bool] = artifact.pruning().toBoolArray()
+		guard let artifactHashOutput = CryptoDelegateType.hash(bools) else { return nil }
         guard let digest = Digest(raw: artifactHashOutput) else { return nil }
         self.init(digest: digest, artifact: artifact, symmetricKeyHash: symmetricKeyHash, symmetricIV: symmetricIV, complete: complete)
     }
