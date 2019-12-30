@@ -38,11 +38,11 @@ public extension RGScalar where T == String {
 }
 
 public extension RGScalar where T == [Bool] {
-    func toBoolArray() -> [Bool] {
+    @inlinable func toBoolArray() -> [Bool] {
         return scalar
     }
     
-    init?(raw: [Bool]) {
+    @inlinable init?(raw: [Bool]) {
         self = Self(scalar: raw)
     }
 }
