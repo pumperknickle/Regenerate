@@ -12,9 +12,9 @@ public protocol RGScalar: RGArtifact {
 
 public extension RGScalar {
     func isComplete() -> Bool { return true }
-	func capture(digestString: String, content: [Bool], at route: Path, prefix: Path) -> (Self, Mapping<String, [Path]>)? { return nil }
+    func capture(digestString: String, content: Data, at route: Path, prefix: Path) -> (Self, Mapping<String, [Path]>)? { return nil }
 	func missing(prefix: Path) -> Mapping<String, [Path]> { return Mapping<String, [Path]>() }
-	func contents(prefix: Path) -> Mapping<String, [Bool]> { return Mapping<String, [Bool]>() }
+    func contents(prefix: Path) -> Mapping<String, Data> { return Mapping<String, Data>() }
     func isValid() -> Bool { return true }
 	func targeting(_ targets: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<String, [Path]>) { return (self, Mapping<String, [Path]>()) }
 	func masking(_ masks: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<String, [Path]>) { return (self, Mapping<String, [Path]>()) }
@@ -23,27 +23,26 @@ public extension RGScalar {
 	func get(property: String) -> CryptoBindable? { return nil }
 	static func properties() -> [String] { return [] }
 	func pruning() -> Self { return self }
-	func encrypt(allKeys: CoveredTrie<String, [Bool]>, commonIv: [Bool]) -> Self? { return self }
+    func encrypt(allKeys: CoveredTrie<String, Data>, commonIv: Data) -> Self? { return self }
 }
 
 public extension RGScalar where T == String {
-    func toBoolArray() -> [Bool] {
-        return scalar.toBoolArray()
+    func toData() -> Data {
+        return scalar.toData()
     }
     
-    init?(raw: [Bool]) {
-        guard let stringValue = String(raw: raw) else { return nil }
+    init?(data: Data) {
+        guard let stringValue = String(data: data) else { return nil }
         self = Self(scalar: stringValue)
     }
 }
 
 public extension RGScalar where T == Data {
-    func toBoolArray() -> [Bool] {
-        return scalar.toBoolArray()
+    func toData() -> Data {
+        return scalar
     }
     
-    init?(raw: [Bool]) {
-        guard let dataValue = Data(raw: raw) else { return nil }
-        self = Self(scalar: dataValue)
+    init?(data: Data) {
+        self = Self(scalar: data)
     }
 }

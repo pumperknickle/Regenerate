@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/pumperknickle/AwesomeDictionary.git",
         "state": {
           "branch": null,
-          "revision": "cc8269bd8223239a28c46e39e8e9c9db60715dbd",
-          "version": "0.0.4"
+          "revision": "1c15823d8d39a1a8bab93722826a438fcc65acab",
+          "version": "0.0.5"
         }
       },
       {
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/pumperknickle/AwesomeTrie.git",
         "state": {
           "branch": null,
-          "revision": "ec130b398f40c144cae449fd041fff0b9968b757",
-          "version": "0.0.9"
+          "revision": "1fa544231166e0846d69eda469aad31de4ed5343",
+          "version": "0.1.0"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/pumperknickle/Bedrock.git",
         "state": {
           "branch": null,
-          "revision": "887167c5588fe0f66ea20ce7bf78395883aa7327",
-          "version": "0.1.8"
+          "revision": "8b27772184b8ac301bc96dbb31584521d3ff0d1d",
+          "version": "0.2.0"
         }
       },
       {
@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/pumperknickle/CryptoStarterPack.git",
         "state": {
           "branch": null,
-          "revision": "7188555c1769faea828910d826e61467ef899060",
-          "version": "1.1.5"
+          "revision": "9ad9e4e5a5db07808e5327e6426a6ec744f9a2e0",
+          "version": "1.1.7"
         }
       },
       {

@@ -76,28 +76,28 @@ final class RGGenericSpec: QuickSpec {
             let regenerativeFoo = RegenerativeFooType(artifact: fooNode)
 
             let rootKey = RegenerativeFooType.Root.SymmetricKey.random()
-            let rootKeyBinary = rootKey.toBoolArray()
-            let rootKeyHash = RegenerativeFooType.Root.CryptoDelegateType.hash(rootKeyBinary)!
+            let rootKeyData = rootKey.toData()
+            let rootKeyHash = RegenerativeFooType.Root.CryptoDelegateType.hash(rootKeyData)!
 
             let firstKey = RegenerativeFooType.Root.SymmetricKey.random()
-            let firstKeyBinary = firstKey.toBoolArray()
-            let firstKeyHash = RegenerativeFooType.Root.CryptoDelegateType.hash(firstKeyBinary)!
+            let firstKeyData = firstKey.toData()
+            let firstKeyHash = RegenerativeFooType.Root.CryptoDelegateType.hash(firstKeyData)!
 
             let secondKey = RegenerativeFooType.Root.SymmetricKey.random()
-            let secondKeyBinary = secondKey.toBoolArray()
-            let secondKeyHash = RegenerativeFooType.Root.CryptoDelegateType.hash(secondKeyBinary)!
+            let secondKeyData = secondKey.toData()
+            let secondKeyHash = RegenerativeFooType.Root.CryptoDelegateType.hash(secondKeyData)!
 
-            let keys = CoveredTrie<String, [Bool]>(trie: TrieMapping<String, [Bool]>()
-                .setting(keys: [Foo.metafield1, ArrayStemType.Digest(0).toString()], value: firstKeyBinary)
-                .setting(keys: [Foo.metafield1, ArrayStemType.Digest(1).toString()], value: secondKeyBinary), cover: rootKeyBinary)
+            let keys = CoveredTrie<String, Data>(trie: TrieMapping<String, Data>()
+                .setting(keys: [Foo.metafield1, ArrayStemType.Digest(0).toString()], value: firstKeyData)
+                .setting(keys: [Foo.metafield1, ArrayStemType.Digest(1).toString()], value: secondKeyData), cover: rootKeyData)
 
             let rootIV = RegenerativeFooType.Root.SymmetricIV.random()
-            let encryptedFoo = regenerativeFoo!.encrypt(allKeys: keys, commonIv: rootIV.toBoolArray())!
+            let encryptedFoo = regenerativeFoo!.encrypt(allKeys: keys, commonIv: rootIV.toData())!
             
-            let allKeys = TrieMapping<Bool, [Bool]>()
-                .setting(keys: rootKeyHash, value: rootKeyBinary)
-                .setting(keys: firstKeyHash, value: firstKeyBinary)
-                .setting(keys: secondKeyHash, value: secondKeyBinary)
+            let allKeys = Mapping<Data, Data>()
+                .setting(key: rootKeyHash, value: rootKeyData)
+                .setting(key: firstKeyHash, value: firstKeyData)
+                .setting(key: secondKeyHash, value: secondKeyData)
 
             let targets: TrieSet<String> = TrieSet<String>()
                 .adding([Foo.metafield1, ArrayStemType.Digest(0).toString()])

@@ -2,7 +2,7 @@ import Foundation
 import Bedrock
 import AwesomeDictionary
 
-public struct RT256<Key: BinaryEncodable, Value: BinaryEncodable>: Codable {
+public struct RT256<Key: DataEncodable, Value: DataEncodable>: Codable {
     private let rawRoot: Root!
     private let rawPaths: Mapping<String, [Path]>!
 }
@@ -20,8 +20,8 @@ extension RT256: Regenerative {
 }
 
 extension RT256: RGRT {
-    public func decodeKey(_ symbols: [String]) -> [Bool]? { return symbols.map { $0 == "1" ? true : false } }
-    public func encodeKey(_ key: [Bool]) -> [String]? { return key.map { $0 == false ? "0" : "1" } }
-    public func decodeValue(_ symbols: [String]) -> [Bool]? { return symbols.map { $0 == "1" ? true : false } }
-    public func encodeValue(_ value: [Bool]) -> [String]? { return value.map { $0 == false ? "0" : "1" } }
+    public func decodeKey(symbols: [String]) -> Data? { return Data(hexString: symbols.reduce("", +)) }
+    public func encodeKey(key: Data) -> [String]? { return key.toHexString().map { "\($0)" } }
+    public func decodeValue(symbols: [String]) -> Data? { return Data(hexString: symbols.reduce("", +)) }
+    public func encodeValue(value: Data) -> [String]? { return value.toHexString().map { "\($0)" } }
 }

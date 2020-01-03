@@ -36,8 +36,8 @@ public extension RGRadixAddress {
 
     func computedValidity() -> Bool {
         guard let node = artifact else { return true }
-        guard let hashOutput = CryptoDelegateType.hash(node.toBoolArray()) else { return false }
-        guard let nodeHash = Digest(raw: hashOutput) else { return false }
+        guard let hashOutput = CryptoDelegateType.hash(node.toData()) else { return false }
+        guard let nodeHash = Digest(data: hashOutput) else { return false }
         if digest != nodeHash { return false }
         return !node.children.values().contains(where: { !$0.computedValidity() })
     }
