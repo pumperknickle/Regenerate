@@ -98,33 +98,33 @@ public extension Addressable {
         return node.isComplete()
     }
 
-    func contents(previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> Mapping<String, Data> {
-        guard let node = artifact else { return Mapping<String, Data>() }
+    func contents(previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> Mapping<Data, Data> {
+        guard let node = artifact else { return Mapping<Data, Data>() }
         guard let symmetricKeyHash = symmetricKeyHash else {
-            guard let previousKey = previousKey else { return node.contents(previousKey: nil, keys: keys).setting(key: digest.toString(), value: node.toData()) }
-            guard let symmetricKey = SymmetricKey(data: previousKey) else { return Mapping<String, Data>() }
-            guard let IV = symmetricIV else { return Mapping<String, Data>() }
-            guard let ciphertext = SymmetricDelegateType.encrypt(plaintext: node, key: symmetricKey, iv: IV) else { return Mapping<String, Data>() }
-            guard let ciphertextHashOutput = CryptoDelegateType.hash(ciphertext) else { return Mapping<String, Data>() }
-            guard let ciphertextDigest = Digest(data: ciphertextHashOutput) else { return  Mapping<String, Data>() }
-            return node.contents(previousKey: previousKey, keys: keys).setting(key: ciphertextDigest.toString(), value: ciphertext)
+            guard let previousKey = previousKey else { return node.contents(previousKey: nil, keys: keys).setting(key: digest.toData(), value: node.toData()) }
+            guard let symmetricKey = SymmetricKey(data: previousKey) else { return Mapping<Data, Data>() }
+            guard let IV = symmetricIV else { return Mapping<Data, Data>() }
+            guard let ciphertext = SymmetricDelegateType.encrypt(plaintext: node, key: symmetricKey, iv: IV) else { return Mapping<Data, Data>() }
+            guard let ciphertextHashOutput = CryptoDelegateType.hash(ciphertext) else { return Mapping<Data, Data>() }
+            guard let ciphertextDigest = Digest(data: ciphertextHashOutput) else { return  Mapping<Data, Data>() }
+            return node.contents(previousKey: previousKey, keys: keys).setting(key: ciphertextDigest.toData(), value: ciphertext)
         }
-        guard let symmetricKeyData = keys[symmetricKeyHash.toData()] else { return Mapping<String, Data>() }
-        guard let symmetricKey = SymmetricKey(data: symmetricKeyData) else { return Mapping<String, Data>() }
-        guard let IV = symmetricIV else { return Mapping<String, Data>() }
-        guard let ciphertext = SymmetricDelegateType.encrypt(plaintext: node, key: symmetricKey, iv: IV) else { return Mapping<String, Data>() }
-        guard let ciphertextHashOutput = CryptoDelegateType.hash(ciphertext) else { return Mapping<String, Data>()}
-        guard let ciphertextDigest = Digest(data: ciphertextHashOutput) else { return Mapping<String, Data>() }
-        return node.contents(previousKey: symmetricKeyData, keys: keys).setting(key: ciphertextDigest.toString(), value: ciphertext)
+        guard let symmetricKeyData = keys[symmetricKeyHash.toData()] else { return Mapping<Data, Data>() }
+        guard let symmetricKey = SymmetricKey(data: symmetricKeyData) else { return Mapping<Data, Data>() }
+        guard let IV = symmetricIV else { return Mapping<Data, Data>() }
+        guard let ciphertext = SymmetricDelegateType.encrypt(plaintext: node, key: symmetricKey, iv: IV) else { return Mapping<Data, Data>() }
+        guard let ciphertextHashOutput = CryptoDelegateType.hash(ciphertext) else { return Mapping<Data, Data>()}
+        guard let ciphertextDigest = Digest(data: ciphertextHashOutput) else { return Mapping<Data, Data>() }
+        return node.contents(previousKey: symmetricKeyData, keys: keys).setting(key: ciphertextDigest.toData(), value: ciphertext)
     }
 
-	func missing(prefix: Path) -> Mapping<String, [Path]> {
-		guard let node = artifact else { return focused() ? Mapping<String, [Path]>().setting(key: digest.toString(), value: [prefix]) : Mapping<String, [Path]>() }
+	func missing(prefix: Path) -> Mapping<Data, [Path]> {
+		guard let node = artifact else { return focused() ? Mapping<Data, [Path]>().setting(key: digest.toData(), value: [prefix]) : Mapping<Data, [Path]>() }
 		return node.missing(prefix: prefix)
     }
     
-    func capture(digestString: String, content: Data, prefix: Path, previousKey: Data?, keys: Mapping<Data, Data>) -> (Self, Mapping<String, [Path]>)? {
-        guard let digest = Digest(stringValue: digestString) else { return nil }
+    func capture(digestString: Data, content: Data, prefix: Path, previousKey: Data?, keys: Mapping<Data, Data>) -> (Self, Mapping<Data, [Path]>)? {
+        guard let digest = Digest(data: digestString) else { return nil }
         if symmetricKeyHash != nil && keys[symmetricKeyHash!.toData()] == nil { return nil }
         let key = symmetricKeyHash != nil ? keys[symmetricKeyHash!.toData()] : previousKey
         let symmetricKey = key == nil ? nil : SymmetricKey(data: key!)
@@ -136,11 +136,11 @@ public extension Addressable {
         let targetedNode = decodedNode.targeting(targets, prefix: prefix)
         let maskedNode = targetedNode.0.masking(masks, prefix: prefix)
         let shouldMask = maskedNode.0.shouldMask(masks, prefix: prefix)
-        let finalNode = (isMasked || shouldMask) ? maskedNode.0.mask(prefix: prefix) : (maskedNode.0, Mapping<String, [Path]>())
+        let finalNode = (isMasked || shouldMask) ? maskedNode.0.mask(prefix: prefix) : (maskedNode.0, Mapping<Data, [Path]>())
         return (Self(digest: digest, artifact: finalNode.0, symmetricKeyHash: symmetricKeyHash, complete: finalNode.0.isComplete(), targets: TrieSet<Edge>(), masks: TrieSet<Edge>(), isMasked: (isMasked || shouldMask), isTargeted: isTargeted, symmetricIV: symmetricIV), finalNode.0.missing(prefix: prefix))
     }
     
-    func capture(digestString: String, content: Data, at route: Path, prefix: Path, previousKey: Data?, keys: Mapping<Data, Data>) -> (Self, Mapping<String, [Path]>)? {
+    func capture(digestString: Data, content: Data, at route: Path, prefix: Path, previousKey: Data?, keys: Mapping<Data, Data>) -> (Self, Mapping<Data, [Path]>)? {
         if route.isEmpty && artifact == nil { return capture(digestString: digestString, content: content, prefix: prefix, previousKey: previousKey, keys: keys) }
         guard let node = artifact else { return nil }
         if symmetricKeyHash != nil && keys[symmetricKeyHash!.toData()] == nil { return nil }
@@ -153,33 +153,33 @@ public extension Addressable {
         return Self(digest: digest, symmetricKeyHash: symmetricKeyHash, symmetricIV: symmetricIV)
     }
 
-	func targeting(_ targets: TrieSet<Edge>, prefix: Path) -> (Self, Mapping<String, [Path]>) {
-		if targets.isEmpty() { return (self, Mapping<String, [Path]>()) }
+	func targeting(_ targets: TrieSet<Edge>, prefix: Path) -> (Self, Mapping<Data, [Path]>) {
+		if targets.isEmpty() { return (self, Mapping<Data, [Path]>()) }
 		guard let artifact = artifact else {
-			if focused() { return (changing(targets: self.targets.overwrite(with: targets)), Mapping<String, [Path]>()) }
-			return (changing(complete: false, targets: self.targets.overwrite(with: targets)), Mapping<String, [Path]>().setting(key: digest.toString(), value: [prefix]))
+			if focused() { return (changing(targets: self.targets.overwrite(with: targets)), Mapping<Data, [Path]>()) }
+			return (changing(complete: false, targets: self.targets.overwrite(with: targets)), Mapping<Data, [Path]>().setting(key: digest.toData(), value: [prefix]))
 		}
 		let childResult = artifact.targeting(targets, prefix: prefix)
 		return (changing(artifact: childResult.0), childResult.1)
 	}
 
-	func masking(_ masks: TrieSet<Edge>, prefix: Path) -> (Self, Mapping<String, [Path]>) {
-		if masks.isEmpty() || isMasked { return (self, Mapping<String, [Path]>()) }
+	func masking(_ masks: TrieSet<Edge>, prefix: Path) -> (Self, Mapping<Data, [Path]>) {
+		if masks.isEmpty() || isMasked { return (self, Mapping<Data, [Path]>()) }
 		guard let artifact = artifact else {
-			if focused() { return (changing(masks: masks), Mapping<String, [Path]>()) }
-			return (changing(complete: false, masks: masks), Mapping<String, [Path]>().setting(key: digest.toString(), value: [prefix]))
+			if focused() { return (changing(masks: masks), Mapping<Data, [Path]>()) }
+			return (changing(complete: false, masks: masks), Mapping<Data, [Path]>().setting(key: digest.toData(), value: [prefix]))
 		}
 		let childResult = artifact.masking(masks, prefix: prefix)
 		return (changing(artifact: childResult.0), childResult.1)
 	}
 
-	func mask(prefix: Path) -> (Self, Mapping<String, [Path]>) {
+	func mask(prefix: Path) -> (Self, Mapping<Data, [Path]>) {
 		if let childResult = artifact?.mask(prefix: prefix) { return (changing(artifact: childResult.0, isMasked: true), childResult.1) }
-		if focused() { return (changing(isMasked: true), Mapping<String, [Path]>()) }
-		return (changing(complete: false, targets: TrieSet<Edge>(), masks: TrieSet<Edge>(), isMasked: true), Mapping<String, [Path]>().setting(key: digest.toString(), value: [prefix]))
+		if focused() { return (changing(isMasked: true), Mapping<Data, [Path]>()) }
+		return (changing(complete: false, targets: TrieSet<Edge>(), masks: TrieSet<Edge>(), isMasked: true), Mapping<Data, [Path]>().setting(key: digest.toData(), value: [prefix]))
 	}
 
-	func target(prefix: Path) -> (Self, Mapping<String, [Path]>) {
-		return focused() ? (changing(isTargeted: true), Mapping<String, [Path]>()) : (changing(complete: false, isTargeted: true), Mapping<String, [Path]>().setting(key: digest.toString(), value: [prefix]))
+	func target(prefix: Path) -> (Self, Mapping<Data, [Path]>) {
+		return focused() ? (changing(isTargeted: true), Mapping<Data, [Path]>()) : (changing(complete: false, isTargeted: true), Mapping<Data, [Path]>().setting(key: digest.toData(), value: [prefix]))
 	}
 }

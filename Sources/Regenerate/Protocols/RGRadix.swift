@@ -187,7 +187,7 @@ public extension RGRadix {
         return changing(children: newChildren)
     }
     
-    func capture(digestString: String, content: Data, at route: Path, prefix: Path, previousKey: Data?, keys: Mapping<Data, Data>) -> (Self, Mapping<String, [Path]>)? {
+    func capture(digestString: Data, content: Data, at route: Path, prefix: Path, previousKey: Data?, keys: Mapping<Data, Data>) -> (Self, Mapping<Data, [Path]>)? {
         guard let firstLeg = route.first else { return nil }
         guard let childStem = children[firstLeg] else { return nil }
         guard let childStemResult = childStem.capture(digestString: digestString, content: content, at: Array(route.dropFirst()), prefix: prefix + [firstLeg], previousKey: previousKey, keys: keys) else { return nil }
@@ -195,37 +195,37 @@ public extension RGRadix {
         return (modifiedNode, childStemResult.1)
     }
 
-	func missing(prefix: Path) -> Mapping<String, [Path]> {
-        if children.isEmpty() { return Mapping<String, [Path]>() }
-		return children.elements().map { $0.1.missing(prefix: prefix + [$0.0]) }.reduce(Mapping<String, [Path]>(), +)
+	func missing(prefix: Path) -> Mapping<Data, [Path]> {
+        if children.isEmpty() { return Mapping<Data, [Path]>() }
+		return children.elements().map { $0.1.missing(prefix: prefix + [$0.0]) }.reduce(Mapping<Data, [Path]>(), +)
     }
     
-    func contents(previousKey: Data?, keys: Mapping<Data, Data>) -> Mapping<String, Data> {
-        return children.values().reduce(Mapping<String, Data>(), { (result, entry) -> Mapping<String, Data> in
+    func contents(previousKey: Data?, keys: Mapping<Data, Data>) -> Mapping<Data, Data> {
+        return children.values().reduce(Mapping<Data, Data>(), { (result, entry) -> Mapping<Data, Data> in
             return result.overwrite(with: entry.contents(previousKey: previousKey, keys: keys))
         })
     }
 
-	func targeting(_ targets: TrieSet<Edge>, prefix: Path) -> (Self, Mapping<String, [Path]>) {
+	func targeting(_ targets: TrieSet<Edge>, prefix: Path) -> (Self, Mapping<Data, [Path]>) {
 		let reducedTargets = targets.subtree(keys: self.prefix)
-		let childrenResult = children.elements().reduce((Mapping<Edge, Child>(), Mapping<String, [Path]>())) { (result, entry) -> (Mapping<Edge, Child>, Mapping<String, [Path]>) in
+		let childrenResult = children.elements().reduce((Mapping<Edge, Child>(), Mapping<Data, [Path]>())) { (result, entry) -> (Mapping<Edge, Child>, Mapping<Data, [Path]>) in
 			let childResult = entry.1.targeting(reducedTargets.including(keys: [entry.0]), prefix: prefix + [entry.0])
 			return (result.0.setting(key: entry.0, value: childResult.0), result.1 + childResult.1)
 		}
 		return (changing(children: childrenResult.0), childrenResult.1)
 	}
 
-	func masking(_ masks: TrieSet<Edge>, prefix: Path) -> (Self, Mapping<String, [Path]>) {
+	func masking(_ masks: TrieSet<Edge>, prefix: Path) -> (Self, Mapping<Data, [Path]>) {
 		let reducedMasks = masks.subtree(keys: self.prefix)
-		let childrenResult = children.elements().reduce((Mapping<Edge, Child>(), Mapping<String, [Path]>())) { (result, entry) -> (Mapping<Edge, Child>, Mapping<String, [Path]>) in
+		let childrenResult = children.elements().reduce((Mapping<Edge, Child>(), Mapping<Data, [Path]>())) { (result, entry) -> (Mapping<Edge, Child>, Mapping<Data, [Path]>) in
 			let childResult = entry.1.masking(reducedMasks.including(keys: [entry.0]), prefix: prefix + [entry.0])
 			return (result.0.setting(key: entry.0, value: childResult.0), result.1 + childResult.1)
 		}
 		return (changing(children: childrenResult.0), childrenResult.1)
 	}
 
-	func mask(prefix: [Edge]) -> (Self, Mapping<String, [Path]>) {
-		let childrenResult = children.elements().reduce((Mapping<Edge, Child>(), Mapping<String, [Path]>())) { (result, entry) -> (Mapping<Edge, Child>, Mapping<String, [Path]>) in
+	func mask(prefix: [Edge]) -> (Self, Mapping<Data, [Path]>) {
+		let childrenResult = children.elements().reduce((Mapping<Edge, Child>(), Mapping<Data, [Path]>())) { (result, entry) -> (Mapping<Edge, Child>, Mapping<Data, [Path]>) in
 			let childResult = entry.1.mask(prefix: prefix + [entry.0])
 			return (result.0.setting(key: entry.0, value: childResult.0), result.1 + childResult.1)
 		}

@@ -96,14 +96,14 @@ public extension RGDictionary {
 		return Self(core: core ?? self.core, incompleteChildren: incompleteChildren ?? self.incompleteChildren, children: children ?? self.children, targets: targets ?? self.targets, masks: masks ?? self.masks, isMasked: isMasked ?? self.isMasked)
 	}
     
-    func capture(digestString: String, content: Data, prefix: Path, previousKey: Data?, keys: Mapping<Data, Data>) -> (Self, Mapping<String, [Path]>)? {
+    func capture(digestString: Data, content: Data, prefix: Path, previousKey: Data?, keys: Mapping<Data, Data>) -> (Self, Mapping<Data, [Path]>)? {
         guard let modifiedCore = core.capture(content: content, digestString: digestString, previousKey: previousKey, keys: keys) else { return nil }
-        let newChildren = modifiedCore.2.reduce((Mapping<String, Value>(), Mapping<String, [Path]>())) { (result, entry) -> (Mapping<String, Value>, Mapping<String, [Path]>) in
+        let newChildren = modifiedCore.2.reduce((Mapping<String, Value>(), Mapping<Data, [Path]>())) { (result, entry) -> (Mapping<String, Value>, Mapping<Data, [Path]>) in
             let childEdge = entry.0.toString()
             let childPrefix = prefix + [childEdge]
             let childAfterTargeting = entry.1.targeting(targets.subtree(keys: [childEdge]), prefix: childPrefix)
             let childAfterMasking = childAfterTargeting.0.masking(masks.subtree(keys: [childEdge]), prefix: childPrefix)
-            let childMasked = isMasked ? childAfterMasking.0.mask(prefix: childPrefix) : (childAfterMasking.0, Mapping<String, [Path]>())
+            let childMasked = isMasked ? childAfterMasking.0.mask(prefix: childPrefix) : (childAfterMasking.0, Mapping<Data, [Path]>())
             return (result.0.setting(key: childEdge, value: childMasked.0), result.1 + childAfterTargeting.1 + childAfterMasking.1 + childMasked.1)
         }
         let foundIndicies = modifiedCore.2.map { $0.0.toString() }
@@ -113,14 +113,14 @@ public extension RGDictionary {
         let leftoverMasks = foundIndicies.reduce(masks ?? TrieSet<String>()) { (result, entry) -> TrieSet<String> in
             return result.excluding(keys: [entry])
         }
-        let newPaths = modifiedCore.1.reduce(newChildren.1) { (result, entry) -> Mapping<String, [Path]> in
+        let newPaths = modifiedCore.1.reduce(newChildren.1) { (result, entry) -> Mapping<Data, [Path]> in
             return result.setting(key: entry, value: (result[entry] ?? []) + [prefix])
         }
         let newIncompleteChildren = newChildren.0.elements().filter { !$0.1.complete }.map { $0.0 }
         return (changing(core: modifiedCore.0, incompleteChildren: incompleteChildren.union(newIncompleteChildren), children: children.overwrite(with: newChildren.0), targets: leftoverTargets, masks: leftoverMasks), newPaths)
     }
     
-    func capture(digestString: String, content: Data, at route: Path, prefix: Path, previousKey: Data?, keys: Mapping<Data, Data>) -> (Self, Mapping<String, [Path]>)? {
+    func capture(digestString: Data, content: Data, at route: Path, prefix: Path, previousKey: Data?, keys: Mapping<Data, Data>) -> (Self, Mapping<Data, [Path]>)? {
         guard let firstLeg = route.first else { return capture(digestString: digestString, content: content, prefix: prefix, previousKey: previousKey, keys: keys) }
         guard let childValue = children[firstLeg] else { return nil }
         if childValue.complete { return nil }
@@ -132,44 +132,44 @@ public extension RGDictionary {
     }
 
 
-	func missing(prefix: Path) -> Mapping<String, [Path]> {
-		let missingCore = core.missingDigests().reduce(Mapping<String, [Path]>()) { (result, entry) -> Mapping<String, [Path]> in
+	func missing(prefix: Path) -> Mapping<Data, [Path]> {
+		let missingCore = core.missingDigests().reduce(Mapping<Data, [Path]>()) { (result, entry) -> Mapping<Data, [Path]> in
 			return result.setting(key: entry, value: [prefix])
 		}
 		return children.elements().map { $0.1.missing(prefix: prefix + [$0.0.toString()]) }.reduce(missingCore, +)
 	}
     
-    func contents(previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> Mapping<String, Data> {
-        return children.elements().reduce(core.contents(previousKey: previousKey, keys: keys)) { (result, entry) -> Mapping<String, Data> in
+    func contents(previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> Mapping<Data, Data> {
+        return children.elements().reduce(core.contents(previousKey: previousKey, keys: keys)) { (result, entry) -> Mapping<Data, Data> in
             return result.overwrite(with: entry.1.contents(previousKey: previousKey, keys: keys))
         }
     }
 
-	func targeting(_ targets: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<String, [Path]>) {
-		return targets.children.keys().reduce((self, Mapping<String, [Path]>()), { (result, entry) -> (Self, Mapping<String, [Path]>) in
+	func targeting(_ targets: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<Data, [Path]>) {
+		return targets.children.keys().reduce((self, Mapping<Data, [Path]>()), { (result, entry) -> (Self, Mapping<Data, [Path]>) in
 			let targeted = result.0.targeting(targets, prefix: prefix, edge: entry)
 			return (targeted.0, result.1 + targeted.1)
 		})
 	}
 
-	func targeting(_ targets: TrieSet<Edge>, prefix: [Edge], edge: String) -> (Self, Mapping<String, [Path]>) {
-		if isMasked { return (self, Mapping<String, [Path]>()) }
+	func targeting(_ targets: TrieSet<Edge>, prefix: [Edge], edge: String) -> (Self, Mapping<Data, [Path]>) {
+		if isMasked { return (self, Mapping<Data, [Path]>()) }
 		let targetsForKey = targets.including(keys: [edge])
-		if targetsForKey.isEmpty() { return (self, Mapping<String, [Path]>()) }
+		if targetsForKey.isEmpty() { return (self, Mapping<Data, [Path]>()) }
 		if let child = children[edge] { return targeting(child: child, targets: targetsForKey, prefix: prefix, edge: edge) }
 		let newTargets = self.targets.overwrite(with: targetsForKey)
 		if !self.targets.subtree(keys: [edge]).isEmpty() || !self.masks.subtree(keys: [edge]).isEmpty() {
-			return (changing(targets: newTargets), Mapping<String, [Path]>())
+			return (changing(targets: newTargets), Mapping<Data, [Path]>())
 		}
-		guard let key = Key(stringValue: edge) else { return (self, Mapping<String, [Path]>()) }
+		guard let key = Key(stringValue: edge) else { return (self, Mapping<Data, [Path]>()) }
 		let coreResult = core.targeting(keys: [key])
-		let corePaths = coreResult.1.reduce(Mapping<String, [Path]>()) { (result, entry) -> Mapping<String, [Path]> in
+		let corePaths = coreResult.1.reduce(Mapping<Data, [Path]>()) { (result, entry) -> Mapping<Data, [Path]> in
 			return result.setting(key: entry, value: [prefix])
 		}
 		return (changing(core: coreResult.0, targets: newTargets), corePaths)
 	}
 
-	func targeting(child: Value, targets: TrieSet<Edge>, prefix: [Edge], edge: String) -> (Self, Mapping<String, [Path]>) {
+	func targeting(child: Value, targets: TrieSet<Edge>, prefix: [Edge], edge: String) -> (Self, Mapping<Data, [Path]>) {
 		let keyTargets = targets.subtree(keys: [edge])
 		let childResult = child.targeting(keyTargets, prefix: prefix + [edge])
 		let newIncompleteChildren = (child.complete && !childResult.0.complete) ? incompleteChildren.union([edge]) : incompleteChildren
@@ -181,30 +181,30 @@ public extension RGDictionary {
 		return (changing(incompleteChildren: newIncompleteChildren, children: children.setting(key: edge, value: childResult.0)), childResult.1)
 	}
 
-	func masking(_ masks: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<String, [Path]>) {
-		return masks.children.keys().reduce((self, Mapping<String, [Path]>())) { (result, entry) -> (Self, Mapping<String, [Path]>) in
+	func masking(_ masks: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<Data, [Path]>) {
+		return masks.children.keys().reduce((self, Mapping<Data, [Path]>())) { (result, entry) -> (Self, Mapping<Data, [Path]>) in
 			let masked = result.0.masking(masks, prefix: prefix, edge: entry)
 			return (masked.0, result.1 + masked.1)
 		}
 	}
 
-	func masking(_ masks: TrieSet<Edge>, prefix: [Edge], edge: String) -> (Self, Mapping<String, [Path]>) {
+	func masking(_ masks: TrieSet<Edge>, prefix: [Edge], edge: String) -> (Self, Mapping<Data, [Path]>) {
 		let masksForKey = masks.including(keys: [edge])
-		if masksForKey.isEmpty() { return (self, Mapping<String, [Path]>()) }
+		if masksForKey.isEmpty() { return (self, Mapping<Data, [Path]>()) }
 		if let child = children[edge] { return masking(child: child, masks: masksForKey, prefix: prefix, edge: edge) }
 		let newMasks = self.masks.overwrite(with: masksForKey)
 		if !self.targets.subtree(keys: [edge]).isEmpty() || !self.masks.subtree(keys: [edge]).isEmpty() {
-			return (changing(masks: newMasks), Mapping<String, [Path]>())
+			return (changing(masks: newMasks), Mapping<Data, [Path]>())
 		}
-		guard let key = Key(stringValue: edge) else { return (self, Mapping<String, [Path]>()) }
+		guard let key = Key(stringValue: edge) else { return (self, Mapping<Data, [Path]>()) }
 		let coreResult = core.masking(keys: [key])
-		let corePaths = coreResult.1.reduce(Mapping<String, [Path]>()) { (result, entry) -> Mapping<String, [Path]> in
+		let corePaths = coreResult.1.reduce(Mapping<Data, [Path]>()) { (result, entry) -> Mapping<Data, [Path]> in
 			return result.setting(key: entry, value: [prefix])
 		}
 		return (changing(core: coreResult.0, masks: newMasks), corePaths)
 	}
 
-	func masking(child: Value, masks: TrieSet<Edge>, prefix: [Edge], edge: String) -> (Self, Mapping<String, [Path]>) {
+	func masking(child: Value, masks: TrieSet<Edge>, prefix: [Edge], edge: String) -> (Self, Mapping<Data, [Path]>) {
 		if masks.contains([edge]) {
 			let maskedChild = child.mask(prefix: prefix + [edge])
 			let newIncompleteChildren = (child.complete && !maskedChild.0.complete) ? incompleteChildren.union([edge]) : incompleteChildren
@@ -216,12 +216,12 @@ public extension RGDictionary {
 		return (changing(incompleteChildren: newIncompleteChildren, children: children.setting(key: edge, value: childResult.0)), childResult.1)
 	}
 
-	func mask(prefix: [Edge]) -> (Self, Mapping<String, [Path]>) {
+	func mask(prefix: [Edge]) -> (Self, Mapping<Data, [Path]>) {
 		let coreResult = core.mask()
-		let corePaths = coreResult.1.reduce(Mapping<String, [Path]>()) { (result, entry) -> Mapping<String, [Path]> in
+		let corePaths = coreResult.1.reduce(Mapping<Data, [Path]>()) { (result, entry) -> Mapping<Data, [Path]> in
 			return result.setting(key: entry, value: [prefix])
 		}
-		let newChildren = children.elements().reduce((Mapping<String, Value>(), Mapping<String, [Path]>(), Set<String>())) { (result, entry) -> (Mapping<String, Value>, Mapping<String, [Path]>, Set<String>) in
+		let newChildren = children.elements().reduce((Mapping<String, Value>(), Mapping<Data, [Path]>(), Set<String>())) { (result, entry) -> (Mapping<String, Value>, Mapping<Data, [Path]>, Set<String>) in
 			if entry.1.isMasked { return (result.0.setting(key: entry.0, value: entry.1), result.1, result.2) }
 			let childResult = entry.1.mask(prefix: prefix + [entry.0.toString()])
 			let newIncompleteChildren = (entry.1.complete && !childResult.0.complete) ? [entry.0] : []

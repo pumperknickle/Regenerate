@@ -4,16 +4,16 @@ import AwesomeDictionary
 
 public struct RT256<Key: DataEncodable, Value: DataEncodable>: Codable {
     private let rawRoot: Root!
-    private let rawPaths: Mapping<String, [Path]>!
+    private let rawPaths: Mapping<Data, [Path]>!
 }
 
 extension RT256: Regenerative {
     public typealias Root = RadixAddress256
 
     public var root: Root { return rawRoot }
-    public var keyPaths: Mapping<String, [Path]> { return rawPaths }
+    public var keyPaths: Mapping<Data, [Path]> { return rawPaths }
 
-    public init(root: Root, paths: Mapping<String, [Path]>) {
+    public init(root: Root, paths: Mapping<Data, [Path]>) {
         self.rawRoot = root
         self.rawPaths = paths
     }

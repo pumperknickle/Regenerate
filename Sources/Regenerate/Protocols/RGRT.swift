@@ -26,7 +26,7 @@ public extension RGRT {
     }
 
     // Empty Tree
-    init() { self.init(root: Root(), paths: Mapping<String, [Path]>()) }
+    init() { self.init(root: Root(), paths: Mapping<Data, [Path]>()) }
 
     var digest: Digest! { return root.digest }
 
@@ -88,23 +88,23 @@ public extension RGRT {
     }
     
     func capture(info: [Data], previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> (Self, [(Key, Value)])? {
-        let optionalDigests = info.reduce([:]) { (result, entry) -> [String: Data]? in
+        let optionalDigests = info.reduce([:]) { (result, entry) -> [Data: Data]? in
             guard let result = result else { return nil }
             guard let digestBits = CryptoDelegateType.hash(entry) else { return nil }
             guard let digest = Digest(data: digestBits) else { return nil }
-            return result.setting(digest.toString(), withValue: entry)
+            return result.setting(digest.toData(), withValue: entry)
         }
         guard let digests = optionalDigests else { return nil }
         return capture(info: digests, previousKey: previousKey, keys: keys)
     }
 
-    func capture(info: [String: Data], previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> (Self, [(Key, Value)])? {
+    func capture(info: [Data: Data], previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> (Self, [(Key, Value)])? {
         let insertions = keyPaths.keys().map { (digest: $0, content: info[$0]) }
         if insertions.isEmpty || !insertions.contains(where: { $0.content != nil }) { return (self, []) }
         let nextStep = insertions.reduce((self, [])) { (result, entry) -> (Self, [(Key, Value)])? in
             guard let result = result else { return nil }
             guard let content = entry.content else { return result }
-            guard let rrmInsertingContent = result.0.capture(content: content, digestString: entry.digest.toString(), previousKey: previousKey, keys: keys) else { return nil }
+            guard let rrmInsertingContent = result.0.capture(content: content, digestString: entry.digest.toData(), previousKey: previousKey, keys: keys) else { return nil }
             return (rrmInsertingContent.0, rrmInsertingContent.2 + result.1)
         }
         guard let rrmAfterStep = nextStep else { return nil }
@@ -112,16 +112,16 @@ public extension RGRT {
         return (recursiveChildResult.0, recursiveChildResult.1 + rrmAfterStep.1)
     }
 
-    func capture(content: Data, previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> (Self, Set<String>, [(Key, Value)])? {
+    func capture(content: Data, previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> (Self, Set<Data>, [(Key, Value)])? {
         guard let digestBytes: Data = CryptoDelegateType.hash(content) else { return nil }
         guard let digest = Digest(data: digestBytes) else { return nil }
-        return capture(content: content, digestString: digest.toString(), previousKey: previousKey, keys: keys)
+        return capture(content: content, digestString: digest.toData(), previousKey: previousKey, keys: keys)
     }
 
-    func capture(content: Data, digestString: String, previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> (Self, Set<String>, [(Key, Value)])? {
+    func capture(content: Data, digestString: Data, previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> (Self, Set<Data>, [(Key, Value)])? {
         guard let routes = keyPaths[digestString] else { return nil }
         if routes.isEmpty { return nil }
-        let resultAfterExploringRoutes = routes.reduce((self, Set<String>([]), [])) { (result, entry) -> (Self, Set<String>, [(Key, Value)])? in
+        let resultAfterExploringRoutes = routes.reduce((self, Set<Data>([]), [])) { (result, entry) -> (Self, Set<Data>, [(Key, Value)])? in
             guard let result = result else { return nil }
             guard let rrmAfterExploringRoute = result.0.capture(digestString: digestString, content: content, at: entry, previousKey: previousKey, keys: keys) else { return nil }
             let newDigests = result.1.union(rrmAfterExploringRoute.1)
@@ -134,7 +134,7 @@ public extension RGRT {
         return (finalRRM, finalResult.1, finalResult.2)
     }
 
-    func capture(digestString: String, content: Data, at route: Path, previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> (Self, Set<String>, (Key, Value)?)? {
+    func capture(digestString: Data, content: Data, at route: Path, previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> (Self, Set<Data>, (Key, Value)?)? {
         guard let modifiedRootResult = root.capture(digestString: digestString, content: content, at: route, prefix: [], previousKey: previousKey, keys: keys) else { return nil }
         guard let valueEdges = modifiedRootResult.0.value(for: route) else { return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys()), nil) }
         if valueEdges.isEmpty { return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys()), nil) }
@@ -146,7 +146,7 @@ public extension RGRT {
         return (Self(root: modifiedRootResult.0, paths: modifiedRootResult.1 + keyPaths), Set(modifiedRootResult.1.keys()), (key, value))
     }
 
-	func targeting(keys: [Key]) -> (Self, Set<String>) {
+	func targeting(keys: [Key]) -> (Self, Set<Data>) {
 		let targets = keys.reduce(TrieSet<Edge>()) { (result, entry) -> TrieSet<Edge> in
             guard let symbolEncodedKey = encodeKey(key: entry.toData()) else { return result }
 			return result.adding(symbolEncodedKey)
@@ -154,7 +154,7 @@ public extension RGRT {
 		return targeting(targets)
 	}
 
-	func masking(keys: [Key]) -> (Self, Set<String>) {
+	func masking(keys: [Key]) -> (Self, Set<Data>) {
 		let masks = keys.reduce(TrieSet<Edge>()) { (result, entry) -> TrieSet<Edge> in
             guard let symbolEncodedKey = encodeKey(key: entry.toData()) else { return result }
 			return result.adding(symbolEncodedKey)
