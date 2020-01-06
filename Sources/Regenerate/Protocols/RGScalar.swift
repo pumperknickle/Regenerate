@@ -5,7 +5,7 @@ import AwesomeTrie
 
 // Leaf node
 public protocol RGScalar: RGArtifact {
-    associatedtype T: Codable
+    associatedtype T: DataEncodable
     var scalar: T! { get }
     init(scalar: T)
 }
@@ -24,25 +24,9 @@ public extension RGScalar {
 	static func properties() -> [String] { return [] }
 	func pruning() -> Self { return self }
     func encrypt(allKeys: CoveredTrie<String, Data>, commonIv: Data) -> Self? { return self }
-}
-
-public extension RGScalar where T == String {
-    func toData() -> Data {
-        return scalar.toData()
-    }
-    
+    func toData() -> Data { return scalar.toData() }
     init?(data: Data) {
-        guard let stringValue = String(data: data) else { return nil }
-        self = Self(scalar: stringValue)
-    }
-}
-
-public extension RGScalar where T == Data {
-    func toData() -> Data {
-        return scalar
-    }
-    
-    init?(data: Data) {
-        self = Self(scalar: data)
+        guard let scalar = T(data: data) else { return nil }
+        self = Self(scalar: scalar)
     }
 }

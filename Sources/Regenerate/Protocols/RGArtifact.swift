@@ -93,9 +93,9 @@ public extension RGArtifact {
 	}
 
 	func pruning() -> Self {
-        return Self.properties().reduce(self) { (_, entry) -> Self in
-			guard let value = get(property: entry) else { return self }
-			guard let toReturn = set(property: entry, to: value.empty()) else { return self }
+        return Self.properties().reduce(self) { (result, entry) -> Self in
+            guard let value = result.get(property: entry) else { return self }
+            guard let toReturn = result.set(property: entry, to: value.empty()) else { return self }
 			return toReturn
 		}
 	}
@@ -105,7 +105,8 @@ public extension RGArtifact {
 	}
     
     func toData() -> Data {
-        return try! JSONEncoder().encode(pruning())
+        let pruned = pruning()
+        return try! JSONEncoder().encode(pruned)
     }
     
     init?(data: Data) {

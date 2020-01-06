@@ -32,7 +32,7 @@ public extension RGDictionary {
         let convertedChildren = unwrappedChildren.elements().reduce(Mapping<Key, Value>()) { (result, entry) -> Mapping<Key, Value>? in
             guard let result = result else { return nil }
             guard let key = Key(stringValue: entry.0) else { return nil }
-            return result.setting(key: key, value: entry.1)
+            return result.setting(key: key, value: entry.1.empty())
         }
         guard let finalConvertedChildren = convertedChildren else { return nil }
         guard let newCore = CoreType(raw: finalConvertedChildren.elements()) else { return nil }

@@ -102,11 +102,14 @@ final class RGGenericSpec: QuickSpec {
             let targets: TrieSet<String> = TrieSet<String>()
                 .adding([Foo.metafield1, ArrayStemType.Digest(0).toString()])
                 .adding([Foo.metafield1, ArrayStemType.Digest(1).toString()])
+            
+            let contents = encryptedFoo.contents(previousKey: rootKey.toData(), keys: allKeys).elements()
 
             let cutFoo: RegenerativeFooType = encryptedFoo.cuttingAllNodes().targeting(targets).0
-            let regeneratedFoo: RegenerativeFooType? = cutFoo.capture(info: Dictionary(uniqueKeysWithValues: encryptedFoo.contents(keys: allKeys).elements()), keys: allKeys)
+            let regeneratedFoo: RegenerativeFooType? = cutFoo.capture(info: Dictionary(uniqueKeysWithValues: contents), keys: allKeys)
 			it("should regenerate partially") {
-				expect(regeneratedFoo!.root.artifact!.array1.artifact).toNot(beNil())
+                expect(regeneratedFoo!.root.artifact!.array1.artifact!.children.elements().count).to(equal(2))
+                expect(regeneratedFoo!.root.artifact!.array1.artifact!.children.values().contains(where: { !$0.complete })).to(beFalse())
 				expect(regeneratedFoo!.root.artifact!.array2.artifact).to(beNil())
 			}
 		}

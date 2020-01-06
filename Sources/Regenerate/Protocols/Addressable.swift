@@ -42,11 +42,11 @@ public extension Addressable {
         guard let symmetricKey = SymmetricKey(data: Data(symmetricKeyData)) else { return nil }
         guard let dataIV = CryptoDelegateType.hash(commonIv) else { return nil }
         guard let IV = SymmetricIV(data: dataIV) else { return nil }
-        guard let ciphertext = SymmetricDelegateType.encrypt(plaintext: encryptedArtifact, key: symmetricKey, iv: IV) else { return nil }
+        guard let ciphertext = SymmetricDelegateType.encrypt(plaintext: encryptedArtifact.pruning(), key: symmetricKey, iv: IV) else { return nil }
         guard let ciphertextHashOutput = CryptoDelegateType.hash(ciphertext) else { return nil }
         guard let ciphertextDigest = Digest(data: ciphertextHashOutput) else { return nil }
         if !keyRoot { return Self(digest: ciphertextDigest, artifact: encryptedArtifact, symmetricKeyHash: nil, complete: complete, targets: targets, masks: masks, isMasked: isMasked, isTargeted: isTargeted, symmetricIV: IV) }
-        guard let symmetricKeyHashData = BaseCrypto.hash(Data(symmetricKeyData)) else { return nil }
+        guard let symmetricKeyHashData = BaseCrypto.hash(symmetricKeyData) else { return nil }
         guard let symmetricKeyHash = Digest(data: symmetricKeyHashData) else { return nil }
         return Self(digest: ciphertextDigest, artifact: encryptedArtifact, symmetricKeyHash: symmetricKeyHash, complete: complete, targets: targets, masks: masks, isMasked: isMasked, isTargeted: isTargeted, symmetricIV: IV)
     }
@@ -101,10 +101,10 @@ public extension Addressable {
     func contents(previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> Mapping<Data, Data> {
         guard let node = artifact else { return Mapping<Data, Data>() }
         guard let symmetricKeyHash = symmetricKeyHash else {
-            guard let previousKey = previousKey else { return node.contents(previousKey: nil, keys: keys).setting(key: digest.toData(), value: node.toData()) }
+            guard let previousKey = previousKey else { return node.contents(previousKey: nil, keys: keys).setting(key: digest.toData(), value: node.pruning().toData()) }
             guard let symmetricKey = SymmetricKey(data: previousKey) else { return Mapping<Data, Data>() }
             guard let IV = symmetricIV else { return Mapping<Data, Data>() }
-            guard let ciphertext = SymmetricDelegateType.encrypt(plaintext: node, key: symmetricKey, iv: IV) else { return Mapping<Data, Data>() }
+            guard let ciphertext = SymmetricDelegateType.encrypt(plaintext: node.pruning(), key: symmetricKey, iv: IV) else { return Mapping<Data, Data>() }
             guard let ciphertextHashOutput = CryptoDelegateType.hash(ciphertext) else { return Mapping<Data, Data>() }
             guard let ciphertextDigest = Digest(data: ciphertextHashOutput) else { return  Mapping<Data, Data>() }
             return node.contents(previousKey: previousKey, keys: keys).setting(key: ciphertextDigest.toData(), value: ciphertext)
@@ -112,7 +112,7 @@ public extension Addressable {
         guard let symmetricKeyData = keys[symmetricKeyHash.toData()] else { return Mapping<Data, Data>() }
         guard let symmetricKey = SymmetricKey(data: symmetricKeyData) else { return Mapping<Data, Data>() }
         guard let IV = symmetricIV else { return Mapping<Data, Data>() }
-        guard let ciphertext = SymmetricDelegateType.encrypt(plaintext: node, key: symmetricKey, iv: IV) else { return Mapping<Data, Data>() }
+        guard let ciphertext = SymmetricDelegateType.encrypt(plaintext: node.pruning(), key: symmetricKey, iv: IV) else { return Mapping<Data, Data>() }
         guard let ciphertextHashOutput = CryptoDelegateType.hash(ciphertext) else { return Mapping<Data, Data>()}
         guard let ciphertextDigest = Digest(data: ciphertextHashOutput) else { return Mapping<Data, Data>() }
         return node.contents(previousKey: symmetricKeyData, keys: keys).setting(key: ciphertextDigest.toData(), value: ciphertext)

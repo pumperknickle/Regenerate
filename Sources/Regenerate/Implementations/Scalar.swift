@@ -2,7 +2,7 @@ import Foundation
 import Bedrock
 import CryptoStarterPack
 
-public struct Scalar<T: Codable>: Codable {
+public struct Scalar<T: DataEncodable>: Codable {
     private let rawScalar: T!
 }
 
