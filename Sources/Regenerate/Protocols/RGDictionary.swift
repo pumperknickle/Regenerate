@@ -42,11 +42,14 @@ public extension RGDictionary {
     }
 
 	init?(_ mapping: Mapping<Key, Value>) {
-		let coreTuples = mapping.elements()
-		let children = coreTuples.reduce(Mapping<String, Value>()) { (result, entry) -> Mapping<String, Value> in
+        let elements = mapping.elements()
+        let coreTuples = elements.reduce(Mapping<Key, Value>()) { (result, entry) -> Mapping<Key, Value> in
+            return result.setting(key: entry.0, value: entry.1.empty())
+        }
+        let children = elements.reduce(Mapping<String, Value>()) { (result, entry) -> Mapping<String, Value> in
 			return result.setting(key: entry.0.toString(), value: entry.1)
 		}
-		guard let core = CoreType(raw: coreTuples) else { return nil }
+        guard let core = CoreType(raw: coreTuples.elements()) else { return nil }
 		self.init(core: core, incompleteChildren: Set([]), children: children, targets: TrieSet<Edge>(), masks: TrieSet<Edge>(), isMasked: false)
 	}
     

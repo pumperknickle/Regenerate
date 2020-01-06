@@ -23,16 +23,14 @@ public extension RGArray {
 	}
 
 	init?(_ rawArray: [Element]) {
-		let rawMapping = rawArray.reduce((Mapping<Index, Element>(), Index(0))) { (result, entry) -> (Mapping<Index, Element>, Index)? in
-			guard let result = result else { return nil }
-			return (result.0.setting(key: result.1, value: entry), result.1.advanced(by: 1))
+		let rawMapping = rawArray.reduce((Mapping<Index, Element>(), Index(0))) { (result, entry) -> (Mapping<Index, Element>, Index) in
+            return (result.0.setting(key: result.1, value: entry.empty()), result.1.advanced(by: 1))
 		}
-		guard let mappingResult = rawMapping else { return nil }
-		guard let core = CoreType(raw: mappingResult.0.elements()) else { return nil }
-		let newChildren = mappingResult.0.elements().reduce(Mapping<String, Element>()) { (result, entry) -> Mapping<String, Element> in
-			return result.setting(key: entry.0.toString(), value: entry.1)
-		}
-		self.init(core: core, incompleteChildren: Set<String>([]), children: newChildren, targets: TrieSet<String>(), masks: TrieSet<String>(), isMasked: false, length: mappingResult.1)
+        let newChildren = rawArray.reduce((Mapping<String, Element>(), Index(0))) { (result, entry) -> (Mapping<String, Element>, Index) in
+            return (result.0.setting(key: result.1.toString(), value: entry), result.1.advanced(by: 1))
+        }
+        guard let core = CoreType(raw: rawMapping.0.elements()) else { return nil }
+        self.init(core: core, incompleteChildren: Set<String>([]), children: newChildren.0, targets: TrieSet<String>(), masks: TrieSet<String>(), isMasked: false, length: rawMapping.1)
 	}
     
     init?(artifacts: [Artifact?]) {
