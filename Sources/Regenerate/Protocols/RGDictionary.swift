@@ -74,6 +74,10 @@ public extension RGDictionary {
         guard let finalMapping = mapping else { return nil }
         self.init(finalMapping)
     }
+    
+    func setting(key: Key, to value: Value) -> Self {
+        return changing(core: core.setting(key: key, to: value.empty()), children: children.setting(key: key.toString(), value: value))
+    }
 
 	func set(property: String, to child: CryptoBindable) -> Self? {
 		return nil
