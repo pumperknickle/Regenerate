@@ -1,7 +1,7 @@
-import Foundation
-import Bedrock
 import AwesomeDictionary
 import AwesomeTrie
+import Bedrock
+import Foundation
 
 public protocol RGRadix: RGArtifact where Child.Artifact == Self {
     associatedtype Child: RGRadixAddress
@@ -26,29 +26,29 @@ public extension RGRadix {
 
     init() { self.init(prefix: [], value: [], children: Mapping<Edge, Child>()) }
 
-	func set(property: String, to child: CryptoBindable) -> Self? {
-		return nil
-	}
+    func set(property _: String, to _: CryptoBindable) -> Self? {
+        return nil
+    }
 
-	func get(property: String) -> CryptoBindable? {
-		return nil
-	}
+    func get(property _: String) -> CryptoBindable? {
+        return nil
+    }
 
-	func value(for route: Path) -> [Edge]? {
-		guard let firstLeg = route.first else { return value }
-		guard let child = children[firstLeg] else { return nil }
-		return child.value(for: Array(route.dropFirst()))
-	}
+    func value(for route: Path) -> [Edge]? {
+        guard let firstLeg = route.first else { return value }
+        guard let child = children[firstLeg] else { return nil }
+        return child.value(for: Array(route.dropFirst()))
+    }
 
-	func key(for route: Path, prefix: [Edge]) -> [Edge]? {
-		guard let firstLeg = route.first else { return prefix + self.prefix }
-		guard let child = children[firstLeg] else { return nil }
-		return child.key(for: Array(route.dropFirst()), prefix: prefix + self.prefix)
-	}
+    func key(for route: Path, prefix: [Edge]) -> [Edge]? {
+        guard let firstLeg = route.first else { return prefix + self.prefix }
+        guard let child = children[firstLeg] else { return nil }
+        return child.key(for: Array(route.dropFirst()), prefix: prefix + self.prefix)
+    }
 
-	static func properties() -> [String] {
-		return []
-	}
+    static func properties() -> [String] {
+        return []
+    }
 
     func isValid() -> Bool {
         return !children.values().contains(where: { !$0.computedValidity() })
@@ -75,18 +75,18 @@ public extension RGRadix {
     }
 
     func cuttingChildStems() -> Mapping<Edge, Child> {
-        return children.elements().reduce(Mapping<Edge, Child>(), { (result, entry) -> Mapping<Edge, Child> in
-            return result.setting(key: entry.0, value: entry.1.empty())
-        })
+        return children.elements().reduce(Mapping<Edge, Child>()) { (result, entry) -> Mapping<Edge, Child> in
+            result.setting(key: entry.0, value: entry.1.empty())
+        }
     }
 
     func cuttingGrandchildStems() -> Mapping<Edge, Child>? {
-        return children.elements().reduce(Mapping<Edge, Child>(), { (result, entry) -> Mapping<Edge, Child>? in
+        return children.elements().reduce(Mapping<Edge, Child>()) { (result, entry) -> Mapping<Edge, Child>? in
             guard let result = result else { return nil }
             guard let node = entry.1.artifact else { return nil }
             guard let newChild = Child(artifact: node.pruning(), symmetricKeyHash: entry.1.symmetricKeyHash, symmetricIV: entry.1.symmetricIV) else { return nil }
             return result.setting(key: entry.0, value: newChild)
-        })
+        }
     }
 
     func grandchildPruning() -> Self? {
@@ -102,7 +102,7 @@ public extension RGRadix {
         return childStem.get(key: suffix)
     }
 
-	func setting(key: [Edge], to value: [Edge]) -> Self? {
+    func setting(key: [Edge], to value: [Edge]) -> Self? {
         if !key.starts(with: prefix) {
             if prefix.starts(with: key) {
                 let childSuffix = prefix - key
@@ -115,7 +115,7 @@ public extension RGRadix {
             let nodeSuffix = prefix - sharedPrefix
             guard let firstKeySuffix = keySuffix.first else { return nil }
             guard let firstNodeSuffix = nodeSuffix.first else { return nil }
-			guard let keyChild = Child(artifact: Self(prefix: keySuffix, value: value, children: Mapping<Edge, Child>()), symmetricKeyHash: nil, symmetricIV: nil) else { return nil }
+            guard let keyChild = Child(artifact: Self(prefix: keySuffix, value: value, children: Mapping<Edge, Child>()), symmetricKeyHash: nil, symmetricIV: nil) else { return nil }
             guard let nodeChild = Child(artifact: changing(prefix: nodeSuffix), symmetricKeyHash: nil, symmetricIV: nil) else { return nil }
             let newChildren = Mapping<Edge, Child>().setting(key: firstKeySuffix, value: keyChild).setting(key: firstNodeSuffix, value: nodeChild)
             return Self(prefix: sharedPrefix, value: [], children: newChildren)
@@ -146,7 +146,7 @@ public extension RGRadix {
             let newChildren = children.deleting(key: firstSymbol)
             let newChildrenTuples = newChildren.elements()
             if !value.isEmpty || newChildrenTuples.count > 1 { return changing(children: newChildren) }
-            if value.isEmpty && newChildren.isEmpty() { return Self() }
+            if value.isEmpty, newChildren.isEmpty() { return Self() }
             guard let childTuple = newChildrenTuples.first else { return nil }
             guard let siblingNode = childTuple.1.artifact else { return nil }
             if prefix.isEmpty { return changing(children: newChildren) }
@@ -186,7 +186,7 @@ public extension RGRadix {
         }
         return changing(children: newChildren)
     }
-    
+
     func capture(digestString: Data, content: Data, at route: Path, prefix: Path, previousKey: Data?, keys: Mapping<Data, Data>) -> (Self, Mapping<Data, [Path]>)? {
         guard let firstLeg = route.first else { return nil }
         guard let childStem = children[firstLeg] else { return nil }
@@ -195,47 +195,47 @@ public extension RGRadix {
         return (modifiedNode, childStemResult.1)
     }
 
-	func missing(prefix: Path) -> Mapping<Data, [Path]> {
+    func missing(prefix: Path) -> Mapping<Data, [Path]> {
         if children.isEmpty() { return Mapping<Data, [Path]>() }
-		return children.elements().map { $0.1.missing(prefix: prefix + [$0.0]) }.reduce(Mapping<Data, [Path]>(), +)
+        return children.elements().map { $0.1.missing(prefix: prefix + [$0.0]) }.reduce(Mapping<Data, [Path]>(), +)
     }
-    
+
     func contents(previousKey: Data?, keys: Mapping<Data, Data>) -> Mapping<Data, Data> {
-        return children.values().reduce(Mapping<Data, Data>(), { (result, entry) -> Mapping<Data, Data> in
-            return result.overwrite(with: entry.contents(previousKey: previousKey, keys: keys))
-        })
+        return children.values().reduce(Mapping<Data, Data>()) { (result, entry) -> Mapping<Data, Data> in
+            result.overwrite(with: entry.contents(previousKey: previousKey, keys: keys))
+        }
     }
 
-	func targeting(_ targets: TrieSet<Edge>, prefix: Path) -> (Self, Mapping<Data, [Path]>) {
-		let reducedTargets = targets.subtree(keys: self.prefix)
-		let childrenResult = children.elements().reduce((Mapping<Edge, Child>(), Mapping<Data, [Path]>())) { (result, entry) -> (Mapping<Edge, Child>, Mapping<Data, [Path]>) in
-			let childResult = entry.1.targeting(reducedTargets.including(keys: [entry.0]), prefix: prefix + [entry.0])
-			return (result.0.setting(key: entry.0, value: childResult.0), result.1 + childResult.1)
-		}
-		return (changing(children: childrenResult.0), childrenResult.1)
-	}
+    func targeting(_ targets: TrieSet<Edge>, prefix: Path) -> (Self, Mapping<Data, [Path]>) {
+        let reducedTargets = targets.subtree(keys: self.prefix)
+        let childrenResult = children.elements().reduce((Mapping<Edge, Child>(), Mapping<Data, [Path]>())) { (result, entry) -> (Mapping<Edge, Child>, Mapping<Data, [Path]>) in
+            let childResult = entry.1.targeting(reducedTargets.including(keys: [entry.0]), prefix: prefix + [entry.0])
+            return (result.0.setting(key: entry.0, value: childResult.0), result.1 + childResult.1)
+        }
+        return (changing(children: childrenResult.0), childrenResult.1)
+    }
 
-	func masking(_ masks: TrieSet<Edge>, prefix: Path) -> (Self, Mapping<Data, [Path]>) {
-		let reducedMasks = masks.subtree(keys: self.prefix)
-		let childrenResult = children.elements().reduce((Mapping<Edge, Child>(), Mapping<Data, [Path]>())) { (result, entry) -> (Mapping<Edge, Child>, Mapping<Data, [Path]>) in
-			let childResult = entry.1.masking(reducedMasks.including(keys: [entry.0]), prefix: prefix + [entry.0])
-			return (result.0.setting(key: entry.0, value: childResult.0), result.1 + childResult.1)
-		}
-		return (changing(children: childrenResult.0), childrenResult.1)
-	}
+    func masking(_ masks: TrieSet<Edge>, prefix: Path) -> (Self, Mapping<Data, [Path]>) {
+        let reducedMasks = masks.subtree(keys: self.prefix)
+        let childrenResult = children.elements().reduce((Mapping<Edge, Child>(), Mapping<Data, [Path]>())) { (result, entry) -> (Mapping<Edge, Child>, Mapping<Data, [Path]>) in
+            let childResult = entry.1.masking(reducedMasks.including(keys: [entry.0]), prefix: prefix + [entry.0])
+            return (result.0.setting(key: entry.0, value: childResult.0), result.1 + childResult.1)
+        }
+        return (changing(children: childrenResult.0), childrenResult.1)
+    }
 
-	func mask(prefix: [Edge]) -> (Self, Mapping<Data, [Path]>) {
-		let childrenResult = children.elements().reduce((Mapping<Edge, Child>(), Mapping<Data, [Path]>())) { (result, entry) -> (Mapping<Edge, Child>, Mapping<Data, [Path]>) in
-			let childResult = entry.1.mask(prefix: prefix + [entry.0])
-			return (result.0.setting(key: entry.0, value: childResult.0), result.1 + childResult.1)
-		}
-		return (changing(children: childrenResult.0), childrenResult.1)
-	}
+    func mask(prefix: [Edge]) -> (Self, Mapping<Data, [Path]>) {
+        let childrenResult = children.elements().reduce((Mapping<Edge, Child>(), Mapping<Data, [Path]>())) { (result, entry) -> (Mapping<Edge, Child>, Mapping<Data, [Path]>) in
+            let childResult = entry.1.mask(prefix: prefix + [entry.0])
+            return (result.0.setting(key: entry.0, value: childResult.0), result.1 + childResult.1)
+        }
+        return (changing(children: childrenResult.0), childrenResult.1)
+    }
 
-	func shouldMask(_ masks: TrieSet<Edge>, prefix: [Edge]) -> Bool {
-		return masks.contains(self.prefix)
-	}
-    
+    func shouldMask(_ masks: TrieSet<Edge>, prefix _: [Edge]) -> Bool {
+        return masks.contains(prefix)
+    }
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let prefix = try container.decode(String.self, forKey: .prefix)
@@ -254,12 +254,12 @@ public extension RGRadix {
         try container.encode(value.toHexArray(), forKey: .value)
         try container.encode(children, forKey: .children)
     }
-    
+
     init?(data: Data) {
         guard let decoded = try? JSONDecoder().decode(Self.self, from: data) else { return nil }
         self = decoded
     }
-    
+
     func toData() -> Data {
         return try! JSONEncoder().encode(pruning())
     }

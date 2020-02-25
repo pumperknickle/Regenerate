@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol RGRadixAddress: Addressable where Artifact: RGRadix, Artifact.Child == Self { }
+public protocol RGRadixAddress: Addressable where Artifact: RGRadix, Artifact.Child == Self {}
 
 public enum TransitionProofType: Int {
     case creation = 1, mutation, deletion
@@ -14,15 +14,15 @@ public extension RGRadixAddress {
         return node.get(key: key)
     }
 
-	func value(for route: Path) -> [Edge]? {
-		guard let artifact = artifact else { return nil }
-		return artifact.value(for: route)
-	}
+    func value(for route: Path) -> [Edge]? {
+        guard let artifact = artifact else { return nil }
+        return artifact.value(for: route)
+    }
 
-	func key(for route: Path, prefix: [Edge]) -> [Edge]? {
-		guard let artifact = artifact else { return nil }
-		return artifact.key(for: route, prefix: prefix)
-	}
+    func key(for route: Path, prefix: [Edge]) -> [Edge]? {
+        guard let artifact = artifact else { return nil }
+        return artifact.key(for: route, prefix: prefix)
+    }
 
     func values() -> [[Edge]] {
         guard let node = artifact else { return [] }
@@ -45,7 +45,7 @@ public extension RGRadixAddress {
     // warning, calling this creates a NEW rrm with a new digest
     func setting(key: [Edge], to value: [Edge]) -> Self? {
         guard let node = artifact else { return nil }
-		guard let modifiedNode = value.isEmpty ? node.deleting(key: key) : node.setting(key: key, to: value) else { return nil }
+        guard let modifiedNode = value.isEmpty ? node.deleting(key: key) : node.setting(key: key, to: value) else { return nil }
         return Self(artifact: modifiedNode, symmetricKeyHash: nil, symmetricIV: symmetricIV)
     }
 
@@ -62,7 +62,7 @@ public extension RGRadixAddress {
     }
 
     func merging(right: Self) -> Self {
-        if artifact == nil && right.artifact == nil { return self }
+        if artifact == nil, right.artifact == nil { return self }
         guard let leftNode = artifact else { return right }
         guard let rightNode = right.artifact else { return self }
         guard let mergedStem = Self(artifact: leftNode.merging(right: rightNode), symmetricKeyHash: symmetricKeyHash, symmetricIV: symmetricIV) else { return self }

@@ -1,5 +1,5 @@
-import Foundation
 import AwesomeDictionary
+import Foundation
 
 public extension Mapping where Value == [[String]] {
     static func + (lhs: Mapping<Key, Value>, rhs: Mapping<Key, Value>) -> Mapping<Key, Value> {

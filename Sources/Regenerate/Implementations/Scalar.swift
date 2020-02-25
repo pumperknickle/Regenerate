@@ -1,6 +1,6 @@
-import Foundation
 import Bedrock
 import CryptoStarterPack
+import Foundation
 
 public struct Scalar<T: DataEncodable>: Codable {
     private let rawScalar: T!
@@ -8,5 +8,5 @@ public struct Scalar<T: DataEncodable>: Codable {
 
 extension Scalar: RGScalar {
     public var scalar: T! { return rawScalar }
-    public init(scalar: T) { self.rawScalar = scalar }
+    public init(scalar: T) { rawScalar = scalar }
 }

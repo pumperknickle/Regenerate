@@ -1,6 +1,6 @@
-import Foundation
-import Bedrock
 import AwesomeDictionary
+import Bedrock
+import Foundation
 
 public struct RT256<Key: DataEncodable, Value: DataEncodable>: Codable {
     private let rawRoot: Root!
@@ -14,8 +14,8 @@ extension RT256: Regenerative {
     public var keyPaths: Mapping<Data, [Path]> { return rawPaths }
 
     public init(root: Root, paths: Mapping<Data, [Path]>) {
-        self.rawRoot = root
-        self.rawPaths = paths
+        rawRoot = root
+        rawPaths = paths
     }
 }
 

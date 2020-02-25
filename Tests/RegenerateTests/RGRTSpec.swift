@@ -1,62 +1,61 @@
+import AwesomeTrie
+import Bedrock
+import CryptoStarterPack
 import Foundation
 import Nimble
 import Quick
-import CryptoStarterPack
-import Bedrock
-import AwesomeTrie
 @testable import Regenerate
 
 final class RGRTSpec: QuickSpec {
     override func spec() {
         describe("Regenerative Radix Merkle Trie") {
-			describe("targeting") {
-				let tree = RT256<UInt256, UInt256>()
+            describe("targeting") {
+                let tree = RT256<UInt256, UInt256>()
 
-				// Values to populate
+                // Values to populate
                 let oneKey = UInt256.min
                 let anotherKey = UInt256.max
                 let oneValue = UInt256.max
                 let anotherValue = UInt256.min
-				let thirdKey = UInt256.max - UInt256(100000)
-				let thirdValue = UInt256.max - UInt256(10000000)
+                let thirdKey = UInt256.max - UInt256(100_000)
+                let thirdValue = UInt256.max - UInt256(10_000_000)
 
-				let modifiedRRM = tree.setting(key: oneKey, to: oneValue)!.setting(key: anotherKey, to: anotherValue)!.setting(key: thirdKey, to: thirdValue)!
-				let contents = modifiedRRM.contents()
-				let cutRRM = modifiedRRM.cuttingAllNodes()
-				let emptyTargeted = cutRRM.targeting(keys: [oneKey])
-				let result = emptyTargeted.0.capture(info: Dictionary(uniqueKeysWithValues: contents.elements()))
-				it("result should just have one key") {
-					expect(result!.0.get(key: oneKey)).toNot(beNil())
-					expect(result!.0.keys()).toNot(beNil())
-					expect(result!.0.keys()!.count).to(equal(1))
-				}
-			}
-			describe("masking") {
-				let tree = RT256<String, UInt256>()
+                let modifiedRRM = tree.setting(key: oneKey, to: oneValue)!.setting(key: anotherKey, to: anotherValue)!.setting(key: thirdKey, to: thirdValue)!
+                let contents = modifiedRRM.contents()
+                let cutRRM = modifiedRRM.cuttingAllNodes()
+                let emptyTargeted = cutRRM.targeting(keys: [oneKey])
+                let result = emptyTargeted.0.capture(info: Dictionary(uniqueKeysWithValues: contents.elements()))
+                it("result should just have one key") {
+                    expect(result!.0.get(key: oneKey)).toNot(beNil())
+                    expect(result!.0.keys()).toNot(beNil())
+                    expect(result!.0.keys()!.count).to(equal(1))
+                }
+            }
+            describe("masking") {
+                let tree = RT256<String, UInt256>()
 
-				// Values to populate
-				let firstKey = "hello world"
-				let secondKey = "hello world1"
-				let thirdKey = "other thing"
+                // Values to populate
+                let firstKey = "hello world"
+                let secondKey = "hello world1"
+                let thirdKey = "other thing"
 
-				let oneValue = UInt256.max
-				let anotherValue = UInt256.min
-				let thirdValue = UInt256.max - UInt256(10000000)
+                let oneValue = UInt256.max
+                let anotherValue = UInt256.min
+                let thirdValue = UInt256.max - UInt256(10_000_000)
 
-				let modifiedRRM = tree.setting(key: firstKey, to: oneValue)!.setting(key: secondKey, to: anotherValue)!.setting(key: thirdKey, to: thirdValue)!
-				let contents = modifiedRRM.contents()
-				let cutRRM = modifiedRRM.cuttingAllNodes()
-				let emptyTargeted = cutRRM.masking(keys: [firstKey])
-				let result = emptyTargeted.0.capture(info: Dictionary(uniqueKeysWithValues: contents.elements()))
-				it("result should have two keys") {
-					expect(result!.0.get(key: firstKey)).toNot(beNil())
-					expect(result!.0.get(key: secondKey)).toNot(beNil())
-					expect(result!.0.keys()).toNot(beNil())
-					expect(result!.0.keys()!.count).to(equal(2))
-				}
-			}
+                let modifiedRRM = tree.setting(key: firstKey, to: oneValue)!.setting(key: secondKey, to: anotherValue)!.setting(key: thirdKey, to: thirdValue)!
+                let contents = modifiedRRM.contents()
+                let cutRRM = modifiedRRM.cuttingAllNodes()
+                let emptyTargeted = cutRRM.masking(keys: [firstKey])
+                let result = emptyTargeted.0.capture(info: Dictionary(uniqueKeysWithValues: contents.elements()))
+                it("result should have two keys") {
+                    expect(result!.0.get(key: firstKey)).toNot(beNil())
+                    expect(result!.0.get(key: secondKey)).toNot(beNil())
+                    expect(result!.0.keys()).toNot(beNil())
+                    expect(result!.0.keys()!.count).to(equal(2))
+                }
+            }
             describe("Initialization") {
-
                 // User defined data structure
                 let rgrmt = RT256<UInt256, UInt256>()
 
@@ -152,9 +151,9 @@ final class RGRTSpec: QuickSpec {
                     }
                     describe("rrm with just root") {
                         // Start with only the cryptographic link
-						let cutRRM = someRRM.cuttingAllNodes().mask().0
+                        let cutRRM = someRRM.cuttingAllNodes().mask().0
                         it("should have same digest as original") {
-							expect(cutRRM.digest).to(equal(someRRM.digest))
+                            expect(cutRRM.digest).to(equal(someRRM.digest))
                         }
                         it("should have no contents") {
                             expect(cutRRM.contents().elements()).to(beEmpty())
@@ -173,7 +172,6 @@ final class RGRTSpec: QuickSpec {
                             it("should output correct keys") {
                                 expect(Set(resultAfterInserting!.1.map { $0.0 })).to(equal(Set([oneKey, anotherKey])))
                                 expect(Set(otherResult!.1.map { $0.0 })).to(equal(Set([oneKey, anotherKey])))
-
                             }
                             it("should output correct values") {
                                 expect(Set(resultAfterInserting!.1.map { $0.1 })).to(equal(Set([oneValue, anotherValue])))
@@ -182,7 +180,7 @@ final class RGRTSpec: QuickSpec {
                         }
                     }
                     describe("malicious insertion") {
-						let cutRRM = someRRM.cuttingAllNodes().mask().0
+                        let cutRRM = someRRM.cuttingAllNodes().mask().0
                         let childNode = someRRM.root.artifact!.children.elements().first!.1.artifact!
                         let childNodeContent = childNode.toData()
                         let rootDigest = someRRM.root.digest
@@ -194,7 +192,7 @@ final class RGRTSpec: QuickSpec {
                             expect(Radix256.Digest(data: childNodeHash!)).toNot(beNil())
                             expect(Radix256.Digest(data: childNodeHash!)).toNot(equal(rootDigest!))
                         }
-						let insertedResult = cutRRM.capture(content: childNodeContent, digestString: rootDigest!.toData())
+                        let insertedResult = cutRRM.capture(content: childNodeContent, digestString: rootDigest!.toData())
                         it("should accept insertion") {
                             expect(insertedResult).toNot(beNil())
                         }

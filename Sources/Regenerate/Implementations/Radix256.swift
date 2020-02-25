@@ -1,7 +1,7 @@
-import Foundation
+import AwesomeDictionary
 import Bedrock
 import CryptoStarterPack
-import AwesomeDictionary
+import Foundation
 
 public struct Radix256: Codable {
     private let rawPrefix: [Edge]!
@@ -19,8 +19,8 @@ extension Radix256: RGRadix {
     public var children: Mapping<Edge, Child> { return rawChildren.first! }
 
     public init(prefix: [Edge], value: [Edge], children: Mapping<Edge, Child>) {
-        self.rawPrefix = prefix
-        self.rawValue = value
-        self.rawChildren = [children]
+        rawPrefix = prefix
+        rawValue = value
+        rawChildren = [children]
     }
 }

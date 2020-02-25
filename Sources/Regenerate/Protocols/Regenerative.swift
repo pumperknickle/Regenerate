@@ -1,7 +1,7 @@
-import Foundation
-import Bedrock
 import AwesomeDictionary
 import AwesomeTrie
+import Bedrock
+import Foundation
 
 public protocol Regenerative: Codable {
     associatedtype Root: Addressable
@@ -16,37 +16,36 @@ public protocol Regenerative: Codable {
     var keyPaths: Mapping<Data, [Path]> { get }
 
     init(root: Root, paths: Mapping<Data, [Path]>)
-	func targeting(_ targets: TrieSet<Edge>) -> (Self, Set<Data>)
-	func masking(_ masks: TrieSet<Edge>) -> (Self, Set<Data>)
-	func mask() -> (Self, Set<Data>)
+    func targeting(_ targets: TrieSet<Edge>) -> (Self, Set<Data>)
+    func masking(_ masks: TrieSet<Edge>) -> (Self, Set<Data>)
+    func mask() -> (Self, Set<Data>)
 }
 
 public extension Regenerative {
-	init(root: Root) { self.init(root: root, paths: root.missing(prefix: [])) }
-    
+    init(root: Root) { self.init(root: root, paths: root.missing(prefix: [])) }
+
     init?(artifact: Artifact?) {
         guard let artifact = artifact else { return nil }
         guard let address = Root(artifact: artifact, complete: true) else { return nil }
         self.init(root: address)
     }
-    
+
     func empty() -> Self { return Self(root: root.empty()) }
 
     func complete() -> Bool { return root.complete }
 
-	func missingDigests() -> Set<Data> { return Set(keyPaths.keys()) }
-    
+    func missingDigests() -> Set<Data> { return Set(keyPaths.keys()) }
+
     func contents(previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> Mapping<Data, Data> { return root.contents(previousKey: previousKey, keys: keys) }
 
     func cuttingAllNodes() -> Self { return Self(root: root.empty()) }
-    
+
     func encrypt(allKeys: CoveredTrie<String, Data>, commonIv: Data) -> Self? {
         if !missingDigests().isEmpty { return nil }
         guard let encryptedRoot = root.encrypt(allKeys: allKeys, commonIv: commonIv, keyRoot: allKeys.cover != nil) else { return nil }
         return Self(root: encryptedRoot, paths: Mapping<Data, [Path]>())
     }
 
-    
     func capture(info: [Data], previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> Self? {
         let optionalDigests = info.reduce([:]) { (result, entry) -> [Data: Data]? in
             guard let result = result else { return nil }
@@ -58,7 +57,7 @@ public extension Regenerative {
         let captured = capture(info: digests, previousKey: previousKey, keys: keys)
         return captured
     }
-    
+
     func capture(info: [Data: Data], previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> Self? {
         let insertions = missingDigests().map { (key: $0, value: info[$0]) }
         if insertions.isEmpty || !insertions.contains(where: { $0.value != nil }) { return self } // no relevant info to insert
@@ -71,7 +70,7 @@ public extension Regenerative {
         guard let regenerativeAfterStep = nextStep else { return nil }
         return regenerativeAfterStep.capture(info: info, previousKey: previousKey, keys: keys)
     }
-    
+
     func capture(content: Data, previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> (Self, Set<Data>)? {
         guard let digestBytes = CryptoDelegateType.hash(content) else { return nil }
         guard let digest = Digest(data: digestBytes) else { return nil }
@@ -92,35 +91,35 @@ public extension Regenerative {
         let finalResult = Self(root: routeResult.0.root, paths: routeResult.0.keyPaths.deleting(key: digestString))
         return (finalResult, routeResult.1)
     }
-    
+
     func capture(digestString: Data, content: Data, at route: Path, previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> (Self, Set<Data>)? {
         guard let modifiedStem = root.capture(digestString: digestString, content: content, at: route, prefix: [], previousKey: previousKey, keys: keys) else { return nil }
         let newMissingDigests = modifiedStem.1.keys().filter { !keyPaths.keys().contains($0) }
         return (Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths), Set(newMissingDigests))
     }
-    
+
     func query(_ queryString: String) -> Self? {
         guard let trie = TrieSet<Edge>(queryString: queryString) else { return nil }
         return targeting(trie).0
     }
-    
+
     func queryAll(_ queryString: String) -> Self? {
         guard let trie = TrieSet<Edge>(queryString: queryString) else { return nil }
         return masking(trie).0
     }
 
-	func targeting(_ targets: TrieSet<Edge>) -> (Self, Set<Data>) {
-		let modifiedStem = root.targeting(targets, prefix: [])
-		return (Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths), Set<Data>(modifiedStem.1.keys()))
-	}
+    func targeting(_ targets: TrieSet<Edge>) -> (Self, Set<Data>) {
+        let modifiedStem = root.targeting(targets, prefix: [])
+        return (Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths), Set<Data>(modifiedStem.1.keys()))
+    }
 
-	func masking(_ masks: TrieSet<Edge>) -> (Self, Set<Data>) {
-		let modifiedStem = root.masking(masks, prefix: [])
-		return (Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths), Set<Data>(modifiedStem.1.keys()))
-	}
+    func masking(_ masks: TrieSet<Edge>) -> (Self, Set<Data>) {
+        let modifiedStem = root.masking(masks, prefix: [])
+        return (Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths), Set<Data>(modifiedStem.1.keys()))
+    }
 
-	func mask() -> (Self, Set<Data>) {
-		let modifiedStem = root.mask(prefix: [])
-		return (Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths), Set<Data>(modifiedStem.1.keys()))
-	}
+    func mask() -> (Self, Set<Data>) {
+        let modifiedStem = root.mask(prefix: [])
+        return (Self(root: modifiedStem.0, paths: modifiedStem.1 + keyPaths), Set<Data>(modifiedStem.1.keys()))
+    }
 }
