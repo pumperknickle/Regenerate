@@ -5,7 +5,7 @@ import CryptoStarterPack
 import Foundation
 
 public protocol Addressable: CryptoBindable, DataEncodable {
-    associatedtype Digest: FixedWidthInteger, Stringable
+    associatedtype Digest: Stringable
     associatedtype Artifact: RGArtifact
     associatedtype CryptoDelegateType: CryptoDelegate
     associatedtype SymmetricDelegateType: SymmetricDelegate
