@@ -1,5 +1,5 @@
 # Regenerate
-![Build](https://github.com/github/docs/actions/workflows/build.yml/badge.svg)
+![Build](https://github.com/pumperknickle/Regenerate/actions/workflows/build.yml/badge.svg)
 
   
 ## Installation
