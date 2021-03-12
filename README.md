@@ -1,8 +1,6 @@
 # Regenerate
+![Build](https://github.com/github/docs/actions/workflows/build.yml/badge.svg?branch=master)
 
-<p align="left">
-  <a href="https://github.com/pumperknickle/Regenerate/actions?query=workflow%3Aswift"><img alt="GitHub Actions status" src="https://github.com/pumperknickle/Regenerate/workflows/Build/badge.svg"></a>
-</p>
 
   
 ## Installation
