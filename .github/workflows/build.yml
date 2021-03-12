@@ -12,6 +12,11 @@ jobs:
     runs-on: macos-latest
 
     steps:
+    - uses: actions/checkout@v1
+    - name: Get Homebrew
+      run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+    - name: Get Libressl
+      run: brew install libressl
     - uses: actions/checkout@v2
     - name: Build
       run: swift build -v
