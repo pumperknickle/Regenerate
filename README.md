@@ -8,7 +8,7 @@
 Add Regenerate to Package.swift and the appropriate targets
 ```swift
 dependencies: [
-.package(url: "https://github.com/pumperknickle/Regenerate.git", from: "1.0.0")
+.package(url: "https://github.com/pumperknickle/Regenerate.git", from: "2.0.4")
 ]
 ```
 
