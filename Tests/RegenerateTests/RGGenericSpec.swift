@@ -64,6 +64,7 @@ final class RGGenericSpec: QuickSpec {
             typealias ArrayStemType = Address<ArrayNodeType>
             typealias FooStemType = Address<Foo>
             typealias RegenerativeFooType = RGObject<FooStemType>
+            typealias Digest = RegenerativeFooType.Root.Digest
 
             // Initialize Data Structure
             let fooNode: Foo = Foo(
@@ -77,15 +78,18 @@ final class RGGenericSpec: QuickSpec {
 
             let rootKey = RegenerativeFooType.Root.SymmetricKey.random()
             let rootKeyData = rootKey.toData()
-            let rootKeyHash = RegenerativeFooType.Root.CryptoDelegateType.hash(rootKeyData)!
+            let rootKeyHashData = RegenerativeFooType.Root.CryptoDelegateType.hash(rootKeyData)!
+            let rootKeyHash = Digest(data: rootKeyHashData)!
 
             let firstKey = RegenerativeFooType.Root.SymmetricKey.random()
             let firstKeyData = firstKey.toData()
-            let firstKeyHash = RegenerativeFooType.Root.CryptoDelegateType.hash(firstKeyData)!
+            let firstKeyHashData = RegenerativeFooType.Root.CryptoDelegateType.hash(firstKeyData)!
+            let firstKeyHash = Digest(data: firstKeyHashData)!
 
             let secondKey = RegenerativeFooType.Root.SymmetricKey.random()
             let secondKeyData = secondKey.toData()
-            let secondKeyHash = RegenerativeFooType.Root.CryptoDelegateType.hash(secondKeyData)!
+            let secondKeyHashData = RegenerativeFooType.Root.CryptoDelegateType.hash(secondKeyData)!
+            let secondKeyHash = Digest(data: secondKeyHashData)!
 
             let keys = CoveredTrie<String, Data>(trie: TrieMapping<String, Data>()
                 .setting(keys: [Foo.metafield1, ArrayStemType.Digest(0).toString()], value: firstKeyData)
@@ -94,7 +98,7 @@ final class RGGenericSpec: QuickSpec {
             let rootIV = RegenerativeFooType.Root.SymmetricIV.random()
             let encryptedFoo = regenerativeFoo!.encrypt(allKeys: keys, commonIv: rootIV.toData())!
 
-            let allKeys = Mapping<Data, Data>()
+            let allKeys = Mapping<RegenerativeFooType.Root.Digest, Data>()
                 .setting(key: rootKeyHash, value: rootKeyData)
                 .setting(key: firstKeyHash, value: firstKeyData)
                 .setting(key: secondKeyHash, value: secondKeyData)

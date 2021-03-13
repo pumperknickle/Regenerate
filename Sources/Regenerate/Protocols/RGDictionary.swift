@@ -148,7 +148,7 @@ public extension RGDictionary {
     }
 
     func contents(previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> Mapping<Data, Data> {
-        return children.elements().reduce(core.contents(previousKey: previousKey, keys: keys).convertToData()) { (result, entry) -> Mapping<Data, Data> in
+        return children.elements().reduce(core.contents(previousKey: previousKey, keys: keys.convertToStructured()!).convertToData()) { (result, entry) -> Mapping<Data, Data> in
             result.overwrite(with: entry.1.contents(previousKey: previousKey, keys: keys))
         }
     }
