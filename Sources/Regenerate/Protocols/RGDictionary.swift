@@ -9,6 +9,7 @@ public protocol RGDictionary: RGArtifact {
     associatedtype CoreType: RGRT where CoreType.Key == Key, CoreType.Value == Value
     typealias CoreRoot = CoreType.Root
     typealias Artifact = Value.Artifact
+    typealias Digest = CoreType.Digest
 
     var core: CoreType! { get }
     var incompleteChildren: Set<String>! { get }
@@ -104,7 +105,8 @@ public extension RGDictionary {
     }
 
     func capture(digestString: Data, content: Data, prefix: Path, previousKey: Data?, keys: Mapping<Data, Data>) -> (Self, Mapping<Data, [Path]>)? {
-        guard let modifiedCore = core.capture(content: content, digestString: digestString, previousKey: previousKey, keys: keys) else { return nil }
+        guard let dig = Digest(data: digestString) else { return nil }
+        guard let modifiedCore = core.capture(content: content, digest: dig, previousKey: previousKey, keys: keys) else { return nil }
         let newChildren = modifiedCore.2.reduce((Mapping<String, Value>(), Mapping<Data, [Path]>())) { (result, entry) -> (Mapping<String, Value>, Mapping<Data, [Path]>) in
             let childEdge = entry.0.toString()
             let childPrefix = prefix + [childEdge]
@@ -121,7 +123,7 @@ public extension RGDictionary {
             result.excluding(keys: [entry])
         }
         let newPaths = modifiedCore.1.reduce(newChildren.1) { (result, entry) -> Mapping<Data, [Path]> in
-            result.setting(key: entry, value: (result[entry] ?? []) + [prefix])
+            result.setting(key: entry.toData(), value: (result[entry.toData()] ?? []) + [prefix])
         }
         let newIncompleteChildren = newChildren.0.elements().filter { !$0.1.complete }.map { $0.0 }
         return (changing(core: modifiedCore.0, incompleteChildren: incompleteChildren.union(newIncompleteChildren), children: children.overwrite(with: newChildren.0), targets: leftoverTargets, masks: leftoverMasks), newPaths)
@@ -140,13 +142,13 @@ public extension RGDictionary {
 
     func missing(prefix: Path) -> Mapping<Data, [Path]> {
         let missingCore = core.missingDigests().reduce(Mapping<Data, [Path]>()) { (result, entry) -> Mapping<Data, [Path]> in
-            result.setting(key: entry, value: [prefix])
+            result.setting(key: entry.toData(), value: [prefix])
         }
         return children.elements().map { $0.1.missing(prefix: prefix + [$0.0.toString()]) }.reduce(missingCore, +)
     }
 
     func contents(previousKey: Data? = nil, keys: Mapping<Data, Data> = Mapping<Data, Data>()) -> Mapping<Data, Data> {
-        return children.elements().reduce(core.contents(previousKey: previousKey, keys: keys)) { (result, entry) -> Mapping<Data, Data> in
+        return children.elements().reduce(core.contents(previousKey: previousKey, keys: keys).convertToData()) { (result, entry) -> Mapping<Data, Data> in
             result.overwrite(with: entry.1.contents(previousKey: previousKey, keys: keys))
         }
     }
@@ -170,7 +172,7 @@ public extension RGDictionary {
         guard let key = Key(stringValue: edge) else { return (self, Mapping<Data, [Path]>()) }
         let coreResult = core.targeting(keys: [key])
         let corePaths = coreResult.1.reduce(Mapping<Data, [Path]>()) { (result, entry) -> Mapping<Data, [Path]> in
-            result.setting(key: entry, value: [prefix])
+            result.setting(key: entry.toData(), value: [prefix])
         }
         return (changing(core: coreResult.0, targets: newTargets), corePaths)
     }
@@ -205,7 +207,7 @@ public extension RGDictionary {
         guard let key = Key(stringValue: edge) else { return (self, Mapping<Data, [Path]>()) }
         let coreResult = core.masking(keys: [key])
         let corePaths = coreResult.1.reduce(Mapping<Data, [Path]>()) { (result, entry) -> Mapping<Data, [Path]> in
-            result.setting(key: entry, value: [prefix])
+            result.setting(key: entry.toData(), value: [prefix])
         }
         return (changing(core: coreResult.0, masks: newMasks), corePaths)
     }
@@ -225,7 +227,7 @@ public extension RGDictionary {
     func mask(prefix: [Edge]) -> (Self, Mapping<Data, [Path]>) {
         let coreResult = core.mask()
         let corePaths = coreResult.1.reduce(Mapping<Data, [Path]>()) { (result, entry) -> Mapping<Data, [Path]> in
-            result.setting(key: entry, value: [prefix])
+            result.setting(key: entry.toData(), value: [prefix])
         }
         let newChildren = children.elements().reduce((Mapping<String, Value>(), Mapping<Data, [Path]>(), Set<String>())) { (result, entry) -> (Mapping<String, Value>, Mapping<Data, [Path]>, Set<String>) in
             if entry.1.isMasked { return (result.0.setting(key: entry.0, value: entry.1), result.1, result.2) }

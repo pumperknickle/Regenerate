@@ -192,7 +192,7 @@ final class RGRTSpec: QuickSpec {
                             expect(Radix256.Digest(data: childNodeHash!)).toNot(beNil())
                             expect(Radix256.Digest(data: childNodeHash!)).toNot(equal(rootDigest!))
                         }
-                        let insertedResult = cutRRM.capture(content: childNodeContent, digestString: rootDigest!.toData())
+                        let insertedResult = cutRRM.capture(content: childNodeContent, digest: rootDigest!)
                         it("should accept insertion") {
                             expect(insertedResult).toNot(beNil())
                         }

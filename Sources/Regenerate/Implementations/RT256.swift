@@ -4,16 +4,16 @@ import Foundation
 
 public struct RT256<Key: DataEncodable, Value: DataEncodable>: Codable {
     private let rawRoot: Root!
-    private let rawPaths: Mapping<Data, [Path]>!
+    private let rawPaths: Mapping<Digest, [Path]>!
 }
 
 extension RT256: Regenerative {
     public typealias Root = RadixAddress256
 
     public var root: Root { return rawRoot }
-    public var keyPaths: Mapping<Data, [Path]> { return rawPaths }
+    public var keyPaths: Mapping<Digest, [Path]> { return rawPaths }
 
-    public init(root: Root, paths: Mapping<Data, [Path]>) {
+    public init(root: Root, paths: Mapping<Digest, [Path]>) {
         rawRoot = root
         rawPaths = paths
     }

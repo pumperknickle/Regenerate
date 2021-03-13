@@ -48,6 +48,7 @@ final class RGArraySpec: QuickSpec {
                 expect(regenerated).toNot(beNil())
                 expect(regenerated!.root.artifact!.children.elements().count).to(equal(1))
                 expect(regenerated!.root.artifact!.children.elements().first!.1.artifact!.children.elements().count).to(equal(2))
+                expect(emptyObject.complete()).to(equal(true))
             }
         }
     }
