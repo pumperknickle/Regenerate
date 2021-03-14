@@ -41,9 +41,9 @@ public extension Regenerative {
 
     func cuttingAllNodes() -> Self { return Self(root: root.empty()) }
 
-    func encrypt(allKeys: CoveredTrie<String, Data>, rootIV: Data) -> Self? {
+    func encrypt(allKeys: CoveredTrie<String, Data>) -> Self? {
         if !missingDigests().isEmpty { return nil }
-        guard let encryptedRoot = root.encrypt(allKeys: allKeys, rootIV: rootIV, keyRoot: allKeys.cover != nil) else { return nil }
+        guard let encryptedRoot = root.encrypt(allKeys: allKeys, keyRoot: allKeys.cover != nil) else { return nil }
         return Self(root: encryptedRoot, paths: Mapping<Digest, [Path]>())
     }
 

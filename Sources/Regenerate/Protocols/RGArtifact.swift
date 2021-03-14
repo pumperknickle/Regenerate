@@ -17,7 +17,7 @@ public protocol RGArtifact: DataEncodable {
     func masking(_ masks: TrieSet<Edge>, prefix: [Edge]) -> (Self, Mapping<Data, [Path]>)
     func mask(prefix: [Edge]) -> (Self, Mapping<Data, [Path]>)
     func shouldMask(_ masks: TrieSet<Edge>, prefix: [Edge]) -> Bool
-    func encrypt(allKeys: CoveredTrie<String, Data>, commonIv: Data) -> Self?
+    func encrypt(allKeys: CoveredTrie<String, Data>) -> Self?
 
     func set(property: String, to child: CryptoBindable) -> Self?
     func get(property: String) -> CryptoBindable?
@@ -25,11 +25,11 @@ public protocol RGArtifact: DataEncodable {
 }
 
 public extension RGArtifact {
-    func encrypt(allKeys: CoveredTrie<String, Data>, commonIv: Data) -> Self? {
+    func encrypt(allKeys: CoveredTrie<String, Data>) -> Self? {
         return Self.properties().reduce(self) { (result, entry) -> Self? in
             guard let result = result else { return nil }
             guard let child = get(property: entry) else { return nil }
-            guard let encryptedChild = child.encrypt(allKeys: allKeys.subtreeWithCover(keys: [entry]), rootIV: Data(commonIv.bytes + entry.toData().bytes), keyRoot: allKeys.contains(key: entry)) else { return nil }
+            guard let encryptedChild = child.encrypt(allKeys: allKeys.subtreeWithCover(keys: [entry]), keyRoot: allKeys.contains(key: entry)) else { return nil }
             return result.set(property: entry, to: encryptedChild)
         }
     }

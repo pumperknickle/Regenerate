@@ -23,7 +23,7 @@ public extension RGScalar {
     func get(property _: String) -> CryptoBindable? { return nil }
     static func properties() -> [String] { return [] }
     func pruning() -> Self { return self }
-    func encrypt(allKeys _: CoveredTrie<String, Data>, commonIv _: Data) -> Self? { return self }
+    func encrypt(allKeys _: CoveredTrie<String, Data>) -> Self? { return self }
     func toData() -> Data { return scalar.toData() }
     init?(data: Data) {
         guard let scalar = T(data: data) else { return nil }

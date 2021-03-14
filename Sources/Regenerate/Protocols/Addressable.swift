@@ -35,13 +35,12 @@ public protocol Addressable: CryptoBindable, DataEncodable {
 }
 
 public extension Addressable {
-    func encrypt(allKeys: CoveredTrie<String, Data>, rootIV: Data, keyRoot: Bool) -> Self? {
+    func encrypt(allKeys: CoveredTrie<String, Data>, keyRoot: Bool) -> Self? {
         guard let artifact = artifact else { return nil }
-        guard let encryptedArtifact = artifact.encrypt(allKeys: allKeys, commonIv: rootIV) else { return nil }
+        guard let encryptedArtifact = artifact.encrypt(allKeys: allKeys) else { return nil }
         guard let symmetricKeyData = allKeys.cover else { return changing(artifact: encryptedArtifact) }
         guard let symmetricKey = SymmetricKey(data: Data(symmetricKeyData)) else { return nil }
-        guard let dataIV = CryptoDelegateType.hash(rootIV) else { return nil }
-        guard let IV = SymmetricIV(data: dataIV) else { return nil }
+        let IV = SymmetricIV.random()
         guard let ciphertext = SymmetricDelegateType.encrypt(plaintext: encryptedArtifact.pruning(), key: symmetricKey, iv: IV) else { return nil }
         guard let ciphertextHashOutput = CryptoDelegateType.hash(ciphertext) else { return nil }
         guard let ciphertextDigest = Digest(data: ciphertextHashOutput) else { return nil }
