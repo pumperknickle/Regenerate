@@ -26,7 +26,7 @@ public extension RGDictionary {
     func encrypt(allKeys: CoveredTrie<String, Data>, commonIv: Data) -> Self? {
         let encryptedChildren = children.elements().reduce(Mapping<String, Value>()) { (result, entry) -> Mapping<String, Value>? in
             guard let result = result else { return nil }
-            guard let childResult = entry.1.encrypt(allKeys: allKeys.subtreeWithCover(keys: [entry.0]), commonIv: Data(commonIv.bytes + entry.0.toData().bytes), keyRoot: allKeys.contains(key: entry.0)) else { return nil }
+            guard let childResult = entry.1.encrypt(allKeys: allKeys.subtreeWithCover(keys: [entry.0]), rootIV: Data(commonIv.bytes + entry.0.toData().bytes), keyRoot: allKeys.contains(key: entry.0)) else { return nil }
             return result.setting(key: entry.0, value: childResult)
         }
         guard let unwrappedChildren = encryptedChildren else { return nil }
@@ -38,7 +38,7 @@ public extension RGDictionary {
         guard let finalConvertedChildren = convertedChildren else { return nil }
         guard let newCore = CoreType(raw: finalConvertedChildren.elements()) else { return nil }
         guard let cover = allKeys.cover else { return changing(core: newCore, children: unwrappedChildren) }
-        guard let encryptedCore = newCore.encrypt(allKeys: CoveredTrie<String, Data>(trie: TrieMapping<String, Data>(), cover: cover), commonIv: commonIv + commonIv) else { return nil }
+        guard let encryptedCore = newCore.encrypt(allKeys: CoveredTrie<String, Data>(trie: TrieMapping<String, Data>(), cover: cover), rootIV: commonIv + commonIv) else { return nil }
         return changing(core: encryptedCore, children: unwrappedChildren)
     }
 

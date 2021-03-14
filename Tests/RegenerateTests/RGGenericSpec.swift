@@ -96,7 +96,7 @@ final class RGGenericSpec: QuickSpec {
                 .setting(keys: [Foo.metafield1, ArrayStemType.Digest(1).toString()], value: secondKeyData), cover: rootKeyData)
 
             let rootIV = RegenerativeFooType.Root.SymmetricIV.random()
-            let encryptedFoo = regenerativeFoo!.encrypt(allKeys: keys, commonIv: rootIV.toData())!
+            let encryptedFoo = regenerativeFoo!.encrypt(allKeys: keys, rootIV: rootIV.toData())!
 
             let allKeys = Mapping<RegenerativeFooType.Root.Digest, Data>()
                 .setting(key: rootKeyHash, value: rootKeyData)

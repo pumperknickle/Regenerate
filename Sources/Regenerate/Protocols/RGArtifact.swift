@@ -29,7 +29,7 @@ public extension RGArtifact {
         return Self.properties().reduce(self) { (result, entry) -> Self? in
             guard let result = result else { return nil }
             guard let child = get(property: entry) else { return nil }
-            guard let encryptedChild = child.encrypt(allKeys: allKeys.subtreeWithCover(keys: [entry]), commonIv: Data(commonIv.bytes + entry.toData().bytes), keyRoot: allKeys.contains(key: entry)) else { return nil }
+            guard let encryptedChild = child.encrypt(allKeys: allKeys.subtreeWithCover(keys: [entry]), rootIV: Data(commonIv.bytes + entry.toData().bytes), keyRoot: allKeys.contains(key: entry)) else { return nil }
             return result.set(property: entry, to: encryptedChild)
         }
     }

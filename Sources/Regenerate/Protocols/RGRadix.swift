@@ -17,7 +17,7 @@ public extension RGRadix {
     func encrypt(allKeys: CoveredTrie<String, Data>, commonIv: Data) -> Self? {
         let newChildren = children.elements().reduce(children) { (result, entry) -> Mapping<Edge, Child>? in
             guard let result = result else { return nil }
-            guard let newChild = entry.1.encrypt(allKeys: allKeys.subtreeWithCover(keys: [entry.0]), commonIv: Data(commonIv.bytes + entry.0.toData().bytes), keyRoot: allKeys.contains(key: entry.0)) else { return nil }
+            guard let newChild = entry.1.encrypt(allKeys: allKeys.subtreeWithCover(keys: [entry.0]), rootIV: Data(commonIv.bytes + entry.0.toData().bytes), keyRoot: allKeys.contains(key: entry.0)) else { return nil }
             return result.setting(key: entry.0, value: newChild)
         }
         guard let finalChildren = newChildren else { return nil }

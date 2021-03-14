@@ -10,6 +10,7 @@ public protocol Regenerative: Codable {
     typealias Edge = Root.Edge
     typealias Path = Root.Path
     typealias Artifact = Root.Artifact
+    typealias SymmetricKey = Root.SymmetricKey
 
     var root: Root { get }
     // change this to data
@@ -40,9 +41,9 @@ public extension Regenerative {
 
     func cuttingAllNodes() -> Self { return Self(root: root.empty()) }
 
-    func encrypt(allKeys: CoveredTrie<String, Data>, commonIv: Data) -> Self? {
+    func encrypt(allKeys: CoveredTrie<String, Data>, rootIV: Data) -> Self? {
         if !missingDigests().isEmpty { return nil }
-        guard let encryptedRoot = root.encrypt(allKeys: allKeys, commonIv: commonIv, keyRoot: allKeys.cover != nil) else { return nil }
+        guard let encryptedRoot = root.encrypt(allKeys: allKeys, rootIV: rootIV, keyRoot: allKeys.cover != nil) else { return nil }
         return Self(root: encryptedRoot, paths: Mapping<Digest, [Path]>())
     }
 
@@ -64,7 +65,7 @@ public extension Regenerative {
         let nextStep = insertions.reduce(self) { (result, entry) -> Self? in
             guard let result = result else { return nil }
             guard let content = entry.value else { return result }
-            guard let childResult = result.capture(content: content, digest: entry.key, previousKey: previousKey, keys: keys) else { return result }
+            guard let childResult = result.capture(content: content, CID: entry.key, previousKey: previousKey, keys: keys) else { return result }
             return childResult.0
         }
         guard let regenerativeAfterStep = nextStep else { return nil }
@@ -74,26 +75,26 @@ public extension Regenerative {
     func capture(content: Data, previousKey: Data? = nil, keys: Mapping<Digest, Data> = Mapping<Digest, Data>()) -> (Self, Set<Digest>)? {
         guard let digestBytes = CryptoDelegateType.hash(content) else { return nil }
         guard let digest = Digest(data: digestBytes) else { return nil }
-        return capture(content: content, digest: digest, previousKey: previousKey, keys: keys)
+        return capture(content: content, CID: digest, previousKey: previousKey, keys: keys)
     }
 
     // warning - this call assumes that the content's digest == digest. Calling this function directly without checking digest equivalency may introduce malicious information
-    func capture(content: Data, digest: Digest, previousKey: Data? = nil, keys: Mapping<Digest, Data> = Mapping<Digest, Data>()) -> (Self, Set<Digest>)? {
-        guard let routes = keyPaths[digest] else { return nil }
+    func capture(content: Data, CID: Digest, previousKey: Data? = nil, keys: Mapping<Digest, Data> = Mapping<Digest, Data>()) -> (Self, Set<Digest>)? {
+        guard let routes = keyPaths[CID] else { return nil }
         if routes.isEmpty { return (self, Set<Digest>([])) }
         let resultExploringRoutes = routes.reduce((self, Set<Digest>([]))) { (result, entry) -> (Self, Set<Digest>)? in
             guard let result = result else { return nil }
-            guard let exploringRoute = result.0.capture(digestString: digest, content: content, at: entry, previousKey: previousKey, keys: keys) else { return result }
+            guard let exploringRoute = result.0.capture(CID: CID, content: content, at: entry, previousKey: previousKey, keys: keys) else { return result }
             return (exploringRoute.0, exploringRoute.1.union(result.1))
         }
         guard let routeResult = resultExploringRoutes else { return nil }
-        if routeResult.1.contains(digest) { return nil }
-        let finalResult = Self(root: routeResult.0.root, paths: routeResult.0.keyPaths.deleting(key: digest))
+        if routeResult.1.contains(CID) { return nil }
+        let finalResult = Self(root: routeResult.0.root, paths: routeResult.0.keyPaths.deleting(key: CID))
         return (finalResult, routeResult.1)
     }
 
-    func capture(digestString: Digest, content: Data, at route: Path, previousKey: Data? = nil, keys: Mapping<Digest, Data> = Mapping<Digest, Data>()) -> (Self, Set<Digest>)? {
-        guard let modifiedStem = root.capture(digestString: digestString.toData(), content: content, at: route, prefix: [], previousKey: previousKey, keys: keys.convertToData()) else { return nil }
+    func capture(CID: Digest, content: Data, at route: Path, previousKey: Data? = nil, keys: Mapping<Digest, Data> = Mapping<Digest, Data>()) -> (Self, Set<Digest>)? {
+        guard let modifiedStem = root.capture(digestString: CID.toData(), content: content, at: route, prefix: [], previousKey: previousKey, keys: keys.convertToData()) else { return nil }
         let structured: Mapping<Digest, [Path]> = modifiedStem.1.convertToStructured()!
         let newMissingDigests = structured.keys().filter { !keyPaths.keys().contains($0) }
         return (Self(root: modifiedStem.0, paths: structured + keyPaths), Set(newMissingDigests))

@@ -10,7 +10,7 @@ public protocol CryptoBindable {
     func masking(_ masks: TrieSet<String>, prefix: [String]) -> (Self, Mapping<Data, [[String]]>)
     func mask(prefix: [String]) -> (Self, Mapping<Data, [[String]]>)
     func target(prefix: [String]) -> (Self, Mapping<Data, [[String]]>)
-    func encrypt(allKeys: CoveredTrie<String, Data>, commonIv: Data, keyRoot: Bool) -> Self?
+    func encrypt(allKeys: CoveredTrie<String, Data>, rootIV: Data, keyRoot: Bool) -> Self?
     func isComplete() -> Bool
     func empty() -> Self
 }
