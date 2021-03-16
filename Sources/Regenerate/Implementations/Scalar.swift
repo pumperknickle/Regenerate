@@ -12,12 +12,19 @@ extension Scalar: RGScalar {
 }
 
 extension Scalar: Codable {
+    enum CodingKeys: String, CodingKey {
+        case scalar
+    }
+    
     public init(from decoder: Decoder) throws {
-        rawScalar = T(data: Data())
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        rawScalar = try values.decode(T.self, forKey: .scalar)
         return
     }
     
     public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(rawScalar, forKey: .scalar)
         return
     }
 }
