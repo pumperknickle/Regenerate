@@ -37,7 +37,7 @@ public extension RGArray {
         guard let elements = artifacts.reduce([], { (result, entry) -> [Element]? in
             guard let result = result else { return nil }
             guard let entry = entry else { return nil }
-            guard let element = Element(artifact: entry, complete: true) else { return nil }
+            guard let element = Element(dataItem: entry, complete: true) else { return nil }
             return result + [element]
         }) else { return nil }
         self.init(elements)

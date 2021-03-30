@@ -28,7 +28,7 @@ public extension RGRT {
     // Empty Tree
     init() { self.init(root: Root(), paths: Mapping<Digest, [Path]>()) }
 
-    var digest: Digest! { return root.digest }
+    var digest: Digest! { return root.fingerprint }
 
     func computedValidity() -> Bool { return root.computedValidity() }
 

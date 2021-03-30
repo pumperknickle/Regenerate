@@ -181,9 +181,9 @@ final class RGRTSpec: QuickSpec {
                     }
                     describe("malicious insertion") {
                         let cutRRM = someRRM.cuttingAllNodes().mask().0
-                        let childNode = someRRM.root.artifact!.children.elements().first!.1.artifact!
+                        let childNode = someRRM.root.dataItem!.children.elements().first!.1.dataItem!
                         let childNodeContent = childNode.toData()
-                        let rootDigest = someRRM.root.digest
+                        let rootDigest = someRRM.root.fingerprint
                         let childNodeHash = BaseCrypto.hash(childNode.toData())
                         it("should be the wrong digest") {
                             expect(childNode.toData()).toNot(beNil())

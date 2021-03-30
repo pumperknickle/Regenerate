@@ -24,8 +24,8 @@ final class RGGenericSpec: QuickSpec {
                 init?(artifact1: ArrayStemType.Artifact?, artifact2: ArrayStemType.Artifact?) {
                     guard let unwrappedArtifact1 = artifact1 else { return nil }
                     guard let unwrappedArtifact2 = artifact2 else { return nil }
-                    guard let address1 = ArrayStemType(artifact: unwrappedArtifact1, complete: true) else { return nil }
-                    guard let address2 = ArrayStemType(artifact: unwrappedArtifact2, complete: true) else { return nil }
+                    guard let address1 = ArrayStemType(dataItem: unwrappedArtifact1, complete: true) else { return nil }
+                    guard let address2 = ArrayStemType(dataItem: unwrappedArtifact2, complete: true) else { return nil }
                     self.array1 = address1
                     self.array2 = address2
                 }
@@ -111,9 +111,9 @@ final class RGGenericSpec: QuickSpec {
             let cutFoo: RegenerativeFooType = encryptedFoo.cuttingAllNodes().targeting(targets).0
             let regeneratedFoo: RegenerativeFooType? = cutFoo.capture(info: Dictionary(uniqueKeysWithValues: contents), keys: allKeys)
             it("should regenerate partially") {
-                expect(regeneratedFoo!.root.artifact!.array1.artifact!.children.elements().count).to(equal(2))
-                expect(regeneratedFoo!.root.artifact!.array1.artifact!.children.values().contains(where: { !$0.complete })).to(beFalse())
-                expect(regeneratedFoo!.root.artifact!.array2.artifact).to(beNil())
+                expect(regeneratedFoo!.root.dataItem!.array1.dataItem!.children.elements().count).to(equal(2))
+                expect(regeneratedFoo!.root.dataItem!.array1.dataItem!.children.values().contains(where: { !$0.complete })).to(beFalse())
+                expect(regeneratedFoo!.root.dataItem!.array2.dataItem).to(beNil())
             }
         }
     }

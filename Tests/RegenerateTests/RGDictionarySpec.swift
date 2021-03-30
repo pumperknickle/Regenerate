@@ -47,10 +47,10 @@ final class RGDictionarySpec: QuickSpec {
 
             it("partial regeneration") {
                 expect(regenerated).toNot(beNil())
-                expect(regenerated!.root.artifact!.children.elements().count).to(equal(2))
-                expect(regenerated!.root.artifact!.children.keys()).to(contain(firstKey.toString()))
-                expect(regenerated!.root.artifact!.children.keys()).to(contain(secondKey.toString()))
-                expect(regenerated!.root.artifact!.children.values().map { $0.artifact!.children.values().contains(where: { !$0.complete }) }).toNot(contain(true))
+                expect(regenerated!.root.dataItem!.children.elements().count).to(equal(2))
+                expect(regenerated!.root.dataItem!.children.keys()).to(contain(firstKey.toString()))
+                expect(regenerated!.root.dataItem!.children.keys()).to(contain(secondKey.toString()))
+                expect(regenerated!.root.dataItem!.children.values().map { $0.dataItem!.children.values().contains(where: { !$0.complete }) }).toNot(contain(true))
             }
         }
     }

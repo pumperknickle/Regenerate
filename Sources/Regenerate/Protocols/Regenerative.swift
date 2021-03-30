@@ -27,7 +27,7 @@ public extension Regenerative {
 
     init?(artifact: Artifact?) {
         guard let artifact = artifact else { return nil }
-        guard let address = Root(artifact: artifact, complete: true) else { return nil }
+        guard let address = Root(dataItem: artifact, complete: true) else { return nil }
         self.init(root: address)
     }
 

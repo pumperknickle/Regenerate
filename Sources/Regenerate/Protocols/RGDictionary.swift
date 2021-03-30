@@ -58,7 +58,7 @@ public extension RGDictionary {
         let mapping = artifacts.elements().reduce(Mapping<Key, Value>()) { (result, entry) -> Mapping<Key, Value>? in
             guard let result = result else { return nil }
             guard let artifact = entry.1 else { return nil }
-            guard let address = Value(artifact: artifact, complete: true) else { return nil }
+            guard let address = Value(dataItem: artifact, complete: true) else { return nil }
             return result.setting(key: entry.0, value: address)
         }
         guard let finalMapping = mapping else { return nil }
@@ -69,7 +69,7 @@ public extension RGDictionary {
         let mapping = da.reduce(Mapping<Key, Value>()) { (result, entry) -> Mapping<Key, Value>? in
             guard let result = result else { return nil }
             guard let artifact = entry.1 else { return nil }
-            guard let address = Value(artifact: artifact, complete: true) else { return nil }
+            guard let address = Value(dataItem: artifact, complete: true) else { return nil }
             return result.setting(key: entry.0, value: address)
         }
         guard let finalMapping = mapping else { return nil }
