@@ -23,6 +23,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
       - name: Install libcurl
-        run: sudo apt-get install libcurl4-openssl-dev
+        run: apt-get install libcurl4-openssl-dev
       - name: Build and Test
         run: swift test --enable-test-discovery
