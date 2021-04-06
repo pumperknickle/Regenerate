@@ -2,6 +2,7 @@ import AwesomeTrie
 import Bedrock
 import CryptoStarterPack
 import Foundation
+import AwesomeDictionary
 
 public struct RadixAddress256: Codable {
     private let rawDigest: UInt256!

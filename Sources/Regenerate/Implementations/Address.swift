@@ -2,15 +2,16 @@ import AwesomeTrie
 import Bedrock
 import CryptoStarterPack
 import Foundation
+import AwesomeDictionary
 
 public struct Address<Artifact: RGArtifact>: Codable {
     private let rawDigest: Digest!
     private let rawArtifact: Artifact?
     private let rawSymmetricKeyHash: Digest?
-    private let rawIncomplete: Singleton?
+    private let rawIncomplete: AwesomeDictionary.Singleton?
     private let rawTargets: TrieSet<Edge>?
     private let rawMasks: TrieSet<Edge>?
-    private let rawIsMasked: Singleton?
+    private let rawIsMasked: AwesomeDictionary.Singleton?
     private let rawIsTargeted: Singleton?
     private let rawSymmetricIV: SymmetricIV?
 

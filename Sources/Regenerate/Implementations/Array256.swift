@@ -9,7 +9,7 @@ public struct Array256<Element: Addressable>: Codable where Element.Digest == UI
     private let rawChildren: Mapping<String, Value>?
     private let rawTargets: TrieSet<Edge>?
     private let rawMasks: TrieSet<Edge>?
-    private let rawIsMasked: AwesomeTrie.Singleton?
+    private let rawIsMasked: Singleton?
     private let rawLength: UInt256!
 
     public init(core: CoreType, incompleteChildren: Set<String>, children: Mapping<String, Value>, targets: TrieSet<Edge>, masks: TrieSet<Edge>, isMasked: Bool, length: UInt256) {
