@@ -23,6 +23,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
       - name: Install openssl
-        run: apt-get install openssl
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends openssl
       - name: Build and Test
         run: swift test --enable-test-discovery
