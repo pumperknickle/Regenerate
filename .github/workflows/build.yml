@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - name: Install libcurl
-        run: apt-get install libcurl4-openssl-dev
+      - name: Install openssl
+        run: apt-get install openssl
       - name: Build and Test
         run: swift test --enable-test-discovery
