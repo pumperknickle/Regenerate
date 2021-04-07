@@ -25,4 +25,4 @@ jobs:
       - name: Install openssl
         run: apt-get update && apt-get install -y libssl-dev zlib1g-dev
       - name: Build and Test
-        run: swift test
+        run: swift test --enable-test-discovery
