@@ -4,10 +4,10 @@ import CryptoStarterPack
 import Foundation
 import AwesomeDictionary
 
-public struct RadixAddress256: Codable {
-    private let rawDigest: UInt256!
-    private let rawArtifact: Radix256?
-    private let rawSymmetricKeyHash: Digest?
+public struct RadixAddress256 {
+    private let rawFingerprint: UInt256!
+    private let rawDataItem: Radix256?
+    private let rawFingerprintOfSymmetricKey: Digest?
     private let rawIncomplete: Singleton?
     private let rawTargets: TrieSet<Edge>?
     private let rawMasks: TrieSet<Edge>?
@@ -20,9 +20,9 @@ extension RadixAddress256: Addressable {
     public typealias Digest = UInt256
     public typealias SymmetricDelegateType = BaseSymmetric
 
-    public var fingerprint: UInt256! { return rawDigest }
-    public var dataItem: Radix256? { return rawArtifact }
-    public var fingerprintOfSymmetricKey: Digest? { return rawSymmetricKeyHash }
+    public var fingerprint: UInt256! { return rawFingerprint }
+    public var dataItem: Radix256? { return rawDataItem }
+    public var fingerprintOfSymmetricKey: Digest? { return rawFingerprintOfSymmetricKey }
     public var complete: Bool! { return rawIncomplete != nil ? false : true }
     public var targets: TrieSet<Edge>! { return rawTargets ?? TrieSet<Edge>() }
     public var masks: TrieSet<Edge>! { return rawMasks ?? TrieSet<Edge>() }
@@ -33,9 +33,9 @@ extension RadixAddress256: Addressable {
     public typealias CryptoDelegateType = BaseCrypto
 
     public init(fingerprint: UInt256, dataItem: Artifact?, fingerprintOfSymmetricKey: Digest?, complete: Bool, targets: TrieSet<Self.Edge>, masks: TrieSet<Self.Edge>, isMasked: Bool, isTargeted: Bool, symmetricIV: UInt128?) {
-        rawDigest = fingerprint
-        rawArtifact = dataItem
-        rawSymmetricKeyHash = fingerprintOfSymmetricKey
+        rawFingerprint = fingerprint
+        rawDataItem = dataItem
+        rawFingerprintOfSymmetricKey = fingerprintOfSymmetricKey
         rawIncomplete = complete ? nil : .void
         rawTargets = targets.isEmpty() ? nil : targets
         rawMasks = masks.isEmpty() ? nil : masks
@@ -47,4 +47,46 @@ extension RadixAddress256: Addressable {
 
 extension RadixAddress256: RGRadixAddress {
     public typealias Artifact = Radix256
+}
+
+extension RadixAddress256: Codable {
+    private enum CodingKeys: String, CodingKey {
+        case fingerprint
+        case dataItem
+        case fingerprintOfSymmetricKey
+        case incomplete
+        case targets
+        case masks
+        case isMasked
+        case isTargeted
+        case symmetricIV
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        let rawFingerprint = try values.decode(Digest.self, forKey: .fingerprint)
+        let rawDataItem = try? values.decode(Artifact.self, forKey: .dataItem)
+        let rawFingerprintOfSymmetricKey = try? values.decode(Digest.self, forKey: .fingerprintOfSymmetricKey)
+        let rawIncomplete = try? values.decode(Singleton.self, forKey: .incomplete)
+        let rawTargets = try? values.decode(TrieSet<Edge>.self, forKey: .targets)
+        let rawMasks = try? values.decode(TrieSet<Edge>.self, forKey: .masks)
+        let rawIsMasked = try? values.decode(Singleton.self, forKey: .isMasked)
+        let rawIsTargeted = try? values.decode(Singleton.self, forKey: .isTargeted)
+        let rawSymmetricIV = try? values.decode(SymmetricIV.self, forKey: .symmetricIV)
+        self.init(fingerprint: rawFingerprint, dataItem: rawDataItem, fingerprintOfSymmetricKey: rawFingerprintOfSymmetricKey, complete: rawIncomplete != nil ? false : true, targets: rawTargets ?? TrieSet<Edge>(), masks: rawMasks ?? TrieSet<Edge>(), isMasked: rawIsMasked != nil ? true : false, isTargeted: rawIsTargeted != nil ? true : false, symmetricIV: rawSymmetricIV)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(rawFingerprint, forKey: .fingerprint)
+        try container.encodeIfPresent(rawDataItem, forKey: .dataItem)
+        try container.encodeIfPresent(rawFingerprintOfSymmetricKey, forKey: .fingerprintOfSymmetricKey)
+        try container.encodeIfPresent(rawIncomplete, forKey: .incomplete)
+        try container.encodeIfPresent(rawTargets, forKey: .targets)
+        try container.encodeIfPresent(rawMasks, forKey: .masks)
+        try container.encodeIfPresent(rawIsMasked, forKey: .isMasked)
+        try container.encodeIfPresent(rawIsTargeted, forKey: .isTargeted)
+        try container.encodeIfPresent(rawSymmetricIV, forKey: .symmetricIV)
+        return
+    }
 }

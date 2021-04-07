@@ -19,16 +19,16 @@ extension RGObject: Regenerative {
 }
 
 extension RGObject: Codable {
-    enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case root
         case paths
     }
     
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        rawRoot = try values.decode(RootType.self, forKey: .root)
-        rawPaths = try values.decode(Mapping<RootType.Digest, [Path]>.self, forKey: .paths)
-        return
+        let rawRoot = try values.decode(RootType.self, forKey: .root)
+        let rawPaths = try values.decode(Mapping<RootType.Digest, [Path]>.self, forKey: .paths)
+        self.init(root: rawRoot, paths: rawPaths)
     }
     
     public func encode(to encoder: Encoder) throws {
