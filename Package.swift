@@ -31,7 +31,7 @@ let package = Package(
         ),
         .testTarget(
             name: "RegenerateTests",
-            dependencies: ["Regenerate", "Quick", "Nimble", "CryptoStarterPack", "Bedrock", "AwesomeTrie", "AwesomeDictionary"]
+            dependencies: ["Regenerate", "Quick", "Nimble"]
         ),
     ]
 )
