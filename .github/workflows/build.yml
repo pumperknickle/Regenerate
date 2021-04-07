@@ -24,7 +24,5 @@ jobs:
         uses: actions/checkout@v1
       - name: Install openssl
         run: apt-get update && apt-get install -y libssl-dev zlib1g-dev
-      - name: Generate Linux Tests
-        run: swift test --generate-linuxmain
       - name: Build and Test
-        run: swift test --enable-test-discovery
+        run: swift test
