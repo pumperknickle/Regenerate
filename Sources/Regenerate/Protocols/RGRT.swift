@@ -3,7 +3,7 @@ import AwesomeTrie
 import Bedrock
 import Foundation
 
-public protocol RGRT: Regenerative where Root: RGRadixAddress {
+public protocol RGRT: Discoverable where Root: RGRadixAddress {
     associatedtype Key: DataEncodable
     associatedtype Value: DataEncodable
 

@@ -3,7 +3,7 @@ import AwesomeTrie
 import Bedrock
 import Foundation
 
-public protocol Regenerative: Codable {
+public protocol Discoverable: Codable {
     associatedtype Root: Addressable
     typealias CryptoDelegateType = Root.CryptoDelegateType
     typealias Digest = Root.Digest
@@ -22,7 +22,7 @@ public protocol Regenerative: Codable {
     func mask() -> (Self, Set<Digest>)
 }
 
-public extension Regenerative {
+public extension Discoverable {
     init(root: Root) { self.init(root: root, paths: root.missing(prefix: []).convertToStructured()!) }
 
     init?(artifact: Artifact?) {

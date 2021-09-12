@@ -8,7 +8,7 @@ public struct RGObject<RootType: Addressable> where RootType.Digest == UInt256 {
     private let rawPaths: Mapping<RootType.Digest, [Path]>!
 }
 
-extension RGObject: Regenerative {
+extension RGObject: Discoverable {
     public var root: RootType { return rawRoot }
     public var keyPaths: Mapping<RootType.Digest, [Path]> { return rawPaths }
 

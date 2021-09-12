@@ -7,7 +7,7 @@ public struct RT256<Key: DataEncodable, Value: DataEncodable> {
     private let rawPaths: Mapping<Digest, [Path]>!
 }
 
-extension RT256: Regenerative {
+extension RT256: Discoverable {
     public typealias Root = RadixAddress256
 
     public var root: Root { return rawRoot }
