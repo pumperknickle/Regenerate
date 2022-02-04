@@ -1,6 +1,5 @@
 # Regenerate
 ![Build](https://github.com/pumperknickle/Regenerate/actions/workflows/build.yml/badge.svg)
-
   
 ## Installation
 ### Swift Package Manager
